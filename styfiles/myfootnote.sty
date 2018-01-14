@@ -1,0 +1,15 @@
+% ************************************************************************
+%
+% Redefinition of footnote style
+%
+% Author : Erik H.W. Meijering
+%
+% ************************************************************************
+
+\renewcommand\footnoterule{
+  \kern+3\p@
+}
+
+\newcommand{\myfootnote}[2]{\renewcommand{\thefootnote}{#1}\footnote{#2}\addtocounter{footnote}{-1}\renewcommand{\thefootnote}{\arabic{footnote}}}
+
+% ************************************************************************

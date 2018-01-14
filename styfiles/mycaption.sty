@@ -1,0 +1,23 @@
+% ************************************************************************
+%
+% Redefinition of captions layout
+%
+% Author : Erik H.W. Meijering
+%
+% ************************************************************************
+
+\usepackage[small,bf]{./styfiles/caption}
+\setlength{\captionmargin}{\myindent}
+
+\newcommand{\delayedcaption}[2]{
+  \setlength{\as@captionwidth}{\linewidth}
+  \addtolength{\as@captionwidth}{-2\captionmargin}
+  \begin{table}[!t]
+    \begin{center}
+      \parbox[t]{\as@captionwidth}{\captionfont
+        {\captionlabelfont\figurename~\ref{#1} (Page~\pageref{#1}).} #2}
+    \end{center}
+  \end{table}
+}
+
+% ************************************************************************

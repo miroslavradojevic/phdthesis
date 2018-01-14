@@ -1,0 +1,157 @@
+% ************************************************************************
+% Methods for Automated Neuron Image Analysis
+% Ph.D. Thesis
+% Miroslav Radojevic
+% ************************************************************************
+
+\documentclass[10pt, twoside, openright]{report}
+
+\setcounter{secnumdepth}{3}
+
+\usepackage{./styfiles/mya4layout}
+\usepackage{./styfiles/myborder}
+%\usepackage{./styfiles/my1724layout}
+\usepackage{./styfiles/myheadings}
+\usepackage{./styfiles/mycleardblpg}
+\usepackage{./styfiles/myfootnote}
+\usepackage{./styfiles/mybbb}
+\usepackage{./styfiles/myquote}
+\usepackage{./styfiles/mysquote}
+\usepackage{./styfiles/mycaption}
+\usepackage{./styfiles/myabbrevia}
+\usepackage{./styfiles/myabstract}
+\usepackage{./styfiles/myappendix}
+\usepackage{./styfiles/dropping}
+\usepackage{afterpage}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage[dutch,english]{babel}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{psfrag}
+\usepackage{pifont}
+\usepackage{rotating}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\bibliographystyle{./styfiles/mybibstyle}
+
+\makeatletter
+\newcommand{\thechapterwords}
+{ \ifcase \thechapter\or One\or Two\or Three\or Four\or Five\or
+  Six\or Seven\or Huit\or Neuf\or Dix\or Onze\fi}
+\def\thickhrulefill{\leavevmode \leaders \hrule height 1ex \hfill \kern \z@}
+\def\@makechapterhead#1{%
+  %\vspace*{50\p@}%
+  \vspace*{5\p@}%
+  {\parindent \z@ \centering \reset@font
+        \thickhrulefill\quad
+        \scshape \@chapapp{} \thechapterwords
+        \quad \thickhrulefill
+        \par\nobreak
+        \vspace*{10\p@}%
+        \interlinepenalty\@M
+        \hrule
+        \vspace*{10\p@}%
+        \huge \bfseries #1\par\nobreak
+        \par
+        \vspace*{10\p@}%
+        \hrule
+    %\vskip 40\p@
+    \vskip 50\p@
+  }}
+\def\@makeschapterhead#1{%
+  %\vspace*{50\p@}%
+  \vspace*{5\p@}%
+  {\parindent \z@ \centering \reset@font
+        \thickhrulefill
+        \par\nobreak
+        \vspace*{10\p@}%
+        \interlinepenalty\@M
+        \hrule
+        \vspace*{10\p@}%
+        \huge \bfseries #1\par\nobreak
+        \par
+        \vspace*{10\p@}%
+        \hrule
+    %\vskip 40\p@
+    \vskip 50\p@
+  }}
+
+%------------------------------------------------------------------
+\newenvironment{publish}{
+  \vfil
+  \footnotesize\ignorespaces
+  \par\noindent\ignorespaces
+\rule{\textwidth}{0.4pt}
+}
+% {%
+%   \par\noindent\rule[1ex]{10em}{0.4pt}
+%   \endcenter
+% }
+
+%------------------------------------------------------------------
+
+% ************************************************************************
+%\includeonly{titlepage,colophon,formalpage,preface,contents,abbreviations}
+%\includeonly{introduction}
+%\includeonly{dsareview}
+%\includeonly{registration}
+%\includeonly{evaluation}
+%\includeonly{quantification}
+%\includeonly{interpolation}
+%\includeonly{bibliography}
+%\includeonly{samenvatting}
+%\includeonly{publications}
+%\includeonly{curriculum}
+
+% ************************************************************************
+\begin{document}
+\selectlanguage{english}
+% ************************************************************************
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\include{./titlepage/titlepage}
+\include{./chapterN/colophon}
+%\include{./chapterN/formalpage}
+%\include{./chapterN/preface}
+%\include{./chapterN/contents}
+%\include{abbreviations}
+
+% ************************************************************************
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+%\graphicspath{{./chapter1/}}%
+%\include{./chapter1/chapter1}
+
+%\graphicspath{{./chapter2/}}%
+%\include{./chapter2/chapter2}
+
+%\graphicspath{{./chapter3/}}%
+%\include{./chapter3/chapter3}
+
+%\graphicspath{{./chapter4/}}%
+%\include{./chapter4/chapter4}
+
+%\graphicspath{{./chapter5/}}%
+%\include{./chapter5/chapter5}
+
+%\include{./chapterN/summary}
+%\include{dsareview}
+%\include{registration}
+%\include{evaluation}
+%\include{quantification}
+%\include{interpolation}
+
+\include{./chapterN/bibliography}
+%\include{./chapterN/samenvatting}
+%\include{./chapterN/phdportfolio}
+%\include{./chapterN/publications}
+%\include{./chapterN/curriculum}
+
+% ************************************************************************
+\end{document}
+% ************************************************************************
+

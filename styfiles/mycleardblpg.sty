@@ -1,0 +1,16 @@
+% ************************************************************************
+%
+% Redefinition of \cleardoublepage command
+%
+% Author : Erik H.W. Meijering
+%
+% ************************************************************************
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+  \hbox{}
+  \thispagestyle{empty}
+  \newpage\fi\fi}
+\makeatother
+
+% ************************************************************************

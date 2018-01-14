@@ -1,0 +1,57 @@
+% ************************************************************************
+% 
+%
+% ************************************************************************
+
+\myquote{0.55\textwidth}{Let no one say that I have said nothing
+  new.\newline The arrangement of the subject is new.}{Blaise Pascal,
+  \emph{Pens\'ees} (\oldstylenums{1670})\nocite{Pascal-1670a}}
+
+
+\noquote
+
+\chpos{15mm}{8mm}
+\chapter[Quantitative Comparison of Spot Detection Methods in\\
+ Fluorescence Microscopy]{Quantitative Comparison \\of Spot Detection Methods \\in Fluorescence Microscopy}
+\chaptermark{Quantitative Comparison of Spot Detection Methods}
+\label{ch2__chaprter2}
+
+\mysquote{\textwidth}
+{Not everything that can be counted counts, and not everything that
+  counts can be counted.}
+{Albert Einstein (1879-1955)}
+
+
+
+% ************************************************************************
+% ************************************************************************
+\myabstract{
+Quantitative analysis of biological image data generally involves the detection of many subresolution spots.
+Especially in live cell imaging, for which fluorescence microscopy is often used, the signal-to-noise ratio (SNR) can be extremely low,
+making automated spot detection a very challenging task. In the past, many methods have been proposed to perform this task,
+but a thorough quantitative evaluation and comparison of these methods is lacking in the literature.
+In this chapter, we evaluate the performance of the most frequently used detection methods for this purpose.
+These include six unsupervised and two supervised methods.
+We perform experiments on synthetic images of three different types,
+for which the ground truth was available,
+as well as on real image data sets acquired for two different biological studies,
+for which we obtained expert manual annotations to compare with.
+The results from both types of experiments suggest that for very low SNRs ($\approx$2),
+the supervised (machine learning) methods perform best overall.
+Of the unsupervised methods, the detector based on the so-called
+$h$-dome transform from mathematical morphology 
+performs comparably, and has the advantage that it does not require a cumbersome learning stage.
+At high SNRs ($>$5), the difference in performance of all considered detectors becomes negligible.}
+
+\smallskip
+
+% ************************************************************************
+% ************************************************************************
+
+\begin{publish}
+Based upon: M. Radojevi\'{c}, I. Smal, E. Meijering, ``Fuzzy logic based'', \textit{in press}.   
+\end{publish}
+
+\section{Introduction}
+\label{ch2__sec:intro}
+\dropping{3}{T}he very first stage in the analysis of biological image data generally deals with the detection of objects of interest.

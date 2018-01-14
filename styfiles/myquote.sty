@@ -1,0 +1,12 @@
+% ************************************************************************
+%
+% Definition of commands for quotes in chapter headings
+%
+% Author : Erik H.W. Meijering
+%
+% ************************************************************************
+
+\newcommand{\myquote}[3]{\rhead[\fancyplain{}{\slshape\leftmark}]{\fancyplain{\parbox[t]{#1}{{\small\slshape #2}\begin{flushright}{\small --- #3}\end{flushright}}}{\thepage}}}
+  
+\newcommand{\noquote}{\rhead[\fancyplain{}{\slshape\leftmark}]{\fancyplain{}{\thepage}}}
+

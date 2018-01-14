@@ -1,0 +1,33 @@
+% ************************************************************************
+%
+% Code for drawing a box on each page in the postscript file
+%
+% Author : Erik H. W. Meijering
+%
+% ************************************************************************
+
+% ************************************************************************
+% The following code causes a box to be drawn on every page of a
+% document in which this file is included. Note that this only holds
+% for the PostScript version, i.e., after running dvips. The box does
+% not appear in windvi or xdvi. You can specify the dimensions of the
+% box simply by adjusting the coordinates of the moveto and rlineto
+% postscript commands:
+%
+%  x mm  y mm moveto  (x and y are in mm)
+% dx mm dy mm rlineto (dx and dy are in mm)
+
+\special{!userdict begin /bop-hook{
+    /mm {2.8346457 mul} def
+    gsave
+    newpath
+     20 mm 28.5 mm moveto
+     170 mm 0 mm rlineto
+     0 mm 240 mm rlineto
+     -170 mm 0 mm rlineto
+     closepath
+     0.5 setlinewidth
+     stroke
+    grestore} def end}
+
+% ************************************************************************
