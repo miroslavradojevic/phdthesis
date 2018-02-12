@@ -1,0 +1,8 @@
+# ignore files
+*.aux
+*.bbl
+*.gz
+*.log
+*.blg
+*.toc
+*.bak

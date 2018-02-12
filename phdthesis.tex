@@ -21,7 +21,8 @@
 \usepackage{./styfiles/myabbrevia}
 \usepackage{./styfiles/myabstract}
 \usepackage{./styfiles/myappendix}
-\usepackage{./styfiles/dropping}
+%\usepackage{./styfiles/dropping}
+\usepackage{lettrine}
 \usepackage{afterpage}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -112,22 +113,21 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-\include{./titlepage/titlepage}
-\include{./chapterN/colophon}
-%\include{./chapterN/formalpage}
-%\include{./chapterN/preface}
-%\include{./chapterN/contents}
-%\include{abbreviations}
+\include{./titlepage}
+\include{./colophon}
+\include{./formalpage}
+\include{./preface}
+\include{./contents}
+\include{./abbreviations}
 
 % ************************************************************************
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-%\graphicspath{{./chapter1/}}%
-%\include{./chapter1/chapter1}
-
+%\graphicspath{{./chapter1/}}
+\include{./chapter1/chapter1}
 %\graphicspath{{./chapter2/}}%
-%\include{./chapter2/chapter2}
+\include{./chapter2/chapter2}
 
 %\graphicspath{{./chapter3/}}%
 %\include{./chapter3/chapter3}
@@ -145,11 +145,11 @@
 %\include{quantification}
 %\include{interpolation}
 
-\include{./chapterN/bibliography}
-%\include{./chapterN/samenvatting}
-%\include{./chapterN/phdportfolio}
-%\include{./chapterN/publications}
-%\include{./chapterN/curriculum}
+\include{./bibliography}
+%\include{./samenvatting/samenvatting}
+%\include{./portfolio/portfolio}
+%\include{./publications/publications}
+%\include{./curriculum/curriculum}
 
 % ************************************************************************
 \end{document}

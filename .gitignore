@@ -1,2 +1,8 @@
-# ignore all aux
+# ignore files
 *.aux
+*.bbl
+*.gz
+*.log
+*.blg
+*.toc
+phdthesis.pdf
