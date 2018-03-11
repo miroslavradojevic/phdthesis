@@ -6,3 +6,4 @@
 *.blg
 *.toc
 phdthesis.pdf
+.DS_Store
