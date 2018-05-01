@@ -6,5 +6,7 @@
 *.blg
 *.toc
 *.tex.bak
+*.bib.bak
+*.bib.sav
 phdthesis.pdf
 .DS_Store
