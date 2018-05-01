@@ -12,7 +12,7 @@
 \usepackage{./styfiles/myborder}
 \usepackage{./styfiles/myheadings}
 \usepackage{./styfiles/mycleardblpg}
-\usepackage{./styfiles/myfootnote}
+%\usepackage{./styfiles/myfootnote}
 \usepackage{./styfiles/mybbb}
 \usepackage{./styfiles/myquote}
 \usepackage{./styfiles/mysquote}
@@ -20,7 +20,7 @@
 \usepackage{./styfiles/myabbrevia}
 \usepackage{./styfiles/myabstract}
 \usepackage{./styfiles/myappendix}
-%\usepackage{./styfiles/dropping}
+\usepackage{./styfiles/dropping}
 \usepackage{lettrine}
 \usepackage{afterpage}
 \usepackage{amsfonts}
@@ -33,7 +33,12 @@
 \usepackage{psfrag}
 \usepackage{pifont}
 \usepackage{rotating}
-\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\usepackage{adjustbox,graphbox} % to align images to center
+\usepackage{upgreek,color,mathtools,algorithm,algpseudocode,grffile}% txfonts
+\usepackage[english]{babel}
+\usepackage[caption=false]{subfig}
+\usepackage[mathscr]{euscript}
+
 \bibliographystyle{./styfiles/mybibstyle}
 
 \makeatletter
@@ -92,9 +97,15 @@
 
 %------------------------------------------------------------------
 \newcommand{\red}[1]{\textcolor{red}{#1}}
-
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\Rho}{\mathrm{P}}
 %------------------------------------------------------------------
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+%------------------------------------------------------------------
 
 % ************************************************************************
 \includeonly{./chapter1/chapter1,./chapter2/chapter2,./chapter3/chapter3,./literature,./bibliography}
