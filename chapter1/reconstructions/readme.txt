@@ -27,3 +27,9 @@ http://neuromorpho.org/neuron_info.jsp?neuron_name=C14---Young-KO-Con
 
 5_23.swc
 http://neuromorpho.org/neuron_info.jsp?neuron_name=5_23
+
+vCH-cobalt.swc
+http://neuromorpho.org/neuron_info.jsp?neuron_name=vCH-cobalt
+
+Wdb_L2D555.swc
+http://neuromorpho.org/neuron_info.jsp?neuron_name=Wdb_L2D555
