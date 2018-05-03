@@ -32,6 +32,7 @@ Physical materialization of the cell portrays the inner structure of the neurona
 Neuron cell thus represents a core building block of the brain and the nervous system. It appears in variety of shapes (Figure~\ref{ch1_fig7}) and specializations \cite{ascolitrees}. The estimated number of neuron cells in a human brain amounts to striking 89 billion \cite{herculano2009human} - number comparable to the count of stars in the Milky Way galaxy. The dimension of each neuron can range from a few to several tens of micrometer with the neurite branch diameter typically measured in $\mu m$ scale. Each neuron is further connected to 50 thousand other neurons on average which results in an extremely powerful computational network and an very efficient information storage device. Intriguing mechanism of the brain functioning has recently emerged as an important research topic as the complex functionality of the brain defines much of the living organism activities, even the those abstract and subjective such as consciousness. Modeling the brain functionality is one of the grand unanswered questions of our era and central to diverse fields such as physics, mathematics, biology and recently prominent - computer science \cite{markram2015reconstruction}.
 
 Numerous technical obstacles have nevertheless persisted when reaching out to record the neuronal sample. This is primarily due to the physical and physiological difficulties and the generally intangible functioning mode of the nervous system. With the early analogue computers \cite{glaser1965semi}, it became possible to connect computer with microscope and automate tracing using analogue linear motion transducers as well as significantly speed up gathering of the information about the dendritic and axonal patterns. Subsequent generations of digital computers \cite{capowski1981accurate,capowski1977computer} brought further advances in the neuron reconstruction technique by introducing the computer graphics mixed with the neuron image and the advanced operator controls such as 3D joystick. The expansion of home PC hardware and software in late decades of the 20th century increased the impact of the informatics \cite{halavi2012digital}. Breakthrough of the conventional PCs made it feasible to throughput more computation and eventually implement in practice the algorithms that, although previously discovered, could not be directly implemented and shared between the users on a needed scale. It also marks the period when the first commercial and open-source academic software solutions emerge and grow (Fig.~\ref{ch1_fig1}) which to this day proved to be a steady trend.
+% In decades following the emergence of neuroscience, the instrumentation has been a limiting factor to the amount and the variety of the morphologic data that could be gathered \ref{ch1_fig1}. At the beginning of the second half of the 20th century, conventional electronic analog techniques were used to join microscope and the analogue computer to automate the neuron morphology quantification \cite{glaser1965semi,capowski1981accurate}.
 
 \begin{figure}
 	\begin{center}
@@ -48,14 +49,20 @@ The physical appearance of the neuron cells takes part in the nervous system act
 The advancements in informatics made it possible (Fig.~\ref{ch1_fig1}) to utilize computers to solve the neuroinformatics challenges over recent decades. With the ever growing amount of data, the processing of the information remains a challenge.   
 
 \section{Essential obstacles in neuron morphology reconstruction}
-The key obstacles in reaching the accurate and robust automation of the neuron reconstruction \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be seen through the number of hampering factors that concern both the intricate nature of the data and the barriers imposed by the imaging modality. In this regard, it is possible to emphasize some major hurdling items.
+The key obstacles in reaching the accurate and robust automation of the neuron reconstruction \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be seen through the number of hampering factors that concern both the intricate nature of the data and the barriers imposed by the imaging modality. In this regard, it is possible to identify some major hurdling items.
 
 \textit{Morphology} of the neuron cell is remarkably diverse (Fig.~\ref{ch1_fig7}). The structural intricacy of the very complex examples can be intractable even to the human visual comprehension. High complexity requires large amount of hours needed for manual delineation. The delineation thus inevitably becomes more error-prone. Dealing with challenging morphology requires novel algorithmic computer vision solutions. The aim of methods is to reduce the manual labor time while fabricating trustful reconstructions. For instance, the 20-fold speedup of the reconstruction time compared to the manual reconstruction had been projected in earlier challenges \cite{liu2011diadem}.
 
-\textit{Imaging} at $\mu m$ scale for this application is \cite{shaw1991point}
-noisy image input (imaging on the boundary of the resolution limits in case of the light microscopy).  Moreover, there are limitations imposed by microscopy. Moreover, particles and debris can be erroneously detected as neuron structures. Due to the sample preparation and the imaging technique, spatial resolution differs along z-axis (layers) compared to the one existing in the image plane (xy). Fluorescence or various kinds of light microscopy modalities.
+\textit{Imaging} objects at $\mu m$ scale size using fluorescence or other kinds of microscopy imposes accuracy limitations.  which are specific for the microscopy. Even if one would have flawless ideal lenses, certain limitation . With the PSF effect, much of the detailed structure can be lost in 
 
-\textit{Data volume size} ever increasing size of the image volume needed to be correctly processed in reasonable time. Although the processing of the 3D data (image stacks) is a  Processing of the stitched images.
+- optical
+- digitization (pixelization) effects 
+
+
+ Namely, is \cite{shaw1991point}
+noisy image input (imaging on the boundary of the resolution limits in case of the light microscopy).  Moreover, there are limitations imposed by microscopy. Moreover, particles and debris can be erroneously detected as neuron structures. Due to the sample preparation and the imaging technique, spatial resolution differs along z-axis (layers) compared to the one existing in the image plane (xy). Fluorescence or various kinds of light microscopy modalities. The lateral $(xy)$ and axial $(z)$ resolutions are different. The resolution details are recorded in the 
+
+\textit{Data volume size} ever increasing size of the neuronal image stacks \cite{halavi2012digital} needs to be correctly processed in reasonable time. Although the processing of the 3D data (image stacks) is a  Processing of the stitched images.
 
 \textit{Need for customization} The algorithms often need to be tailored in order to address a particular biological question and be used in wider range of the biological questions being studied which prevents them from being used across different laboratories.
 
@@ -66,9 +73,11 @@ noisy image input (imaging on the boundary of the resolution limits in case of t
 Aforementioned factors impose much of the computational barrier \cite{svoboda2011past} in attempt to consistently produce digital reconstructions comparable with the expert ones. To have the optimal results in practice, additional expert corrections are often necessary \cite{peng2011proof}. 
 
 \section{Neuron tracing in light microscopy images}
-Neuron reconstruction tools have been adopting to the advancements of technical infrastructure available for experimentation. In decades following the emergence of neuroscience, the instrumentation has been a limiting factor to the amount and the variety of the morphologic data that could be gathered \ref{ch1__fig1}. At the beginning of the second half of the 20th century, conventional electronic analog techniques were used to join microscope and the analogue computer to automate the neuron morphology quantification \cite{glaser1965semi},  \cite{capowski1981accurate}. Variety of software platforms \cite{meijering2010neuron,acciai2016automated}. 
+Neuron reconstruction tools have been adopting to the advancements of technical infrastructure available for experimentation.  
 
-One of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}.
+\section{Tools}
+One of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}. Variety of other software platforms \cite{meijering2010neuron,acciai2016automated}. 
+
 
 \begin{figure}
 	\centering
@@ -82,18 +91,21 @@ One of the key Java tools is the ImageJ library \cite{abramoff2004image} with me
 	\label{ch1_fig2-4}
 \end{figure}
 
-\subsection{Fuzzy logic }
-
+\subsection{Fuzzy logic system}
+It may be argued, rather persuasively, that most of the concepts encountered in various domains of human knowledge are, in reality, much too complex to admit of simple or precise definition. This is true, for example, of the concepts of recession and utility in economics; schizophrenia and arthritis in medicine; stability and adaptivity in system theory; sparseness and stiffness in numerical analysis; grammaticality and meaning in linguistics; performance measurement and correctness in computer science; truth and causality in philosophy; intelligence and creativity in psychology; and obscenity and insanity in law.
+Usage of the linguistic variables 
 \subsection{Multiple hypothesis tracking}
 Computation methods
 
 \subsection{Bayesian methods in neuron tracing} 
-Bayesian filtering (optimal nonlinear filtering, stochastic filtering) \cite{doucet2001introduction} represent a common generic solution for problems that are non-linear, approach to computing posterior distributions of the values intended to be filtered. Basic algorithm applicable in different contexts. The problem is defined as the estimate the set of hidden states
+Bayesian filtering \cite{doucet2001introduction} offers a common generic solution for problems that are non-linear, where state-space cannot be Gaussian. Other names for the same concept are: (optimal nonlinear, stochastic). In essence, the approach boils down to computing posterior distributions of the values intended to be filtered. Basic algorithm applicable in different contexts. The problem is defined as the estimate the set of hidden states
 
 The collection of the methods used . Curently, BigNeuron challenge Several notable approaches in broad sense can be differentiated. 
 
 
-$$ \mathrm{x}_t, t \in \mathbb{N} $$
+$$ \{ \mathrm{x}_t, t \in \mathbb{N} \} $$
+$$ \{ \mathrm{y}_t, t \in \mathbb{N} \} $$
+$$ \{ \mathrm{p}(\mathrm{x} | \mathrm{y}) \} $$
 
 
 % https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3477
@@ -124,7 +136,9 @@ The work showcased in this thesis will exclusively use open source SWC format.
 Measuring distances between neurons: L-measure \cite{scorcioni2008measure}, Neuro-blast \cite{wan2015blastneuron}. Distances between neurons can be based on the overlap and the inter-node metric distances.
 
 \section{Thesis outline}
+
 This thesis primarily addresses/contributes to the need for automated methods for neuron reconstruction. 
 In this thesis, methods that cope with uncertainty are showcased. The work is showcased in the domain of the neuron reconstruction and several neuron related tasks such as the object detection, namely the detection of the critical points (bifurcation and terminal) in microscopic images of neurons (Chapter~\ref{ch2:fuzzy}) and the localization  The first chapter  and probabilistic and bayesian methods are explored. The underlying idea assumes that the neuron tracing itself is never a .
 
+The thesis is organized as follows. In Chapter 2,  
 
