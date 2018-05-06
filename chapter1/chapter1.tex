@@ -49,30 +49,64 @@ The physical appearance of the neuron cells takes part in the nervous system act
 The advancements in informatics made it possible (Fig.~\ref{ch1_fig1}) to utilize computers to solve the neuroinformatics challenges over recent decades. With the ever growing amount of data, the processing of the information remains a challenge.   
 
 \section{Capturing neuron morphology}
-Typically, imaging neurons consists of three main stages \cite{peng2015bigneuron}. First, the neuron sample is labeled in order to expose the structure, then the digital images are acquired using one of the microscopy modalities. Finally, the obtained neuron images are computer processed. The key obstacles in reaching the accurate and robust automation of the neuron reconstruction \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be seen through the number of hampering factors which concern both the intricate nature of the data and the barriers imposed by the imaging modality. In this regard, it is possible to identify some major hurdling items.
+Typically, imaging neurons consists of three main stages \cite{peng2015bigneuron}. First, the neuron sample is labeled in order to expose the structure, then the digital images are acquired using one of the microscopy modalities. Finally, the obtained neuron images are computer processed. In addition, the algorithms often require to be customized in order to address a particular biological question or be used in wider range of biological questions under wider range of image types which often prevents them from being used across different laboratories. The key obstacles in reaching the ubiquitous, accurate and robust automation of the neuron reconstruction \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be seen through the number of hampering factors which concern both the intricate nature of the data and the barriers imposed by the imaging modality. In this regard, it is possible to identify some major hurdling items.
 
 \textit{Morphology} of the neuron cell is remarkably diverse (Fig.~\ref{ch1_fig7}). The structural intricacy of the complex examples can be challenging, even to the human visual comprehension. High complexity requires large amount of hours needed for manual delineation which thus inevitably becomes more error-prone. Hence the need for constant improvement of the computer vision algorithms. The aim of the methods is to reduce the manual labor time while fabricating trustful reconstructions. For instance, the 20-fold speedup of the reconstruction time compared to the manual reconstruction had been projected in earlier challenges \cite{liu2011diadem}.
 
-\textit{Imaging} neurite arbor using different variations of light microscopy has been widely accepted choice for inspecting the cell structure \cite{meijering2010neuron,donohue2011automated}. Capturing $\mu$m scale objects (e.g. neurite diameter \cite{ascolitrees}), however, introduces imaging limitations. Optical systems suffer from the diffraction limit resulting in the single-lens imaged object point source being transmitted as the airy pattern \cite{cox2012optical}. In practice, the point source produces the point-spread function (PSF) which under reasonable assumptions can be approximated with the Gaussian \cite{zhang2007gaussian}. Nevertheless, the lateral resolution in fluorescence microscopy is such that the neurite dimensions are not substantially higher than the imaging resolution limits (sub-$\mu$m) which can be a limiting factor. Axial spatial resolution ($xy$ plane), on the other hand, is yet even (multiple times) lower as the precision is lost in the transition when imaging different stack layers ($z$ axis resolution). Eventually, the imaging process is predominantly affected by the particle-count driven photon noise \cite{van1998digital}, modeled with the Poisson process. Thus, the Poisson distribution is further used in generating synthetic microscopic images \cite{smal2010quantitative}. In accordance with the earlier studies, signal-to-noise ratio (SNR) of the microscopic image is expressed as the ratio of the intensity inside neuron above the background and the standard deviation of the noise inside neuron \cite{cheezum2001quantitative,smal2010quantitative}. Besides optical ``blurring'', neuron imaging can comprise pixelisation with the large spatial extent of the neuron. Combining together the optical magnification with the limited size of the digital matrix used to store the recording, as a consequence -the voxel size becomes larger that the PSF resulting in partial volume effect .
-% particles and debris can be erroneously detected as neuron structures
+\textit{Imaging} neurite arbor using different variations of light microscopy has been widely accepted choice for inspecting the cell structure \cite{meijering2010neuron,donohue2011automated}. Capturing $\mu$m scale objects (e.g. neurite diameter \cite{ascolitrees}), however, introduces imaging limitations. Optical systems suffer from the diffraction limit resulting in the single-lens imaged object point source being transmitted as the airy pattern \cite{cox2012optical}. In practice, the point source produces the point-spread function (PSF) which under reasonable assumptions can be approximated with the Gaussian \cite{zhang2007gaussian}. Nevertheless, the lateral resolution in fluorescence microscopy is such that the neurite dimensions are not substantially higher than the imaging resolution limits (sub-$\mu$m) which can be a limiting factor. Axial spatial resolution ($xy$ plane), on the other hand, is yet even (multiple times) lower as the precision is lost in the transition when imaging different stack layers ($z$ axis resolution). Eventually, the imaging process is predominantly affected by the particle-count driven photon noise \cite{van1998digital}, modeled with the Poisson process. Thus, the Poisson distribution is further used in generating synthetic microscopic images \cite{smal2010quantitative}. In accordance with the earlier studies, signal-to-noise ratio (SNR) of the microscopic image is expressed as the ratio of the intensity inside neuron above the background and the standard deviation of the noise inside neuron \cite{cheezum2001quantitative,smal2010quantitative}. Besides optical ``blurring'', neuron imaging can comprise pixelisation with the large spatial extent of the neuron. Combining together the optical magnification with the limited size of the digital matrix used to store the recording, as a consequence -the voxel size becomes larger that the PSF resulting in partial volume effect.% particles and debris can be erroneously detected as neuron structures
 
-Burden of the ever increasing \textit{data volume size} - the dimensions of the neuronal image stacks \cite{peng2017automatic} represent a hurdle for the processing and often require dedicated methods, such as processing of the stitched imagery \cite{zhou2015neuron}. The objective to stay accurate and processed in reasonable time.
+Burden of the ever increasing \textit{data volume size} tends to counterbalance the increased memory and processing speed of commonly available modern computers. Although the automated tracing of the neuron morphology has substantially improved over the recent years, the existing methods do not scale satisfactory in terms of the processing speed and the accuracy with the increased dimensionality of the data. Typically, the methods are challenged if applied on (datasets with) very large neuronal image stacks \cite{peng2017automatic}. Consequently, the image volume size represents a significant challenge for the computer vision methods. Dedicated strategies, such as extending the existing neuron tracing algorithms in order to be able to trace the unlimited data volumes \cite{peng2017automatic}, processing of the stitched imagery, or iteratively tracing in adjacent image tiles \cite{zhou2015neuron} have been introduced.% The objective to stay accurate and processed in reasonable time
 
-\textit{Need for customization} The algorithms often need to be tailored in order to address a particular biological question and be used in wider range of the biological questions being studied which prevents them from being used across different laboratories.
+\textit{Gold standard} of the neuron reconstruction is not an unique absolute digital representation of the image, but rather an (considerably subjective) approximation of the existing morphology. Often, the gold standard expert annotations are semi-automatic - thus obtained aided with various established tracing tools \cite{ascoli2007neuromorpho} both non-commercial such as NeuronJ \cite{meijering2004design}, open-source Vaa3D \cite{peng2014extensible} or the commercial packages such as Neurolucida (MBF Bioscience) or Amira (Thermo Fisher Scientific). With the often intricate structure of neuronal arbor, the expert annotations can differ and should be interpreted as a one among possible versions. Attempts to reach a consensus annotation by bringing together gold standards from different sources \cite{peng2015bigneuron}. Hence, the subsequent corrections (proof-editing) are often crucial in reaching better quality \cite{peng2011proof}. To have the optimal results in practice, additional expert corrections are often essential \cite{peng2011proof}. One way to overcome the obstacle is to use the consensus from several available gold-standard reconstructions as a better choice. Such scenario requires further definition on how the consensus would be computed. If the study concentrates on benchmarking the image analysis methods, synthetic neuron images can be generated from the existing reconstructions as the ground truth \cite{koene2009netmorph,radojevic2015fuzzy,radojevic-pnr}. This way, there is no need for multiple reconstruction sources as the real ground truth is known through reverse engineering.% \textit{Dynamic images} Analysis of the images captured from the live neuronal cultures.
 
-\textit{Gold standard} reconstruction can differ between different experts and is not guaranteed. Attempts to reach a consensus by bringing together gold standards from different sources \cite{peng2015bigneuron}. Hence, the corrections (proof-editing) is often needed \cite{peng2011proof}. One way to overcome this is to use the consensus from the available gold-standard reconstructions, or to do the reverse engineering by generating synthetic neurons \cite{Koene-2009,radojevic2015fuzzy}
-%\textit{Dynamic images} Analysis of the images captured from the live neuronal cultures.
+Aforementioned characteristics impose much of the barrier in attempt to consistently and efficiently produce digital reconstructions comparable with the expert ones.
 
-Aforementioned factors impose much of the computational barrier \cite{svoboda2011past} in attempt to consistently produce digital reconstructions comparable with the expert ones. To have the optimal results in practice, additional expert corrections are frequently essential \cite{peng2011proof}. 
+\begin{figure}
+	\centering
+	\begin{tabular}{c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}}
+		\includegraphics[width=0.25\textwidth]{ch1_fig2a} & 
+		\includegraphics[width=0.25\textwidth]{ch1_fig2b} & 
+		\includegraphics[width=0.25\textwidth]{ch1_fig2c} \\
+		a) Shortest path tracing & b) Minimum spanning tree & c) Path-pruning
+	\end{tabular}
+	\caption{Examples of the essential neuron reconstruction strategies: a) Finding optimal path having two control points, b) Inferring the  optimal tree structure from the set of nodes c) Pruning the over-complete neuron tree.}
+	\label{ch1_fig2}
+\end{figure}
 
-\section{Neuron tracing in light microscopy images}
-Strategies in neuron tracing...
-What is typically computed in neuron tracing? Centroid $\mathrm{p}(\mathrm{x} | \mathrm{y})$ Tracing is boiled down to the optimization problem, finding and optimal path (Fig.~\ref{ch1_fig2}a) or a tree (Fig.~\ref{ch1_fig2}b).
+% reconstruction components: trace, seed point, ancor point, lanmark, blob, tree
+\section{Reconstructions from light microscopy}
+Strategies for neuron single cell reconstruction employ different algorithmic approaches. Vast majority of the introduced work treats tree reconstruction as modular task where different algorithms are dedicated to processing particular tree components. Nevertheless, there is a certain duality as the reconstruction accuracy also depends on the ability of the algorithm to generalize well. Extensive amount of the methodologies introduced over the years \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be broadly described into three general approaches (Fig.~\ref{ch1_fig2}) where each strategy emulates various optimization tasks: neurite tracing as an optimal path between given endpoints (Fig.~\ref{ch1_fig2}a), finding an optimal tree from the set of given landmark points that already belong to the tree (extracting the most accurate tree from the given set of guide points Fig.~\ref{ch1_fig2}b) and over-tracing/over-representing the tree (Fig.~\ref{ch1_fig2}c). As one might presume, the methodological separation cannot be rigorous. It is very likely for the methods to combine together different ideas and overlap in terms of the approach.
+
+Neurite branch tracing is summarized as the energy/cost minimization problem \cite{meijering2004design,peng2010automatic}, such as computing an optimal (shortest) path through the existing voxel grid. Such strategy has been particularly successful in practice \cite{meijering2004design,peng2010v3d,longair2011simple}, especially for semi-automated tasks where the control/initialization points of the optimized trace are known and previously had been drawn out of the global image context. The downside of (tracing) such approach is that the usage requires starting points, trace endpoints or correct initialization.
+
+\begin{equation}
+C(\mathrm{X}) = \int_{\mathrm{X}} c( \mathrm{x}_i, I(\mathrm{x}) ) d\mathrm{x}
+\label{ch1_eq3}
+\end{equation}
+
+Given the output format used to store the result (neuron format explained in detail in Section~\ref{ch1_sec4}), digital neuron tree consists of the set of connected discrete neuron compartments (spherical nodes). The essential geometrical quantities computed during tracing are the compartment center coordinates $\mathrm{p} = (x, y, z)$ and the neurite radius $r$. Depending on the tracing approach, neuron nodes can be also assigned with the direction $ \mathrm{v} = ( v_x, v_y, v_z ) $ computed at $\mathrm{p}$. The cumulative cost function used to steer the tracing (Eq.~\ref{ch1_eq3}) is subject to the optimization and computed over the tract components and, aside from the geometrical constrains, also needs to include the image values $I(\mathrm{x})$ - i.e. locally sampled/interpolated image intensity, or another custom designed measure computed using (by filtering) local image intensities over the spatial extent of the node $\mathrm{x}$. For further illustration, it is useful to introduce a vector $\mathrm{x} = \left[  \mathrm{p}, r, \mathrm{v} \right] $ combining all geometrical elements together. Sequence $\mathrm{X}_L = \left\lbrace \mathrm{x}_i \right\rbrace, 1 \leq i \leq L $ containing $L$ nodes corresponds to a digitized neurite tract (trace).
+
+Notable tracing approaches are geodesic shortest path \cite{peng2010automatic} or live-wire segmentation \cite{meijering2004design} solved using Dijsktra algorithm \cite{dijkstra1959note}. Besides, similar optimization approaches based on fast marching \cite{baerentzen2001implementation,liu2016rivulet} or  open-curve snake \cite{wang2011broadly} are used.
+
+Cost function $ c( \mathrm{x}_i, I(\mathrm{x}) ) $ typically represents a weighted score of the set of geometry $c_{\text{G}}()$ and intensity $c_{\text{I}}()$ based components. If limited to two constituents for the illustration purpose, cost function would decompose into:
+
+\begin{equation}
+c( \mathrm{x}, I(\mathrm{x}) ) = \gamma c_{\text{G}}( \mathrm{x} ) + (1 - \gamma) c_{\text{I}}( \mathrm{x}, I(\mathrm{x}) ), \; \; \gamma \in \left[ 0, 1 \right]
+\end{equation}
+
+where $ \gamma \in \left[ 0, 1 \right] $. Intensity-based component can directly use the sampled/interpolated voxel intensities $I(x, y, z)$ or their normalized values $\tilde{I}(x,y,z) = \frac{I}{I_{\text{max}}} $ where $ c_{\text{I}}(x, I(\mathrm{x})) = e^{\lambda (1-\tilde{I}(\mathrm{x}))^2} $ or the tubularity measure $\rho$ derived from the ratios of the eigen values computed at different scales $ c_{\text{I}}() = \rho(\mathrm{p}) = \rho( (x, y, z) ) $ \cite{sato19973d,meijering2004design,frangi1998multiscale}.
+
+exponent of inverse intensity of pixels along the path and closeness to local centers of image intensity distribution
+
+merging the obtained paths into an optimal tree, assembling multiple tracts by detecting and merging their shared portions
+
+Global versus local processing trade-off is essential for the method success as the correct generalizations are a real bottleneck.
 
 
-Tracing approaches (geodesic, live-wire) often (typically) involve cost function that either represents .
 
-Live-wire, based on the established Dijkstra shortest path algorithm \cite{dijkstra1959note}.
+Prefiltering helps reducing noisy, non-tubular structures. 
+
+Lowest cost path is extracted, based on the Dijkstra shortest path algorithm \cite{dijkstra1959note} which is a methodology well established in tracing curvilinear structures.
 \begin{equation}
 C(\mathrm{p}_1, \mathrm{p}_2) = \gamma C_{\lambda}(\mathrm{p}_2) + (1 - \gamma) C_{\mathrm{v}}(\mathrm{p}_1, \mathrm{p}_2)
 \label{ch1_eq2}
@@ -83,25 +117,17 @@ C_{\lambda}({\mathrm{p}}) = \rho(\mathrm{p})
 \end{equation}
 
 \begin{equation}
-C_{\mathrm{v}}(\mathrm{p}_1, \mathrm{p}_2) = \frac{1}{2} \left(  \varphi(\mathrm{p}_1, \mathrm{p}_2) + \varphi(\mathrm{p}_2, \mathrm{p}_1) \right)  
+C_{\mathrm{v}}(\mathrm{p}_1, \mathrm{p}_2) = 1/2 \left(  \sqrt{ \varphi(\mathrm{p}_1, \mathrm{p}_2) } + \sqrt{  \varphi(\mathrm{p}_2, \mathrm{p}_1) } \right)  
 \end{equation}
 
-\begin{figure}
-	\centering
-	\begin{tabular}{c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{0.75em}}}
-		\includegraphics[width=0.25\textwidth]{ch1_fig2a} & 
-		\includegraphics[width=0.25\textwidth]{ch1_fig2b} & 
-		\includegraphics[width=0.25\textwidth]{ch1_fig2c} \\
-		a) Shortest path tracing & b) Minimum spanning tree & c) Path-pruning
-	\end{tabular}
-	\caption{Examples of key neuron reconstruction strategies: a) Finding optimal path having two control points, b) Inferring the  optimal tree structure from the set of nodes c) Pruning the over-complete neuron tree.}
-	\label{ch1_fig2}
-\end{figure}
+where $\varphi( \mathrm{p}_{1}, \mathrm{p}_{2} ) = | \mathrm{p}_{\mathrm{v}} \cdot \mathbf{u}( \mathrm{p}_{1}, \mathrm{p}_{2} )  |  $ and $\mathbf{u} = $
 
-\subsection{Bayesian methods in neuron tracing} 
+\subsection{Bayesian filtering in neuron tracing}
+Tracing neurite branches can be seen as a Bayesian filtering problem. Namely, the centerline, the radius solved using  where quantification of the neuron compartment values can be seen as probability density function of the... 
+
 Bayesian reasoning relies on the assumption that the estimated unknown quantities are hidden, not measurable directly but possible to estimate (filter) their posterior distribution using given observations \cite{doucet2001introduction}. Bayesian model consists of two essential components: prediction and update \cite{ristic2004beyond}. Prediction uses exiting prior knowledge to generate the prior distribution  of the state variable, denoted with $ \{ \mathrm{x}_t $, $ t \in \mathbb{N} \} $.  $ \{ \mathrm{y}_t, t \in \mathbb{N} \} \{ \mathrm{p}(\mathrm{x} | \mathrm{y}) \} $ 
 
-
+As an example, centroid (or some other) estimate of the the distribution of the distribution $\mathrm{p}(\mathrm{x})$  $\mathrm{p}(\mathrm{x} | \mathrm{y})$
 offers a common generic solution for tasks that involve non-Gaussianity, high dimensionality, non-linear state-space model, where state-space cannot be Gaussian. Other names for the same concept are: (optimal nonlinear, stochastic). In essence, the approach boils down to computing posterior distributions of the values intended to be filtered. Basic algorithm applicable in different contexts. The problem is defined as the estimate the set of hidden states The approach is also convenient becuase it leaves plenty of possibilities for customization of the filtering (it can be used as a component algorithm).
 
 Other methods used to establish optimal connections between paths.
@@ -125,9 +151,10 @@ One of the key Java tools is the ImageJ library \cite{abramoff2004image} with me
 % http://research.mssm.edu/cnic/swc.html
 % http://www.neuronland.org/NLMorphologyConverter/MorphologyFormats/SWC/Spec.html
 \section{Neuronal reconstruction format}
+\label{ch1_sec4}
 Once processed, neurons are typically exported into a dedicated data format intended to store the idiosyncratic tree-like topology of the cell. Among different ideas and implementations of standards used for storing reconstructed neurons, two neuron morphology file formats prevail in lab usage and recent large scale neuron related projects \cite{bakker2016web}: Neurolucida DAT format (MicroBrightField, Inc.) and SWC format \cite{cannon1998line}. Neurolucida DAT format is closed-source binary format whose reverse engineered description\footnote{http://neuronland.org} suggests neuron compartments being saved as a hierarchical tree of the linear segments. SWC format on the other hand is open-source, space delimited text format that stores tree structure in an array $\mathcal{N} = \{ n_1, \dots , n_i, \dots , n_j, \dots  \}$ where each element of the array, $n_i$, corresponds to a neuronal spherical compartment (Fig.~\ref{ch1_fig5}d). SWC, therefore, renders the reconstruction as a list of nodes (neuronal compartments) with seven attributes: node index identifier $i$, node type, sphere 3D coordinates $(x_i,y_i,z_i)$, radius $r_i$ and a parent node index (Fig~\ref{ch1_fig5}). Parent node index represents the link towards predecessor node. By convention it is set to -1 for the origin node. To conform with a tree structure, each spherical compartment may have one predecessor (parent) with lower node index ($i<j$, Fig.~\ref{ch1_fig5}). Loops and disconnected branches should not exist as that would not be in agreement with the tree-like structure. Etymologically, SWC represents the acronym containing the initials of the last names of Stockley, Wheal, and Cole. Although not directly described in their joint work on quantitative measurement and modeling of the neuron morphology \cite{stockley1993system}, the origin of the SWC name is an acronym of the initials of their last names. 
 
-Lastly, the SWC format exhibits variations, especially concerning the unified definition of the soma reconstruction \cite{bakker2016web}. Several interpretation of the standard exist\footnote{http://research.mssm.edu/cnic/swc.html}\footnote{http://www.neuronland.org/NLMorphologyConverter/MorphologyFormats/SWC/Spec.html}\footnote{NeuroMorpho.org FAQ: What is SWC format? http://www.neuromorpho.org/myfaq.jsp}. One of the downsides of the SWC format is its often oversimplified cylinder model of the soma. Being a rather simple (straightforward to implement the software to read and export) and open-source format, easy for exchange - it has been adopted by notable large-scale neuron morphology projects \cite{ascoli2007neuromorpho,peng2015bigneuron}.
+Lastly, the SWC format exhibits variations, especially concerning the unified definition of the soma reconstruction \cite{bakker2016web}. Several interpretation of the standard exist\footnote{http://research.mssm.edu/cnic/swc.html}\footnote{http://www.neuronland.org/NLMorphologyConverter/MorphologyFormats/SWC/Spec.html}\footnote{NeuroMorpho.org FAQ: What is SWC format? http://www.neuromorpho.org/myfaq.jsp}. One of the downsides of the SWC format is its often oversimplified cylinder model of the soma. Being a rather simple (straightforward to implement the software to read and export) and open-source format, easy for exchange - it has been adopted by notable large-scale neuron morphology projects \cite{ascoli2007neuromorpho,peng2015bigneuron}. Some reconstruction methods even base the reconstruction methods on the SWC format \cite{feng2015neutube}.
 
 The work showcased in this thesis will exclusively use open source SWC format.
  
@@ -149,20 +176,24 @@ Measuring distances between neurons: L-measure \cite{scorcioni2008measure}, Neur
 
 \section{Thesis outline}
 
-\subsubsection{Fuzzy logic system}
+\subsection{Fuzzy logic system}
 Detecting characteristic points of the neuron tree structure, along with many of the concepts encountered in various domains of human knowledge, is in practice, too complex to be modeled with a concise or precise definition. This is true, for example, for expressing . Unsupervised method based on fuzzy logic, linguistic variables and set of if-then rules is used to 
 
 dealing with such concepts through the use of fuzzy algorithms structured as a branching questionnaire.
 
 Usage of the linguistic variables 
 
-\subsubsection{Multiple hypothesis tracking}
+\subsection{Multiple hypothesis tracking}
 Computation methods
 
 Chapters include synthetic images that offer possibility of objective comparison.
 
 This thesis primarily addresses/contributes to the need for automated methods for neuron reconstruction. 
 In this thesis, methods that cope with uncertainty are showcased. The work is showcased in the domain of the neuron reconstruction and several neuron related tasks such as the object detection, namely the detection of the critical points (bifurcation and terminal) in microscopic images of neurons (Chapter~\ref{ch2:fuzzy}) and the localization  The first chapter  and probabilistic and bayesian methods are explored. The underlying idea assumes that the neuron tracing itself is never a .
+
+\subsection{Probabilistic reconstruction}
+Employs iterative tracing
+
 
 The thesis is organized as follows. In Chapter 2,  . Subsequently, in Chapter 3, 
 
