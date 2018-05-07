@@ -80,7 +80,7 @@ Strategies for neuron single cell reconstruction employ different algorithmic ap
 Neurite branch tracing is summarized as the energy/cost minimization problem \cite{meijering2004design,peng2010automatic}, such as computing an optimal (shortest) path through the existing voxel grid. Such strategy has been particularly successful in practice \cite{meijering2004design,peng2010v3d,longair2011simple}, especially for semi-automated tasks where the control/initialization points of the optimized trace are known and previously had been drawn out of the global image context. The downside of (tracing) such approach is that the usage requires starting points, trace endpoints or correct initialization.
 
 \begin{equation}
-C(\mathrm{X}) = \int_{\mathrm{X}} c( \mathrm{x}_i, I(\mathrm{x}) ) d\mathrm{x}
+C(\mathrm{X}) = \int_{\mathrm{X}} c( \mathrm{x}, I(\mathrm{x}) ) d\mathrm{x}
 \label{ch1_eq3}
 \end{equation}
 
@@ -88,13 +88,16 @@ Given the output format used to store the result (neuron format explained in det
 
 Notable tracing approaches are geodesic shortest path \cite{peng2010automatic} or live-wire segmentation \cite{meijering2004design} solved using Dijsktra algorithm \cite{dijkstra1959note}. Besides, similar optimization approaches based on fast marching \cite{baerentzen2001implementation,liu2016rivulet} or  open-curve snake \cite{wang2011broadly} are used.
 
-Cost function $ c( \mathrm{x}_i, I(\mathrm{x}) ) $ typically represents a weighted score of the set of geometry $c_{\text{G}}()$ and intensity $c_{\text{I}}()$ based components. If limited to two constituents for the illustration purpose, cost function would decompose into:
+Cost function $ c( \mathrm{x}_i, I(\mathrm{x}) ) $ typically represents a weighted score of the set of geometry $c_{\text{g}}()$ and intensity $c_{\text{i}}()$ based components. If limited to two constituents for the illustration purpose, cost function would decompose into:
 
 \begin{equation}
-c( \mathrm{x}, I(\mathrm{x}) ) = \gamma c_{\text{G}}( \mathrm{x} ) + (1 - \gamma) c_{\text{I}}( \mathrm{x}, I(\mathrm{x}) ), \; \; \gamma \in \left[ 0, 1 \right]
+c( \mathrm{x}, I(\mathrm{x}) ) = \alpha c_{\gamma}( \mathrm{x} ) + (1 - \alpha) c_{\iota}( \mathrm{x}, I(\mathrm{x}) )
+\label{ch1_eq4}
 \end{equation}
 
-where $ \gamma \in \left[ 0, 1 \right] $. Intensity-based component can directly use the sampled/interpolated voxel intensities $I(x, y, z)$ or their normalized values $\tilde{I}(x,y,z) = \frac{I}{I_{\text{max}}} $ where $ c_{\text{I}}(x, I(\mathrm{x})) = e^{\lambda (1-\tilde{I}(\mathrm{x}))^2} $ or the tubularity measure $\rho$ derived from the ratios of the eigen values computed at different scales $ c_{\text{I}}() = \rho(\mathrm{p}) = \rho( (x, y, z) ) $ \cite{sato19973d,meijering2004design,frangi1998multiscale}.
+where $ \alpha \in \left[ 0, 1 \right] $. 
+
+Intensity-based component can use the sampled/interpolated voxel intensities directly $c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = I(\mathrm{x}) = I(\mathrm{p}) = I(x, y, z)$, or the exponential function of the normalized values $ \tilde{I}(\mathrm{x}) = \tilde{I}(\mathrm{p}) = \tilde{I}(x,y,z) = I(x, y, z) / I_{\text{max}} $ where $ c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = \text{exp} \left(  \lambda  (1 - \tilde{I}(\mathrm{x}))^2 \right) $ or the precomputed tubularity measure $ I_{\Sigma} $ computed from the hessian eigen values obtained at different scales $\Sigma = \left\lbrace \sigma_k \right\rbrace $ $ c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = I_{\Sigma}(\mathrm{p}) = I_{\Sigma}( (x, y, z) ) $ \cite{sato19973d,meijering2004design,frangi1998multiscale}.
 
 exponent of inverse intensity of pixels along the path and closeness to local centers of image intensity distribution
 
