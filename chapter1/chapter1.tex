@@ -126,7 +126,7 @@ C_{\mathrm{v}}(\mathrm{p}_1, \mathrm{p}_2) = 1/2 \left(  \sqrt{ \varphi(\mathrm{
 where $\varphi( \mathrm{p}_{1}, \mathrm{p}_{2} ) = | \mathrm{p}_{\mathrm{v}} \cdot \mathbf{u}( \mathrm{p}_{1}, \mathrm{p}_{2} )  |  $ and $\mathbf{u} = $
 
 \subsection{Bayesian filtering in neuron tracing}
-Tracing neurite branches can be seen as a Bayesian filtering problem. Namely, the centerline, the radius solved using  where quantification of the neuron compartment values can be seen as probability density function of the... 
+Tracing neurite branches can be conceived as estimating the unknown quantities using given observations. In such  as a Bayesian filtering problem. Recursive Bayesian estimation,  Namely, the centerline, the radius solved using  where quantification of the neuron compartment values can be seen as probability density function of the... 
 
 Bayesian reasoning relies on the assumption that the estimated unknown quantities are hidden, not measurable directly but possible to estimate (filter) their posterior distribution using given observations \cite{doucet2001introduction}. Bayesian model consists of two essential components: prediction and update \cite{ristic2004beyond}. Prediction uses exiting prior knowledge to generate the prior distribution  of the state variable, denoted with $ \{ \mathrm{x}_t $, $ t \in \mathbb{N} \} $.  $ \{ \mathrm{y}_t, t \in \mathbb{N} \} \{ \mathrm{p}(\mathrm{x} | \mathrm{y}) \} $ 
 
@@ -146,7 +146,6 @@ c_{\mathrm{p}, \sigma} = \frac{ \sum\limits_{d\mathrm{p}} (I(\mathrm{p} + d\math
 \label{ch1_eq1}
 \end{equation}
 
-\section{Tools}
 One of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}. Variety of other software platforms \cite{meijering2010neuron,acciai2016automated}. 
 
 % https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3477
