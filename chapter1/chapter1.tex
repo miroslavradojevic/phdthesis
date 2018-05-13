@@ -75,55 +75,93 @@ Aforementioned characteristics impose much of the barrier in attempt to consiste
 
 % reconstruction components: trace, seed point, ancor point, lanmark, blob, tree
 \section{Reconstructions from light microscopy}
-Strategies for neuron single cell reconstruction employ different algorithmic approaches. Vast majority of the introduced work treats tree reconstruction as modular task where different algorithms are dedicated to processing particular tree components. Nevertheless, there is a certain duality as the reconstruction accuracy also depends on the ability of the algorithm to generalize well. Extensive amount of the methodologies introduced over the years \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be broadly described into three general approaches (Fig.~\ref{ch1_fig2}) where each strategy emulates various optimization tasks: neurite tracing as an optimal path between given endpoints (Fig.~\ref{ch1_fig2}a), finding an optimal tree from the set of given landmark points that already belong to the tree (extracting the most accurate tree from the given set of guide points Fig.~\ref{ch1_fig2}b) and over-tracing/over-representing the tree (Fig.~\ref{ch1_fig2}c). As one might presume, the methodological separation cannot be rigorous. It is very likely for the methods to combine together different ideas and overlap in terms of the approach.
+Strategies for neuron single cell reconstruction employ different (algorithmic) approaches. Vast majority of the introduced work treats tree reconstruction as loosely modular task where different algorithmic units are dedicated to handle particular tree components. Nevertheless, there is inevitably a degree of commonality and interdependence as the cascade of the methods requires outputs the used computation stages to be used in the follow up steps. The reconstruction accuracy also depends on the algorithmic ability to generalize well which does involve undertaking a fair share of parallelized processing. Extensive amount of the methodologies introduced over the years \cite{meijering2010neuron,donohue2011automated,acciai2016automated} can be broadly cast into three general approaches (strategies) (Fig.~\ref{ch1_fig2}) where each strategy emulates various optimization tasks: neurite tracing as an optimal path between given endpoints (Fig.~\ref{ch1_fig2}a), finding an optimal tree from the set of given landmark points that already belong to the tree (extracting the most accurate tree from the given set of guide points Fig.~\ref{ch1_fig2}b) and over-tracing/over-representing the tree (Fig.~\ref{ch1_fig2}c). As one might presume, the methodological separation cannot be absolutely rigorous. It is very likely for the methods to combine together different ideas and overlap in terms of the approach.
 
-Neurite branch tracing is summarized as the energy/cost minimization problem \cite{meijering2004design,peng2010automatic}, such as computing an optimal (shortest) path through the existing voxel grid. Such strategy has been particularly successful in practice \cite{meijering2004design,peng2010v3d,longair2011simple}, especially for semi-automated tasks where the control/initialization points of the optimized trace are known and previously had been drawn out of the global image context. The downside of (tracing) such approach is that the usage requires starting points, trace endpoints or correct initialization.
+Neurite branch tracing could be interpreted as the energy/cost minimization problem \cite{meijering2004design,peng2010automatic} used to extract the trace or to refine the existing one. Classic example of neurite tracing is computing an optimal (shortest) path through the existing voxel grid where the designed geodesic metric or cost function has been defined to weigh the transition between grid elements (graph vertices). Such processing strategy has been particularly ubiquitous in practice \cite{meijering2004design,peng2010v3d,longair2011simple}, notably for semi-automated tasks where the control points of the optimized trace are initially known or had been computed. Notable tracing approaches are geodesic shortest path \cite{peng2010automatic} or live-wire segmentation \cite{meijering2004design} solved using Dijsktra shortest-path algorithm \cite{dijkstra1959note} - a methodology well established in tracing curvilinear structures. The downside of tracing defined in this manner is the necessity of having starting points, trace endpoints or correct initialization which can be challenging and require global image reasoning. Computed curve can further be refined with energy minimization and solved using gradient descent optimization \cite{peng2007straightening,peng2010automatic}. 
+
+Given the output format used to store the digital reconstruction result (explained in more detail in Section~\ref{ch1_sec4}), digital neuron tree consists of the set of connected discrete neuron compartments (spherical nodes). Neuronal compartment would hence correspond to the cross-section of the branch segment. The essential geometrical quantities computed during tracing are the compartment 3D center $\mathrm{p} = (x, y, z)$ and the local (sphere) radius $r$ which would relate to the diameter of the segment. Depending on the tracing approach, neuron nodes can be also assigned with the direction $ \mathrm{v} = ( v_x, v_y, v_z ) $ computed at $\mathrm{p}$. The cumulative cost function used to steer the tracing toward an optimal solution is used within the optimization scheme and computed over the tract components. Aside from the geometrical constrains, also needs to include (take into account) the values extracted from the image - i.e. locally sampled/interpolated image intensity, or some other custom designed measure computed using (by filtering) local image intensities over the spatial extent of the node $\mathrm{x}$. For a more in-depth illustration, it is useful to introduce a vector $\mathrm{x} = \left[  \mathrm{p}, r, \mathrm{v} \right] $ combining all geometrical elements of the neuron compartment together. Sequence of digital neurite nodes $\mathrm{X} = \left\lbrace \mathrm{x}_1, ... , \mathrm{x}_i, ..., \mathrm{x}_N \right\rbrace$ would concatenate together the nodes that correspond to a digitized neurite tract (trace). Cumulative cost (Eq.~\ref{ch1_eq3}) computed over the tract would result in a measure whose minimization results with an optimal trace. Cost defined such way can be also used to define the energy being minimized to further refine the trace.%  using gradient descent 
+
+%\begin{equation}
+%C(\mathrm{X}) = \int_{\mathrm{X}} c( \mathrm{x}, I(\mathrm{x}) ) d\mathrm{x}
+%\end{equation}
+%The trace segment with $L$ elements can be  $\mathrm{X}_L = \left\lbrace \mathrm{x}_i \right\rbrace, 1 \leq i \leq L $ containing $L$.
 
 \begin{equation}
-C(\mathrm{X}) = \int_{\mathrm{X}} c( \mathrm{x}, I(\mathrm{x}) ) d\mathrm{x}
+C(\mathrm{X}) = \sum\nolimits_{i} c(\mathrm{x}_i, I(\mathrm{x}_i)) \Delta\mathrm{x} 
 \label{ch1_eq3}
 \end{equation}
 
-Given the output format used to store the result (neuron format explained in detail in Section~\ref{ch1_sec4}), digital neuron tree consists of the set of connected discrete neuron compartments (spherical nodes). The essential geometrical quantities computed during tracing are the compartment center coordinates $\mathrm{p} = (x, y, z)$ and the neurite radius $r$. Depending on the tracing approach, neuron nodes can be also assigned with the direction $ \mathrm{v} = ( v_x, v_y, v_z ) $ computed at $\mathrm{p}$. The cumulative cost function used to steer the tracing (Eq.~\ref{ch1_eq3}) is subject to the optimization and computed over the tract components and, aside from the geometrical constrains, also needs to include the image values $I(\mathrm{x})$ - i.e. locally sampled/interpolated image intensity, or another custom designed measure computed using (by filtering) local image intensities over the spatial extent of the node $\mathrm{x}$. For further illustration, it is useful to introduce a vector $\mathrm{x} = \left[  \mathrm{p}, r, \mathrm{v} \right] $ combining all geometrical elements together. Sequence $\mathrm{X}_L = \left\lbrace \mathrm{x}_i \right\rbrace, 1 \leq i \leq L $ containing $L$ nodes corresponds to a digitized neurite tract (trace).
-
-Notable tracing approaches are geodesic shortest path \cite{peng2010automatic} or live-wire segmentation \cite{meijering2004design} solved using Dijsktra algorithm \cite{dijkstra1959note}. Besides, similar optimization approaches based on fast marching \cite{baerentzen2001implementation,liu2016rivulet} or  open-curve snake \cite{wang2011broadly} are used.
-
-Cost function $ c( \mathrm{x}_i, I(\mathrm{x}) ) $ typically represents a weighted score of the set of geometry $c_{\text{g}}()$ and intensity $c_{\text{i}}()$ based components. If limited to two constituents for the illustration purpose, cost function would decompose into:
+Cost function $ c( \mathrm{x}, I(\mathrm{x}) ) $ (Eq.~\ref{ch1_eq3}) typically represents a weighted score of the set of geometry and intensity based components. If expressed with two constituents for the illustration purpose, cost function would further decompose into:
 
 \begin{equation}
-c( \mathrm{x}, I(\mathrm{x}) ) = \alpha c_{\gamma}( \mathrm{x} ) + (1 - \alpha) c_{\iota}( \mathrm{x}, I(\mathrm{x}) )
+c(\mathrm{x}, I(\mathrm{x})) = \alpha c_{\iota}(\mathrm{x}, I(\mathrm{x})) + (1-\alpha) c_{\gamma}(\mathrm{x}) 
 \label{ch1_eq4}
 \end{equation}
 
-where $ \alpha \in \left[ 0, 1 \right] $. 
+where $c_{\gamma}$ corresponds to the geometry-based and $c_{\iota}$ to an intensity-based component, with weight $ \alpha \in \left[ 0, 1 \right] $. 
 
-Intensity-based component can use the sampled/interpolated voxel intensities directly $c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = I(\mathrm{x}) = I(\mathrm{p}) = I(x, y, z)$, or the exponential function of the normalized values $ \tilde{I}(\mathrm{x}) = \tilde{I}(\mathrm{p}) = \tilde{I}(x,y,z) = I(x, y, z) / I_{\text{max}} $ where $ c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = \text{exp} \left(  \lambda  (1 - \tilde{I}(\mathrm{x}))^2 \right) $ or the precomputed tubularity measure $ I_{\Sigma} $ computed from the hessian eigen values obtained at different scales $\Sigma = \left\lbrace \sigma_k \right\rbrace $ $ c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = I_{\Sigma}(\mathrm{p}) = I_{\Sigma}( (x, y, z) ) $ \cite{sato19973d,meijering2004design,frangi1998multiscale}.
-
-exponent of inverse intensity of pixels along the path and closeness to local centers of image intensity distribution
-
-merging the obtained paths into an optimal tree, assembling multiple tracts by detecting and merging their shared portions
-
-Global versus local processing trade-off is essential for the method success as the correct generalizations are a real bottleneck.
-
-
-
-Prefiltering helps reducing noisy, non-tubular structures. 
-
-Lowest cost path is extracted, based on the Dijkstra shortest path algorithm \cite{dijkstra1959note} which is a methodology well established in tracing curvilinear structures.
+The intensity-based component can directly use the sampled voxel intensities:
 \begin{equation}
-C(\mathrm{p}_1, \mathrm{p}_2) = \gamma C_{\lambda}(\mathrm{p}_2) + (1 - \gamma) C_{\mathrm{v}}(\mathrm{p}_1, \mathrm{p}_2)
+c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = I(\mathrm{x})
+\end{equation}
+
+where $I(\mathrm{x}) = I(\mathrm{p}) = I(x, y, z)$ represents the voxel intensity at given location. Alternatively, the exponential of the inverse intensity of pixels along the path can be used to define the cost \cite{peng2010automatic}:
+\begin{equation}
+c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = \text{exp} \left(  \lambda  (1 - \tilde{I}(\mathrm{x}))^2 \right)
+\end{equation}
+
+where $\tilde{I}(\mathrm{x})$ represents the normalized intensity value $ \tilde{I}(\mathrm{x}) = \tilde{I}(\mathrm{p}) = \tilde{I}(\mathrm{p}) / I_{\text{max}}$, with $\max_{\substack{\forall \mathrm{p}}} I(\mathrm{p})$.
+
+The custom tubularity measure $\rho$ can also be used to weight an intensity-based component:
+\begin{equation}
+c_{\iota}( \mathrm{x}, I(\mathrm{x}) ) = \rho(\mathrm{p}) = \rho(x, y, z)
+\end{equation}
+
+where $ \rho $ denotes the computed tubularity measure. If obtained over set of scales $\Sigma$, it becomes $\rho_{\Sigma}$ with $\Sigma = \left\lbrace \sigma_k \right\rbrace$, $1 \leq k \leq K$ used to denote the scales $\sigma$ used when filtering. Ratios of the Hessian eigen values obtained at different scales $\sigma_k$ are used to determine the scalar intensity which highlights the tubular structures \cite{sato19973d,meijering2004design,frangi1998multiscale}. Also the scale-space analysis of the line profile model \cite{steger1998unbiased} can be used. Thanks to the Hessian analysis, the tubularity measure can incorporate the local direction of the filtered tube-like structure. Tubularity measures are commonly computed at pre-filtering aiming to reduce the presence of noisy, non-tubular structures. Tubularity measure calculated this way is deterministic and unsupervised  which implies usage of the predefined computation recipe regardless of the input data. Moreover, calculating the tubularity measure can also be cast as a supervised learning problem \cite{sironi2016multiscale,li2017deep} enabling tubularity measure to adopt to a particular problem based on the training. The practical downside of such approach, aside from designing the most suitable machine learning model, is that it requires dedicated training which in practice can be time and resource consuming.%closeness to local centers of image intensity distribution
+
+Trace refinement can be based on the discrepancy of the node locations from the centers of the intensity distribution. Minimizing the energy computed as in Eq.~\ref{ch1_eq2} is used to further align the curve to the underlying image intensities.  
+\begin{equation}
+c_{\iota}(\mathrm{x}_i, I(\Theta(\mathrm{x}_i))) = \text{exp} \left( \lambda \frac{ \sum\nolimits_{\mathrm{y} \in \Theta(\mathrm{x}_i)} \lVert \mathrm{x} - \mathrm{y} \rVert^2 I(\mathrm{y}) \Delta\mathrm{y}  }{\sum\nolimits_{\mathrm{y} \in \Theta(\mathrm{x}_i)} I(\mathrm{y}) \Delta\mathrm{y} } \right) 
 \label{ch1_eq2}
 \end{equation}
 
+$\Theta(\mathrm{x}_i)$ of the Eq.~\ref{ch1_eq2} denotes the local spatial neighborhood of the spherical node compartment $\mathrm{x}_i$. Such refinement scheme equates to the image intensity based mean-shift \cite{cheng1995mean} of the node location, which can also be used to refine a collection of the overlapping tracings \cite{radojevic-pnr}.
+
+Zero-mean normalized cross-correlation (ZNCC) is a normalized, contrast-independent measure used to quantify the similarity of the encountered intensities sampled within the node compartment with the given spatial intensity distribution model.
 \begin{equation}
-C_{\lambda}({\mathrm{p}}) = \rho(\mathrm{p})
+c_{\gamma}(\mathrm{x}_i, \Phi(\mathrm{x}_i)) = \frac{ \sum\limits_{\mathrm{p} \in \Phi(\mathrm{x}_i)} (I(\mathrm{p}) - \bar{I}(\mathrm{p}))(G_{\sigma}(\mathrm{p}) - \bar{G}_{\sigma}) }{ \sqrt{ \sum\limits_{\mathrm{p} \in \Phi(\mathrm{x}_i)}(I(\mathrm{p}) - \bar{I}(\mathrm{p}))^2 \sum\limits_{\mathrm{p} \in \Phi(\mathrm{x}_i)}(G_{\sigma}(\mathrm{p}) - \bar{G}_{\sigma})^2 } }
+\label{ch1_eq1}
 \end{equation}
 
+$\Phi(\mathrm{x}_i)$ represents the spatial neighborhood of the node compartment $\mathrm{x}_i = [ \mathrm{p}, \mathrm{v}, \sigma ]$, commonly defined as the tube cross-section cylinder centered at $\mathrm{p}$, having $\sigma$ radius and directed along $\mathrm{v}$. $\bar{I}$ and $\bar{G}$ are the respective mean values of the intensities inside the sampled region $\Phi$. $G_{\sigma}$ denotes the spatial intensity distribution model at given scale (cylinder radius) $\sigma$. In case of neurons - a Gaussian intensity profiles in the cylinder cross-section plane are a reasonable choice \cite{radojevic2017neuron}. 
+
+The geometry-based component can incorporate the vectorial (directional) alignment of the centroids along the filtered tubularity direction \cite{meijering2004design}:  
 \begin{equation}
-C_{\mathrm{v}}(\mathrm{p}_1, \mathrm{p}_2) = 1/2 \left(  \sqrt{ \varphi(\mathrm{p}_1, \mathrm{p}_2) } + \sqrt{  \varphi(\mathrm{p}_2, \mathrm{p}_1) } \right)  
+c_{\gamma}(\mathrm{x}) = c_{\gamma}(\mathrm{x}_{i}, \mathrm{x}_{i+1}) = 1/2 \left( \varphi(\mathrm{p}_i, \mathrm{p}_{i+1})^{\frac{1}{2}} + \varphi(\mathrm{p}_{i+1}, \mathrm{p}_{i})^{\frac{1}{2}} \right) 
+\end{equation}
+where $\varphi( \mathrm{p}_{i}, \mathrm{p}_{j} ) = | \mathrm{v}_i \cdot \mathrm{u}_{ij} |  $ quantifies the alignment of the curve - amount of the directional overlap of the local tubularity direction with the unit link vector between the two points $\mathrm{u}_{ij} = (\mathrm{p}_j - \mathrm{p}_i) / \lVert \mathrm{p}_j - \mathrm{p}_i \rVert $. Furthermore, the geometry-based measure such as the digital trace smoothness \cite{peng2010automatic} or bending energy \cite{radojevic2015fuzzy} is derived using the topological information:
+\begin{equation}
+c_{\gamma}(\mathrm{x}) = c_{\gamma}(\mathrm{x}_{i-1}, \mathrm{x}_{i}, \mathrm{x}_{i+1}) = \sum\nolimits_{i} (- \mathrm{p}_{i-1} + 2\mathrm{p}_i - \mathrm{p}_{i+1})^2 \Delta\mathrm{p}
 \end{equation}
 
-where $\varphi( \mathrm{p}_{1}, \mathrm{p}_{2} ) = | \mathrm{p}_{\mathrm{v}} \cdot \mathbf{u}( \mathrm{p}_{1}, \mathrm{p}_{2} )  |  $ and $\mathbf{u} = $
+Besides Dijkstra shortest path tracing, variants of, conceptually similar, fast marching algorithm \cite{sethian1999level} have been successfully adopted to the neuron reconstruction domain reporting the range of improvements related to tracing the discontinuous areas using gradient descent \cite{liu2016rivulet} \cite{van2007subvoxel,xiao2013app2,liu2016rivulet}.
+
+Active contour based methods are particularly attractive for this work. They are among the most widely used segmentation methods that have also been employed for neuron tracing.
+or energy minimization methods such as open-curve snake using gradient-vector flow
+\cite{schmitt2004new}
+ \cite{wang2011broadly} have been used in neuron tracing. Ba  \cite{wang2011broadly}
+
+Accurately merging the obtained traces into a tree reconstruction represents a significant challenge. Due to the complexity of the problem (many alternatives to examine) and the amount of computation needed to reach the solution, assembling  a tree structure is typically solved as the approximation. multiple tracts and merging their shared portions.
+
+
+Significant share of the methods aims at finding a globally optimal solution on the whole-tree level. Having such approach, the set of node candidates is commonly turned into a weighted graph. The reconstruction is then based on computing the optimal tree (minimum weight trees) from the established weighted graph. The widespread tool for this application is the NP-complete minimum spanning tree (MST) algorithm \cite{peng2015bigneuron}. Alternative solution is to extract minimum trees spanning subset of the graph edges. However, since finding the optimal solution is a complex NP-hard problem and involves plenty of scenarios to explore and assess, the approximative solutions are used in practice, for instance  with the  namely k-MST \cite{turetken2011automated} where 
+
+%
+Finally, the methods that employ the over-reconstruction, over-segmentation of the 
+
+ 
+
+Global versus local processing trade-off is essential for the method success as the correct generalizations represent a true challenge.
 
 \subsection{Bayesian filtering in neuron tracing}
 Tracing neurite branches can be conceived as estimating the unknown quantities using given observations. In such  as a Bayesian filtering problem. Recursive Bayesian estimation,  Namely, the centerline, the radius solved using  where quantification of the neuron compartment values can be seen as probability density function of the... 
@@ -137,16 +175,6 @@ Other methods used to establish optimal connections between paths.
 The collection of the methods used: shortest path (i.e. Dijkstra \cite{dijkstra1959note}), fast marching, geodesic . In all of those an optimal solution to the cost is sought after. Currently, BigNeuron challenge Several notable approaches in broad sense can be differentiated.
 
 On model-based reasoning. Why is the Gaussian cross-section model \cite{zhao2011automated,radojevic2017neuron} suitable.
-
-\subsubsection{Likelihood}
-Zero-mean normalized cross-correlation (ZNCC) is defined as 
-
-\begin{equation}
-c_{\mathrm{p}, \sigma} = \frac{ \sum\limits_{d\mathrm{p}} (I(\mathrm{p} + d\mathrm{p}) - \bar{I}(\mathrm{p}))(G_{\sigma}(\mathrm{p}) - \bar{G}_{\sigma}) }{ \sqrt{ \sum\limits_{d\mathrm{p}}(I(\mathrm{p} + d\mathrm{p}) - \bar{I}(\mathrm{p}))^2 \sum\limits_{d\mathrm{p}}(G_{\sigma}(\mathrm{p}) - \bar{G}_{\sigma})^2 } }
-\label{ch1_eq1}
-\end{equation}
-
-One of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}. Variety of other software platforms \cite{meijering2010neuron,acciai2016automated}. 
 
 % https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3477
 % http://www.neuromorpho.org/myfaq.jsp (What is SWC format?)
@@ -175,6 +203,8 @@ The work showcased in this thesis will exclusively use open source SWC format.
 \end{figure}
 
 Measuring distances between neurons: L-measure \cite{scorcioni2008measure}, Neuro-blast \cite{wan2015blastneuron}. Distances between neurons can be based on the overlap and the inter-node metric distances.
+
+Reconstruction tools: one of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}. Variety of other software platforms \cite{meijering2010neuron,acciai2016automated}. 
 
 \section{Thesis outline}
 
