@@ -1,11 +1,40 @@
 % ************************************************************************
 %
-% Automated neuron tracing using probability hypothesis density filtering
+% Automated neuron detection in high-content fluorescence microscopy images
+% using machine learning 
 %
 % ************************************************************************
 \chpos{15mm}{8mm}
-\chapter[Automated neuron tracing using probability hypothesis density filtering]{Automated neuron tracing using probability hypothesis density filtering}
-\chaptermark{Automated neuron tracing using probability hypothesis density filtering}
-\label{ch3:phd}
+\chapter[Automated neuron detection in high-content fluorescence microscopy images using machine learning]{Automated neuron detection in high-content fluorescence microscopy images using machine learning}
+\chaptermark{Automated neuron detection in high-content fluorescence microscopy images using machine learning}
+\label{ch5:ndetchml}
 
-\myabstract{\lettrine{T}{he} functionality of neurons and their role in neuronal networks is tightly connected to the cell morphology. A fundamental problem in many neurobiological studies aiming to unravel this connection is the digital reconstruction of neuronal cell morphology from microscopic image data. Many methods have been developed for this, but they are far from perfect, and better methods are needed. Here we present a new method for tracing neuron centerlines needed for full reconstruction. The method uses a fundamentally different approach than previous methods by considering neuron tracing as a Bayesian multi-object tracking problem. The problem is solved using probability hypothesis density filtering. Results of experiments on 2D and 3D fluorescence microscopy image datasets of real neurons indicate the proposed method performs comparably or even better than the state of the art.}
+\myabstract{\lettrine{T}{he} study of neuronal morphology in relation to function, and the development of effective medicines to positively impact this relationship in patients suffering from neurodegenerative diseases, increasingly involves image-based high-content screening and analysis. The first critical step toward fully automated high-content image analyses in such studies is to detect all neuronal cells and distinguish them
+	from possible non-neuronal cells or artifacts in the images.
+	Here we investigate the performance of well-established machine
+	learning techniques for this purpose. These include
+	support vector machines, random forests, k-nearest neighbors,
+	and generalized linear model classifiers, operating on
+	an extensive set of image features extracted using the compound
+	hierarchy of algorithms representing morphology, and
+	the scale-invariant feature transform. We present experiments
+	on a dataset of rat hippocampal neurons from our own studies
+	to find the most suitable classifier(s) and subset(s) of features
+	in the common practical setting where there is very
+	limited annotated data for training. The results indicate that
+	a random forests classifier using the right feature subset ranks
+	best for the considered task, although its performance is not
+	statistically significantly better than some support vector machine
+	based classification models.}
+
+%\smallskip
+%\bigskip
+\vfill
+\vspace{10em}
+% ************************************************************************
+\begin{publish}
+	Based upon: G. Mata, M. Radojevi\'{c}, E. Meijering, ``Automated neuron detection in high-content fluorescence microscopy images using machine learning'', \textit{Neuroinformatics}, vol. 0, no. 0, pp.0-0, 2018.   
+\end{publish}
+
+\section{Introduction}
+\label{ch5_sec_intro}

@@ -1,11 +1,24 @@
 % ************************************************************************
 %
-% Automated neuron tracing using probability hypothesis density filtering
+% Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images 
+% using Sequential Monte Carlo Estimation
 %
 % ************************************************************************
 \chpos{15mm}{8mm}
-\chapter[Automated neuron tracing using probability hypothesis density filtering]{Automated neuron tracing using probability hypothesis density filtering}
-\chaptermark{Automated neuron tracing using probability hypothesis density filtering}
-\label{ch3:phd}
+\chapter[Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images using Sequential Monte Carlo Estimation]{Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images using Sequential Monte Carlo Estimation}
+\chaptermark{Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images using Sequential Monte Carlo Estimation}
+\label{ch4:pnr}
 
-\myabstract{\lettrine{T}{he} functionality of neurons and their role in neuronal networks is tightly connected to the cell morphology. A fundamental problem in many neurobiological studies aiming to unravel this connection is the digital reconstruction of neuronal cell morphology from microscopic image data. Many methods have been developed for this, but they are far from perfect, and better methods are needed. Here we present a new method for tracing neuron centerlines needed for full reconstruction. The method uses a fundamentally different approach than previous methods by considering neuron tracing as a Bayesian multi-object tracking problem. The problem is solved using probability hypothesis density filtering. Results of experiments on 2D and 3D fluorescence microscopy image datasets of real neurons indicate the proposed method performs comparably or even better than the state of the art.}
+\myabstract{\lettrine{M}{icroscopic}  images of neuronal cells provide essential structural information about the key constituents of the brain and form the basis of many neuroscientific studies. Computational analyses of the morphological properties of the captured neurons require first converting the struc- tural information into digital tree-like reconstructions. Many dedicated computational methods and corresponding soft- ware tools have been and are continuously being developed with the aim to automate this step while achieving human- comparable reconstruction accuracy. This pursuit is ham- pered by the immense diversity and intricacy of neuronal morphologies as well as the often low quality and ambigu- ity of the images. Here we present a novel method we de- veloped in an effort to improve the robustness of digital re- construction against these complicating factors. The method is based on probabilistic filtering by sequential Monte Carlo estimation and uses prediction and update models designed specifically for tracing neuronal branches in microscopic im- age stacks. Moreover, it uses multiple probabilistic traces to arrive at a more robust, ensemble reconstruction. The pro- posed method was evaluated on fluorescence microscopy image stacks of single neurons and dense neuronal networks with expert manual annotations serving as the gold standard, as well as on synthetic images with known ground truth. The results indicate that our method performs well under varying experimental conditions and compares favorably to state-of- the-art alternative methods.}
+
+%\smallskip
+%\bigskip
+\vfill
+\vspace{10em}
+% ************************************************************************
+\begin{publish}
+	Based upon: M. Radojevi\'{c}, E. Meijering, ``Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images using Sequential Monte Carlo Estimation'', \textit{Neuroinformatics}, vol. 0, no. 0, pp.0-0, 2018.   
+\end{publish}
+
+\section{Introduction}
+\label{ch4_sec_intro}
