@@ -242,35 +242,32 @@ The work showcased in this thesis will exclusively use open source SWC format.
 	\label{ch1_fig5}
 \end{figure}
 
-Measuring distances between neurons: L-measure \cite{scorcioni2008measure}, Neuro-blast \cite{wan2015blastneuron}. Distances between neurons can be based on the overlap and the inter-node metric distances.
+Eventually, measuring distances between the reconstruct neurons: L-measure \cite{scorcioni2008measure}, Neuro-blast \cite{wan2015blastneuron}. Distances between neurons can be measured based on the overlap and the inter-node metric distances such as spatial distance (SD) metric.
 
-Reconstruction tools: one of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}. Variety of other software platforms \cite{meijering2010neuron,acciai2016automated}. 
+\red{TODO, move: Reconstruction tools: one of the key Java tools is the ImageJ library \cite{abramoff2004image} with method \cite{longair2011simple,pool2008neuritetracer}. Variety of other software platforms \cite{meijering2010neuron,acciai2016automated}.} 
 
 \section{Thesis outline}
-This thesis showcases the image analysis approaches dedicated to the computer vision problems applied in microscopy images of tree-shaped neuron cells. Digital reconstruction of single neuron morphology and the detection of the characteristic landmark points within the tree structure have been covered throughout the thesis chapters. Central subject is the usage of probabilistic methodology - namely Bayesian filtering methods in processing very characteristic and challenging imagery of neuron cells. In this regard, SMC methods had been designed and adopted in two different fashions to tackle the neuron reconstruction and neuron tracing problems. Moreover, the computational technique which models the uncertainty has been used for localizing the characteristic bifurcation and terminal points of neuron trees using the set of rules. Finally, machine learning approach was used to detect the rectangular regions within a large 2D mosaic containing the neuron. 
+This thesis showcases the theoretical and experimental results of the investigation over several computer vision approaches dedicated to solving number of diverse bioimage analysis problems applied on microscopy images of neuron cells. Fundamental questions for quantitative neurobiology such as digital reconstruction and tracing of single-neuron morphology, detection of regions containing single neuron as well as the localization and identification of tree-structure landmark points such as junctions and terminations (named as \textit{critical points}) have been investigated in separate research topics, implemented and experimentally evaluated. This thesis presents the obtained results of the research study.
 
-On model-based reasoning : Gaussian cross-section model \cite{zhao2011automated,radojevic2017neuron} suitable.
+Detecting critical points within the tree structure, along with many other vision-related tasks encountered in various domains, is in practice, too complex to be modeled with a concise or precise strict definition. However, it sounds faithful to loosely define the junction as a point where three streamlines of some configuration pattern merge together, or the terminal point as the one where only one streamline segment can be distinguished in the local neighborhood. In Chapter~\ref{ch2:fuzzy}, fuzzy logic with rule-based reasoning and has been adapted to an unsupervised object detection task - fully automatic detection and characterization of both types of critical points in fluorescence microscopy images of neurons. The essential features about the main streamlines are obtained using directional filtering and stored using (fuzzified) linguistic terms. A custom-tailored set of dedicated rules structured as an IF-THEN questionnaire is then accumulated and evaluated over the set of linguistic terms leading to a joint decision used to indicate the singularity points. The very concept of fuzzy set allows engineering partial membership towards a defined linguistic term and thus helps modeling the uncertainty. The ability to define the set of general rules that can be truthful \textit{to a degree} is a convenient tool for fusing the information together. 
 
-Chapter~\ref{ch2:fuzzy} Fuzzy logic system is devoted to the 
+Central subject of the thesis is the usage of probabilistic methodology for processing aforementioned challenging neuron cell imagery. Non-deterministic Bayesian filtering approach has been a main framework of choice used to accomplish two important tasks: tracing (Chapter~\ref{ch3:phd}) and reconstruction (Chapter~\ref{ch4:pnr}) of the idiosyncratic tree-shaped structures in 3D microscopy stacks. TODO. In this regard, versatile tooling of Sequential Monte Carlo (SMC) methods had been adopted to solve each task in two different fashions employing different algorithmic principles cast as single- and multi- object filtering problems where the object of interest is a neurite cross-section. In Chapter~\ref{ch3:phd}, the solution to multi-object filtering based on the Probability Hypothesis Density (PHD) filter implemented using SMC was applied for simultaneously tracing multiple neurites of the arbor.
+% both custom-tailored to tackle the neuron reconstruction and neuron tracing problems
 
-Chapter~\ref{ch3:phd} uses
-Sequential Monte Carlo (SMC) implementation of the PHD filter,
+Finally, supervised machine learning was employed in Chapter~\ref{ch5:ndetchml} detecting the rectangular regions within a large 2D mosaic containing the neuron (object of interest). in the large high-throughput screening mosaics
 
- indicating that the Bayesian filtering can be a 
-Chapter~\ref{ch4:pnr}
+\red{The authors propose a non-deterministic Bayesian approach to tracing neuronal arbors with the intent to blend a prior model and the page data using a multi-target tracking framework. Specifically, the authors propose a probability hypothesis density filter (PHD) as a way to formalize concepts that have been in existence in prior tracking based neuron reconstruction algorithms. This framework is elegant, and represents a definite step forward as reconstruction algorithms continue to evolve and mature. In other words, I do not consider this idea altogether novel as claimed by the authors, but a helpful step in cleaning up some of the earlier frameworks. On the down side, the proposed method is still limited by classic limitations, for example, the ability to identify seed points with sensitivity and specificity, and this work does not provide a solution. }
 
-Chapter~\ref{ch5:ndetchml}
+%----------------------------------------
+Several contributions are highlighted. First, PHD filter represents an elegant extension towards higher generalization level. 
 
-Detecting characteristic points of the neuron tree structure, along with many of the concepts encountered in various domains of human knowledge, is in practice, too complex to be modeled with a concise or precise definition. This is true, for example, for expressing . Unsupervised method based on fuzzy logic, linguistic variables and set of if-then rules is used to 
+The relevance of model-based reasoning - Gaussian cross-section model \cite{zhao2011automated,radojevic2017neuron} suitable. And the usage of the zero-mean normalized cross correlatioon (ZNCC) to quantify the presence of the modeled cross section.
 
-dealing with such concepts through the use of fuzzy algorithms structured as a branching questionnaire.
-
-Usage of the linguistic variables 
-
-Multiple hypothesis tracking
-Computation methods
+Sequential Monte Carlo (SMC) implementation of the multi-object filtering, namely a PHD filter, indicating that the Bayesian filtering can be adopted to simultaneous multiple-object tracking.
 
 Chapters include synthetic images that offer possibility of objective comparison.
+
+Multiple hypothesis tracking
 
 This thesis primarily addresses/contributes to the need for automated methods for neuron reconstruction. 
 In this thesis, methods that cope with uncertainty are showcased. The work is showcased in the domain of the neuron reconstruction and several neuron related tasks such as the object detection, namely the detection of the critical points (bifurcation and terminal) in microscopic images of neurons (Chapter~\ref{ch2:fuzzy}) and the localization  The first chapter  and probabilistic and bayesian methods are explored. The underlying idea assumes that the neuron tracing itself is never a .
@@ -278,6 +275,4 @@ In this thesis, methods that cope with uncertainty are showcased. The work is sh
 Probabilistic reconstruction
 Employs iterative tracing
 
-
-The thesis is organized as follows. In Chapter~\ref{ch2:fuzzy},  . Subsequently, in Chapter 3, 
-
+The thesis is organized as follows. In Chapter~\ref{ch2:fuzzy},  . Subsequently

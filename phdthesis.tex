@@ -89,10 +89,6 @@
   \par\noindent\ignorespaces
 \rule{\textwidth}{0.4pt}
 }
-% {%
-%   \par\noindent\rule[1ex]{10em}{0.4pt}
-%   \endcenter
-% }
 
 %------------------------------------------------------------------
 \newcommand{\red}[1]{\textcolor{red}{#1}}
@@ -107,7 +103,7 @@
 %------------------------------------------------------------------
 
 % ************************************************************************
-%\includeonly{./chapter1/chapter1,./literature,./bibliography} % 
+\includeonly{./chapter1/chapter1,./chapter2/chapter2,./bibliography}
 
 % ************************************************************************
 \begin{document}
@@ -142,18 +138,12 @@
 \graphicspath{{./chapter5/}}
 \include{./chapter5/chapter5}
 
-%\include{./chapterN/summary}
-%\include{dsareview}
-%\include{registration}
-%\include{evaluation}
-%\include{quantification}
-%\include{interpolation}
-
 \include{./bibliography}
-%\include{./samenvatting/samenvatting}
-%\include{./portfolio/portfolio}
-%\include{./publications/publications}
-%\include{./curriculum/curriculum}
+\include{./summary/summary}
+\include{./summary/samenvatting}
+\include{./portfolio/portfolio}
+\include{./publications/publications}
+\include{./curriculum/curriculum}
 
 % ************************************************************************
 \end{document}
