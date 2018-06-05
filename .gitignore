@@ -8,6 +8,10 @@
 *.tex.bak
 *.bib.bak
 *.bib.sav
-phdthesis.pdf
 .DS_Store
+phdthesis.pdf
 cover/cover.pdf
+*.gls
+*.glg
+*.nlo
+*.ist
