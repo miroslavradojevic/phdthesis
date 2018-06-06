@@ -1,555 +1,557 @@
-\documentclass[twocolumn,natbib]{svjour3}
-
-\usepackage{graphicx}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{txfonts}
-\usepackage{upgreek}
-\usepackage[caption=false]{subfig}
-\usepackage[normalem]{ulem}
-\usepackage{url}
-\usepackage{array}
-\usepackage{adjustbox}
-\usepackage{color}
-
-\newcommand{\marked}[1]{\textcolor{red}{#1}}
-\newcommand{\struck}[1]{\textcolor{red}{\sout{#1}}}
-
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\argmax}{arg\,max}
-
-\bibliographystyle{ninf}
-
-\journalname{Neuroinformatics}
-
-\begin{document}
-
-\title{Fuzzy-Logic Based Detection and Characterization of Junctions and Terminations in Fluorescence Microscopy Images of Neurons}
-
-\author{Miroslav Radojevi\'{c} \and Ihor Smal \and Erik Meijering}
-
-\institute{M. Radojevi\'{c} \and I. Smal \and E. Meijering\\
-              Biomedical Imaging Group Rotterdam\\
-              Erasmus University Medical Center, Rotterdam, the Netherlands\\
-              Departments of Medical Informatics and Radiology\\
-              \email{\{m.radojevic,h.meijering\}@erasmusmc.nl}      
-}
-
-\date{}
-
-\maketitle
-
-\begin{abstract}
-Digital reconstruction of neuronal cell morphology is an important step toward understanding the functionality of neuronal networks. Neurons are tree-like structures whose description depends critically on the junctions and terminations, collectively called critical points, making the correct localization and identification of these points a crucial task in the reconstruction process. Here we present a fully automatic method for the integrated detection and characterization of both types of critical points in fluorescence microscopy images of neurons. \marked{In view of the majority of our current studies, which are based on cultured neurons, we describe and evaluate the method for application to two-dimensional (2D) images. The method} relies on directional filtering and angular profile analysis to extract essential features about the main streamlines at any location in an image, and employs fuzzy logic with carefully designed rules to reason about the feature values in order to make well-informed decisions about the presence of a critical point and its type. Experiments on simulated as well as real images of neurons demonstrate the detection performance of our method. A comparison with the output of two existing neuron reconstruction methods reveals that our method achieves substantially higher detection rates and could provide beneficial information to the reconstruction process.
-\keywords{Neuron reconstruction \and Junction detection \and Bifurcation detection \and Termination detection \and Fuzzy logic \and Fluorescence microscopy \and Image analysis}
-\end{abstract}
-
-\section{Introduction}
-\label{sec:intro}
-The complexity and functionality of the brain depend critically on the morphology and related interconnectivity of its neuronal cells \citep{Kandel-2000,Ascoli-2002,Donohue-2008}. To understand how a healthy brain processes information and how this capacity is negatively affected by psychiatric and neurodegenerative diseases \citep{Anderton-1998,lin2010mechanisms,Siskova-2014} it is therefore very important to study neuronal cell morphology. Advanced microscopy imaging techniques allow high-sensitivity visualization of individual neurons and produce vast amounts of image data, which are shifting the bottleneck in neuroscience from the imaging to the data processing \marked{\citep{svoboda2011past, Peng-2011, Senft-2011, halavi2012digital}} and call for a high level of automation. The first processing step toward high-throughput quantitative morphological analysis of neurons is their digital reconstruction from the image data. Many methods have been developed for this in the past decades \citep{meijering2010neuron,donohue2011automated} but the consensus of recent studies is that there is still much room for improvement in both accuracy and computational efficiency \citep{Liu-2011, svoboda2011past}.
-
-A key aspect of any neuron reconstruction method is the detection and localization of terminations and junctions of the dendritic (and axonal) tree, collectively called ``critical points'' in this paper (Fig.~\ref{fig:example}), which ultimately determine the topology and faithfulness of the resulting digital representation. Roughly there are two ways to extract these critical points in neuron reconstruction \citep{al2008improved, meijering2010neuron,Basu-2013}. The most often used approach is to start with segmentation or tracing of the elongated image structures and then to infer the critical points, either afterwards or along the way, by searching for attachments and endings in the resulting subsets \citep{Dima-2002, xiong2006automated, narro2007neuronmetrics, vasilkoski2009detection, bas2011principal, chothani2011automated, Dehmelt-2011, ho2011neurphologyj, choromanska2012automatic, xiao2013app2}. This approach depends critically on the accuracy of the initial segmentation or tracing procedure, which usually is not designed to reliably capture critical points in the first place and thus often produces very fragmented results, requiring manual postprocessing to fix issues \citep{Peng-2011,Luisi-2011,Dercksen-2014}. The reverse approach is to first identify critical points in the images and then to use these as seed points for tracing the elongated image structures. Critical points can be obtained either by manual pinpointing, as in semiautomatic tracing methods \marked{\citep{meijering2004design, Schmitt-2004, narro2007neuronmetrics, lu2009semi, peng2010v3d, longair2011simple}}, or by fully automatic detection using sophisticated image filtering and pattern recognition methods (discussed in the next section). The latter approach has barely been explored for neuron reconstruction, but if reliable detectors can be designed, they provide highly valuable information to the reconstruction process.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{n01b} % ./fig/n01w is an alternative
-\caption{Fluorescence microscopy image of a neuron with manually indicated junctions (red circles) and terminations (yellow circles). The radius of each annotated critical-point region reflects the size of the underlying image structure.}
-\label{fig:example}
-\end{figure}
-
-Here we present a novel method -- which we coin Neuron Pinpointer (NP) -- for fully automatic detection and characterisation of critical points in fluorescence microscopy images of neurons. \marked{We describe and evaluate the method for studies where single (cultured) neurons are imaged in 2D although all aspects of the method can in principle be extended to 3D. The method may also be useful for reconstruction approaches based on 2D projections \citep{Zhou-2015}.} For computational efficiency the method starts with an initial data reduction step, based on local variation analysis, by which obvious background image regions are excluded. In the remaining set of foreground regions the method then explores the local neighborhood of each image pixel and calculates the response to a set of directional filters. Next, an iterative optimization scheme is used for robust peak selection in the resulting angular profile, and a set of corresponding features relevant for the detection task is computed. The feature set is then further processed to make a nonlinear decision on the presence of a critical point and its type (termination or junction) at each foreground image pixel. To conveniently deal with ambiguity and uncertainty in the data, the decision-making is carried out by a fuzzy-logic rule-based system using predefined rules specifically designed for this task. The presented work aims to facilitate the task of automatic neuron reconstruction by contributing a general scheme for extracting critical points that can serve as useful input for any tracing algorithm.
-
-This paper is a considerably extended version of our recent conference report \citep{radojevic2014fuzzy}. We have modified the filtering algorithms and fuzzy-logic rules so as to be able to detect both junction and termination points. In addition we here present the full details of our method and an extensive evaluation based on both manually annotated real neuron images and computer generated neuron images. To obtain the latter we here propose a new computational approach based on publicly available expert manual tracings. We start with a brief overview of related work on critical-point detection (Section~\ref{sec:related_work}) and then present the underlying concepts (Section~\ref{sec:proposed-approach}), implementational details (Section~\ref{sec:implementation-details}), and experimental evaluation (Section~\ref{sec:experiments}) of our method, followed by a summary of the conclusions that can be derived from the results (Section~\ref{sec:conclusions}).
-
-\section{Related Work}
-\label{sec:related_work}
-Detecting topologically critical points in images has been a long-standing problem in many areas of computer vision. Although an in-depth review of the problem and proposed solutions is outside the scope of this paper, we provide a brief discussion in order to put our work into context.
-
-Examples of previous work include the design of filters to find image locations where either three or more edges join (``junctions of edges'') \citep{sinzinger2008model, Hansen-2004, laganiere2004detection} or three or more lines join (``junctions of lines'') \citep{yu1998rotated, deschenes2000detection}. In biomedical applications, the predominant type of junction is the bifurcation, with occasional trifurcations, as seen in blood vessel trees, bronchial trees, gland ductal trees, and also in dendritic trees \citep{Koene-2009, Iber-2013}. Hence, research in this area has focused on finding image locations where three (or more) elongated structures join \citep{tsai2004model, agam2005vessel, bevilacqua2005combined, bhuiyan2007automatic, zhou2007vascular, aibinu2010vascular, calvo2011automatic, obaraa2012contrast, su2012junction, azzopardi2013automatic}.
-
-A common approach to find bifurcation points is to infer them from an initial processing step that aims to segment the elongated structures. However, the way these structures are segmented may influence the subsequent critical-point inference. Popular image segmentation methods use intensity thresholding and/or morphological processing, in particular skeletonization \citep{hoover2000locating, Dima-2002, He-2003, Weaver-2004, pool2008neuritetracer, bevilacqua2009comparison, Leandro-2009, aibinu2010vascular}, but these typically produce very fragmented results. Popular methods to enhance elongated image structures prior to segmentation include Hessian based analysis \marked{\citep{frangi1998multiscale, xiong2006automated, zhang2007automated, al2008improved, Yuan-2009, turetken2011automated, Myatt-2012, Basu-2013,santamaria2015automatic}}, Lapla\-cean-of-Gaussian filters \citep{chothani2011automated}, Gabor filters \citep{bhuiyan2007automatic,azzopardi2013automatic}, phase congruency analysis \citep{obara2012contrast}, and curvelet based image filtering approaches \citep{Narayanaswamy-2011}. However, being tailored to elongated structures, such filters often yield a less optimal response precisely at the bifurcation points, where the local image structure is more complex than a single ridge. 
-
-Several concepts have been proposed to explicitly detect bifurcation points in the images without relying on an initial segmentation of the axonal and dendritic trees. Examples include the usage of circular statistics of phase information \citep{obaraa2012contrast}, steerable wavelet based local symmetry detection \citep{puspoki2013detection}, or combining eigen analysis of the Hessian and correlation matrix \citep{su2012junction}. The problem with existing methods is that they often focus on only one particular type of critical point (for example bifurcations but not terminations), or they use rather rigid geometrical models (for example assuming symmetry), while in practice there are many degrees of freedom \citep{michaelis1994junction}. Image filtering methods for bifurcation detection have also been combined with supervised machine-learning based approaches such as support vector machines \citep{turetken2011automated}, artificial neural networks \citep{bevilacqua2009comparison}, or with multiple classifiers using AdaBoost \citep{zhou2007vascular}, but these lack flexibility in that they require a training stage for each application.
-
-Robust neuron tracing requires knowledge of not only the bifurcation points but also the termination points. Since each type of critical point may vary considerably in terms of geometry (orientation and diameter of the branches) and image intensity (often related to the branch diameter), designing or training a dedicated filter for each possible case is impractical, and a more integrated approach is highly desirable for both detection and characterization of the different types of critical points. To the best of our knowledge, no generic methods currently exist for critical-point detection in neuron images. The method proposed in this paper aims to fill this gap and to complement exploratory neuron reconstruction algorithms that initialize on a set of seed points.
-
-\section{Proposed Method}
-\label{sec:proposed-approach}
-Our proposed method for detection and characterization of critical points consists of three steps: feature extraction (Section~\ref{subsec:feature-extraction}), fuzzy-logic based mapping (Section~\ref{subsec:flrb-detection}), and, finally, critical-point determination (Section~\ref{sec:CPextraction}). Here we describe each step in detail. \struck{Since in our applications we work with two-dimensional (2D) fluorescence microscopy images of cultured neurons, this is reflected in the method description, but all presented concepts can be extended to work with three-dimensional (3D) images if needed.}
-
-\subsection{Feature Extraction}
-\label{subsec:feature-extraction}
-The aim of the feature extraction step is to compute a set of quantitative features of the local image structure at each pixel position that helps to discriminate between different types of critical points. Since the tree-like neuronal image structures typically cover only a small portion of the image, we avoid unnecessary computations by first performing a foreground selection step (Section \ref{subsubsec:foreground-selection}), which discards image locations that are very unlikely to contain neuronal structures and keeps only those regions that are worthy of further examination. Next, the angular profile (Section \ref{subsubsec:angular-profile}) of each foreground pixel is constructed, from which the quantitative features are computed.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{n19-fground-r8-perc75} % try also ./fig/n01-fground-r8-perc85      538x724   85perc
-\caption{Example of foreground selection. The original image of $560\times780$ pixels is divided into background \marked{(green transparent mask)} and foreground \marked{(gray-scale regions without mask)} using $r_{d}=8$ pixels and the $75^\textrm{th}$ variation percentile as threshold. In this example, 25\% of the total number of pixels is selected for further processing.}
-\label{fig:foreground-selection}
-\end{figure}
-
-\subsubsection{Foreground Selection}
-\label{subsubsec:foreground-selection}
-To determine whether a pixel location $(x,y)$ in a given image $I$ should be considered as foreground or background, we analyze the local intensity variation $\rho(x,y)$ within a circular neighborhood of radius $r_{d}$ centered at that location. To avoid making strong assumptions about the local intensity distribution we chose to use the difference between the $95^\textrm{th}$ and the $5^\textrm{th}$ percentile of the intensities within the neighborhood as the measure of variation:
-\begin{gather} 
-\rho(x,y) = \mathcal{P}_{95}(\mathcal{I}_{\!\!xy}) - \mathcal{P}_{5}(\mathcal{I}_{\!\!xy}) \\
-\mathcal{I}_{\!\!xy} = \left\{\, I(m,n)\ |\ (m-x)^{2}+(n-y)^{2} \leq r_d^2\, \right\} \\
-x,m \in [0,W-1]\ \textrm{and}\ y,n \in [0,H-1]
-\end{gather}
-where $W$ and $H$ denote, respectively, the width and the height of $I$ in pixels. The value of $\rho$ is relatively low within more or less homogeneous regions (background but also the soma) but relatively high in regions containing neuronal branches. Consequently, the histogram of $\rho$ computed over the entire image contains two clusters (representing foreground and background pixels), which can be separated using simple percentile thresholding \citep{doyle1962operations}. The percentile should be chosen such that background pixels (true negatives) are removed as much as possible while at the same time the foreground pixels (true positives) are retained as much as possible (in practice this implies allowing for false positives). We found that in our applications a percentile of around $75$ is a safe threshold (Fig.~\ref{fig:foreground-selection}). \marked{Small gaps in the foreground region are closed by morphological dilation.} The resulting set of foreground pixel locations is denoted by $F$. In our applications the parameter $r_{d}$ is typically set to the diameter of the axonal and dendritic structures observed in the image.
-
-\subsubsection{Angular Profile Analysis}
-\label{subsubsec:angular-profile}
-For each selected foreground location, a local angular profile is computed and analyzed. The key task here is to assess the presence and properties of any curvilinear image structures passing through the given location. To this end we correlate the image with a set of oriented kernels distributed evenly over a range of angles around that location \citep{radojevic2014fuzzy}. The basic kernel used for this purpose is of size $D\times D$ pixels and has a constant profile in one direction and a Gaussian profile in the orthogonal direction (Fig.~\ref{fig:directional-filtering}):
-\begin{equation}
-G(x,y)=\textrm{e}^{-x^2/2\sigma_{\!\!D}^{2}}/S
-\label{eq:G}
-\end{equation}
-where $S$ is a normalization factor such that the sum of $G(x,y)$ over all kernel pixels is unity. We chose the Gaussian both because we observed that the cross-sectional profile of axons and dendrites in our applications is approximately Gaussian-like and because the Gaussian is a theoretically well-justified filter for regularization purposes. The parameters $D$ and $\sigma_{\!D}$ determine the size and shape of the kernel profile and should correspond to the expected branch diameter.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{filtering}
-\caption{Geometry involved in the computation of the angular profile. In effect, the value of $p(x,y,\alpha,k,D)$ is the correlation of the image $I(x,y)$ with the kernel $G(m,n)$ of size $D\times D$ pixels, after rotating the kernel patch over angle $\alpha$ and shifting it over $kD$ with respect to $(x,y)$.}
-\label{fig:directional-filtering}
-\end{figure}
-
-Using the kernel we compute the local angular profile at any pixel location $(x,y)$ in the given image $I$ as:
-\begin{equation}
-p(x,y,\alpha,k,D)=\sum_{m}\sum_{n} I(x_{m,n},y_{m,n})\,G(m,n)
-\label{eq:angularprofile}
-\end{equation}
-where the transformed image coordinates are obtained as:
-\begin{equation}
-\begin{bmatrix} x_{m,n} \\ y_{m,n} \end{bmatrix} =
-\begin{bmatrix} x \\ y \end{bmatrix} +
-kD\begin{bmatrix} \sin\alpha \\ -\!\cos\alpha \end{bmatrix} +
-\begin{bmatrix} \cos\alpha & -\!\sin\alpha \\ \sin\alpha & \cos\alpha \end{bmatrix}
-\begin{bmatrix} m \\ n \end{bmatrix}
-\label{eq:xymn}
-\end{equation}
-and the summation is performed over all $(m,n)$ for which the kernel is defined. That is, $p(x,y,\alpha,k,D)$ is the correlation of the image with the kernel patch rotated over angle $\alpha$ and shifted over a distance $kD$ with respect to $(x,y)$ in the direction corresponding to that angle (Fig.~\ref{fig:directional-filtering}). In practice, $p$ is calculated for a discrete set of angles, $\alpha_{i}=i/(2\pi N_{\alpha}),\, i=0,\dots,N_{\alpha}-1$, where $N_{\alpha}$ is automatically set such that the circle with radius $kD$ is sampled with pixel resolution. The parameter $k$ is typically set slightly larger than 0.5 so as to scan the neighborhood around the considered pixel $(x,y)$. To obtain the image intensity at non-integer transformed locations $(x_{m,n},y_{m,n})$, linear interpolation is used.
-
-In contrast with previous works, which used differential kernels for directional filtering and profiling \citep{yu1998rotated, can1999rapid, zhang2007automated}, we employ the matched kernel (Eq.~\ref{eq:G}), which avoids noise amplification. Although applying a set of rotated kernels is computationally more demanding than Hessian or steerable filtering based methods, it provides more geometrical flexibility in matching the kernels with the structures of interest while retaining excellent directional sensitivity. In our framework, the computational burden is drastically reduced by the foreground selection step, and further reduction is possible since the filtering process is highly parallelizable.
-
-After computing the angular profile we further process it in order to extract several features (Fig.~\ref{fig:feature-extraction}) relevant for critical-point detection and characterization:
-
-\paragraph{Peaks.} At each foreground pixel location we first determine how many and in which direction line-like image structures pass through it. This is done by finding the local maxima (``peaks'') in the angular profile at that location. Since the oriented kernels act as low-pass filters, the profile is sufficiently smooth to extract the peaks reliably using the iterative line searching algorithm \citep{flannery1992numerical}. The found peaks correspond to angles $\hat{\alpha}_{i}, i=1,\dots,N_{\hat{\alpha}}$, in which directions the image intensities are the highest. Here $N_{\hat{\alpha}}\leq4$ to accommodate terminations, normal body points, and junctions (bifurcations and crossovers).
-
-\paragraph{Likelihood.} For each $\hat{\alpha}_{i}$ we calculate a likelihood $l_i \in \left[ 0, 1 \right]  $ from the angular profile according to:
-\begin{equation} 
-l_i = \frac{p(x,y,\hat{\alpha}_{i},k,D)-p_{\min}}{p_{\max}-p_{\min}}
-\end{equation}
-where $p_{\min}$ and $p_{\max}$ denote, respectively, the minimum and maximum of $p(x,y,\alpha,k,D)$ over $\alpha$.
-
-\paragraph{Energy.} Next we consider the local grid $\uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$ for each $\hat{\alpha}_{i}$ (Fig.~\ref{fig:feature-extraction}), consisting of the transformed coordinates $(x_{m,n},y_{m,n})$ corresponding to $\alpha=\hat{\alpha}_{i}$ (Eq.~\ref{eq:xymn}), and we extract a refined centerline point set $\lambda_{i}$ (or ``streamline'') on this grid by finding for each $n$ the local maximum over $m$:
-\begin{gather}
-\label{eq:refine-centerline} 
-\lambda_{i} = \left\{(x_{\hat{m}_{n},n},y_{\hat{m}_{n},n})\right\}_{n\,\in\,\left[-D/2,D/2\right]}\\[0.5ex]
-\hat{m}_{n} = \argmax_{m\,\in\,\left[-D/2,D/2\right]} I(x_{m,n},y_{m,n})
-\label{eq:hatm}
-\end{gather}
-We quantify how much the streamline deviates from a straight line by estimating its bending energy $u_{i}\geq0$ as:
-\begin{equation}
-u_{i} = \frac{1}{\Updelta m}\sum_{n} \left( \hat{m}_{n-1} - 2\hat{m}_{n} + \hat{m}_{n+1} \right)^2
-\end{equation}
-where $\Updelta m$ is the pixel spacing in the direction of $m$ and the summation extends over all $n$ for which the summand can be evaluated. This calculation is a discrete approximation of the integral squared second-order derivative of the centerline function if it were continuously defined.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{feature-extr}
-\caption{Flowchart of the feature extraction scheme. The example showcases a bifurcation but the same scheme is used also for terminations. The scheme, which starts with the angular profile $p(x,y,\alpha,k,D)$ and is executed clockwise, is applied to each pixel in the selected foreground regions and results in the set of features $l_i$, $u_i$, and $c_i$, where $i$ indexes the streamlines. See main text for details.}
-\label{fig:feature-extraction}
-\end{figure}
-
-\paragraph{Correlation.} Given a streamline $\lambda_{i}$ we estimate the orthogonal direction at each point in the set by averaging the orthogonal directions of the two neighboring streamline segments corresponding to that point (that is, from the point to the next point, and from the point to the previous point). Using these direction estimates we sample a refined local grid $\Uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$, consisting of image coordinates $(\tilde{x}_{m,n},\tilde{y}_{m,n})$ relative to the streamline (Fig.~\ref{fig:feature-extraction}), and compute a normalized cross-correlation \citep{lewis1995fast} score $c_{i}\in[-1,1]$ as:
-\begin{equation} 
-\label{eq:correlation}
-c_{i} = \frac{\sum_{m}\sum_{n} \bigl[I(\tilde{x}_{m,n},\tilde{y}_{m,n})-\bar{I}\bigr] \bigl[G(m,n)-\bar{G}\bigr]}{\sqrt{\sum_{m}\sum_{n}\bigl[I(\tilde{x}_{m,n},\tilde{y}_{m,n})-\bar{I}\bigr]^{2}\sum_{m}\sum_{n}\bigl[G(m,n)-\bar{G}\bigr]^{2}}}
-\end{equation}
-where, similar to the angular profile calculation (Eq.~\ref{eq:angularprofile}), the summations extend over all $(m,n)$ for which the kernel is defined, and $\bar{I}$ and $\bar{G}$ denote the mean of the image intensities and of the kernel values, respectively. Effectively $c_{i}$ quantifies the degree to which the template $G$ matches a straightened version of the streamline. To cover a range of possible scales (radii of the underlying image structures), we take the largest score of a set of templates with \marked{standard deviations} of the Gaussian profile model \citep{su2012junction} \marked{covering $\left\lbrace 1,\dots,\left\lfloor{\frac{D}{2}}\right\rfloor\right\rbrace $ set of values measured in pixels}.
-
-\subsection{Fuzzy-Logic Based Mapping}
-\label{subsec:flrb-detection}
-The feature values extracted at each foreground image location subsequently need to be processed in order to assess the presence of a critical point and its type. Recognizing that in practice everything is ``a matter of degree'' \citep{zadeh1975fuzzy}, and allowing for nonlinear input-output mappings, we chose to use fuzzy logic for this purpose. Fuzzy logic has been successfully used in many areas of engineering \citep{mendel1995fuzzy} but to the best of our knowlege has not been explored for neuron critical-point analysis. We briefly describe the basics of fuzzy logic (Section~\ref{sec:FL}) and then present our specific fuzzy-logic system for calculating critical-point maps of neuron images (Section~\ref{sec:cp-detection}).
-
-\subsubsection{Basics of Fuzzy Logic}
-\label{sec:FL}
-In a fuzzy-logic system (Fig.~\ref{fig:fls-general}), numerical inputs are first expressed in linguistic terms (the fuzzification step), and are then processed based on predefined rules to produce linguistic outputs (the inference step), which are finally turned back into numerical values (the defuzzification step).
-
-\paragraph{Fuzzification.} Given an input scalar value $s\in\mathbb{R}$, the fuzzification step results in a vector $\tilde{\mathbf{s}}$ whose elements express the degree of membership of $s$  to input fuzzy sets, each corresponding to a linguistic term describing $s$. A fuzzy set is defined by a membership function $\mu:\mathbb{R}\rightarrow[0,1]$ quantifying the degree to which $s$ can be described by the corresponding linguistic term. Commonly used membership functions are trapezoidal, Gaussian, triangular, and piecewise linear \citep{mendel1995fuzzy}. As an example, we may have linguistic terms LOW and HIGH, representing the subjective notions ``low'' and ``high'', respectively. The degrees to which ``$s$ is low'' (which in this paper we will write as $s=\textrm{LOW}$) and ``$s$ is high'' ($s=\textrm{HIGH}$) are given by membership values $\mu_{\textrm{LOW}}(s)$ and $\mu_{\textrm{HIGH}}(s)$, respectively. The output of the fuzzification step thus becomes $\tilde{\mathbf{s}}=[\mu_{\textrm{LOW}}(s),\mu_{\textrm{HIGH}}(s)]^{T}$.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{fls-general}
-\caption{Scheme of a single input/output fuzzy-logic (FL) system. A scalar input value $s$ is converted to a vector $\tilde{\mathbf{s}}$ containing the memberships of $s$ for each of the input fuzzy sets, resulting in a vector $\tilde{\mathbf{z}}$ containing the memberships of $z$ for each of the output fuzzy sets.}
-\label{fig:fls-general}
-\end{figure}
-
-\paragraph{Inference.} The input fuzzy set memberships are processed by the inference engine to produce a fuzzy output based on rules expressing expert knowledge. The rules can be either explicitly defined or implicitly learned by some training process, and may express nonlinear input-output relationships and involve multiple inputs. In engineering applications, the rules are commonly given as IF-THEN statements about the input and output linguistic terms. For example, the output terms could be OFF, NONE, and ON, indicating whether a certain property of interest is ``off'', ``none'' (expressing ambiguity), or ``on''. A rule could then be:
-\begin{equation} 
-\label{eq:rule-prototype}
-\begin{split}
-R_{i}\!:\ \ & \textrm{IF}\ (s_{1}=\textrm{HIGH})\ \wedge\ (s_{2}=\textrm{LOW}) \\
-& \textrm{THEN}\ (z=\textrm{OFF})
-\end{split}
-\end{equation}
-where $z\in\mathbb{R}$ is the variable over the output range. This is not a binary logical statement, where the input and output conditions can be only true or false, but a fuzzy logical statement, where the conditions are expressed in terms of memberships, in this case $\mu_{\textrm{HIGH}}(s_{1})$, $\mu_{\textrm{LOW}}(s_{2})$, and $\mu_{\textrm{OFF}}(z)$. Input conditions are often combined using the operators $\wedge$ (denoting fuzzy intersection) or $\vee$ (denoting fuzzy union), which are commonly defined as, respectively, the minimum and maximum of the arguments \citep{mendel1995fuzzy}. In our example, the IF-part of $R_{i}$ (Eq.~\ref{eq:rule-prototype}) would result in the following intermediate value (degree of verity):
-\begin{equation}
-\upsilon_{i} = \min\left\{\mu_{\textrm{HIGH}}(s_{1}),\mu_{\textrm{LOW}}(s_{2})\right\}
-\end{equation}    
-This value is then used to constrain the fuzzy set corresponding to the output linguistic term addressed by $R_{i}$, in this case OFF, resulting in the output fuzzy set:
-\begin{equation}
-\Upsilon_{\!i}(z) = \min\left\{\mu_{\textrm{OFF}}(z),\upsilon_{i}\right\}
-\end{equation}
-In practice there may be many rules $R_{i}, i=1,\dots,N_{R}$, which are aggregated by the inference engine to produce a single output fuzzy set $\Upsilon$. The common way to do this \citep{mendel1995fuzzy} is by means of a weighted fuzzy union:
-\begin{equation}
-\Upsilon(z) = \max\left\{w_{1}\Upsilon_{\!1}(z),\dots,w_{N_{R}}\Upsilon_{\!N_{R}}(z)\right\}
-\end{equation}
-Although it is possible to assign a different weight to each rule by setting $w_{i}\in[0,1]$, in our applications this is not critical, and therefore we simply use $w_{i}=1$ for all $i$.
-
-\paragraph{Defuzzification.} In the final step of the fuzzy-logic system, the fuzzy output $\Upsilon$ is converted back to a scalar output value. Although there are many ways to do this, a common choice is to calculate the centroid \citep{mendel1995fuzzy}:
-\begin{equation}
-\label{eq:centroid-general}
-\hat{z} = \frac{\int z\Upsilon(z)dz}{\int\Upsilon(z)dz} 
-\end{equation}
-With this value we can finally calculate the vector of output fuzzy set memberships: $\tilde{\mathbf{z}}=[\mu_{\textrm{OFF}}(\hat{z}),\mu_{\textrm{NONE}}(\hat{z}),\mu_{\textrm{ON}}(\hat{z})]^{T}$.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.70\linewidth]{fls-architecture}
-\caption{Architecture of the proposed fuzzy-logic system for critical-point detection. A cascade of two fuzzy-logic modules ($\textrm{FL}_{1}$ and $\textrm{FL}_{2}$) is used, where the first determines the degree to which streamlines (up to four) are present at the image location under consideration, and based on this information the second determines the degree to which that location corresponds to the possible types of critical points.}
-\label{fig:fls-architecture}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.95\linewidth]{fls-detail}
-\caption{Architecture of the proposed fuzzy-logic system for processing the information of one streamline. Input feature values are fuzzified into linguistic terms LOW and HIGH, which are translated by the first fuzzy-logic module ($\textrm{FL}_{1}$) into intermediate linguistic terms OFF, NONE, ON, which are finally translated by the second fuzzy-logic module ($\textrm{FL}_{2}$) into linguistic terms END, NONE, JUN.}
-\label{fig:fls-detail}
-\end{figure}
-
-\subsubsection{Termination and Junction Mapping}
-\label{sec:cp-detection}
-To determine the presence and type of critical point at any foreground image location, we use a cascade of two fuzzy-logic systems, representing two decision levels (Fig.~\ref{fig:fls-architecture}). The first level takes as input vectors $\mathbf{s}_{i}=[l_{i},u_{i},c_{i}]$, $i=1,\dots,4$, which contain the features for each of the streamlines extracted in the angular profile analysis step at the image location under consideration (Section~\ref{subsubsec:angular-profile}). For each streamline (Fig.~\ref{fig:fls-detail}), the features are fuzzified ($\mu$) and processed by the first fuzzy-logic module ($\textrm{FL}_{1}$), which determines the degree to which the streamline indeed represents a line-like image structure (ON), or not (OFF), or whether the image structure is ambiguous (NONE). In cases where less than four streamlines were found by the angular profile analysis step, the feature vectors of the nonexisting streamlines are set to $\mathbf{0}$. The fuzzy output for all four streamlines together forms the input for the second decision level, where another fuzzy-logic module ($\textrm{FL}_{2}$) determines the degree to which the image location corresponds to a junction (JUN), or a termination (END), or neither of these (NONE).
-
-The input streamline features, $l_{i}$, $u_{i}$, $c_{i}$, are expressed in linguistic terms LOW and HIGH using membership functions $\mu_{\textrm{LOW}}$ and $\mu_{\textrm{HIGH}}$ defined for each type of feature. In our application we use trapezoidal membership functions, each having two inflection points, such that $\mu_{\textrm{LOW}}$ and $\mu_{\textrm{HIGH}}$ are each other's complement (Fig.~\ref{fig:fuzz}). For example, the degrees to which $l_{i}=\textrm{LOW}$ and $l_{i}=\textrm{HIGH}$, are given by $l_{i}^{\textrm{LOW}}=\mu^{L}_{\textrm{LOW}}(l_{i})$ and $l_{i}^{\textrm{HIGH}}=\mu^{L}_{\textrm{HIGH}}(l_{i})=1-l_{i}^{\textrm{LOW}}$, respectively, and because of this complementarity we often simply write $\mu^{L}$ to refer to both membership functions (Fig.~\ref{fig:fls-detail}). Similarly, the membership degrees of $u_{i}$ and $c_{i}$ are given by $\mu^{U}$ and $\mu^{C}$, respectively. Summarizing, we use the following notations and definitions for the fuzzification step:
-\begin{equation}
-\begin{array}{lcccl}
-\mu^{L}\!:\ & l_{i} & \rightarrow & \tilde{\mathbf{l}}_{i} & = \left[l_{i}^{\textrm{LOW}}\!,\, l_{i}^{\textrm{HIGH}}\right]^T \\[1ex]
-\mu^{U}\!:\ & u_{i} & \rightarrow & \tilde{\mathbf{u}}_{i} & = \left[u_{i}^{\textrm{LOW}}\!,\, u_{i}^{\textrm{HIGH}}\right]^T \\[1ex]
-\mu^{C}\!:\ & c_{i} & \rightarrow & \tilde{\mathbf{c}}_{i} & = \left[c_{i}^{\textrm{LOW}}\!,\, c_{i}^{\textrm{HIGH}}\right]^T
-\end{array}
-\end{equation}
-and the lower and higher inflection points of $\mu^{L}$ are denoted by $L_{\textrm{LOW}}$ and $L_{\textrm{HIGH}}$, and similarly $U_{\textrm{LOW}}$ and $U_{\textrm{HIGH}}$ for $\mu^{U}$, and $C_{\textrm{LOW}}$ and $C_{\textrm{HIGH}}$ for $\mu^{C}$ (Fig.~\ref{fig:fuzz}).
-
-\begin{figure}[!t]
-\centering
-\includegraphics[height=10.5em]{L_fuzzification_1}\hfill
-\includegraphics[height=10.5em]{L_fuzzification_2} \\[3ex]
-\includegraphics[height=10.5em]{U_fuzzification_1}\hfill
-\includegraphics[height=10.5em]{U_fuzzification_2} \\[3ex]
-\includegraphics[height=10.5em]{C_fuzzification_1}\hfill
-\includegraphics[height=10.5em]{C_fuzzification_2} \\[1ex]
-\caption{Input membership functions used in the fuzzification step for $\textrm{FL}_{1}$. Example LOW and HIGH membership values are shown (right column) for input values (dashed vertical lines in the plots on the left) $l_{i}=0.35$ (top row), $u_{i}=10$ (middle row), and $c_{i}=0.85$ (bottom row). The inflection points of the membership functions are, respectively, $L_{\textrm{LOW}}=0.05$ and $L_{\textrm{HIGH}}=0.4$ for $\mu^{L}$, $U_{\textrm{HIGH}}=5$ and $U_{\textrm{LOW}}=20$ for $\mu^{U}$, and $C_{\textrm{LOW}}=0.5$ and $C_{\textrm{HIGH}}=0.95$ for $\mu^{C}$. Notice that features $u_{i}$ (the centerline bending energies of the streamlines) are reinterpreted here to express the degree of smoothness (hence the inverted membership functions as compared to the other two).}
-\label{fig:fuzz}
-\end{figure}
-
-Taken together, the input to $\textrm{FL}_{1}$ is the matrix of memberships $\tilde{\mathbf{s}}_{i}=[\tilde{\mathbf{l}}_{i},\tilde{\mathbf{u}}_{i},\tilde{\mathbf{c}}_{i}]$, and the output is the vector $\tilde{\mathbf{o}}_{i}$ of memberships to the linguistic terms OFF, NONE, ON:
-\begin{equation}
-\mathrm{FL}_{1}\!:\ \tilde{\mathbf{s}}_{i} \rightarrow \tilde{\mathbf{o}}_{i} = \left[o_{i}^{\textrm{OFF}}\!,\, o_{i}^{\textrm{NONE}}\!,\, o_{i}^{\textrm{ON}}\right]^T
-\label{eq:FL1}
-\end{equation}
-To calculate these memberships we introduce scalar variable $o$, where $o=0$ corresponds to OFF, $o=1$ to NONE, and $o=2$ to ON, and we define Gaussian membership functions $\mu_{\textrm{OFF}}^{O}$, $\mu_{\textrm{NONE}}^{O}$ and $\mu_{\textrm{ON}}^{O}$, centered around $0$, $1$, and $2$, respectively (Fig.~\ref{fig:fuzzy-sets-FL1}), and with fixed standard deviation $0.4$ so that they sum to about 1 in the interval $[0,2]$. The rules used by $\textrm{FL}_{1}$ to associate the input terms LOW and HIGH to the output terms OFF, NONE, and ON, are given in Table~\ref{tab:rules-FL1}. They are based on the heuristic assumption that a line-like image structure exists (ON) if the evidence represented by all three features support it (HIGH). By contrast, if the likelihood is LOW and at least one other feature is also LOW, this indicates that no such structure exists (OFF). In all remaining cases, some structure may exist, but it is not line-like (NONE). As an example, rule $R_8$ (Table~\ref{tab:rules-FL1}) is given by:
-\begin{equation}
-\begin{split}
-R_8\!:\ \ & \textrm{IF}\ (l=\textrm{HIGH})\ \wedge\ (u=\textrm{HIGH})\ \wedge\ (c=\textrm{HIGH}) \\
-& \textrm{THEN}\ (o = \textrm{ON})
-\end{split}
-\end{equation}
-which results in the verity value:
-\begin{equation}
-\upsilon_{8} = \min\left\{\mu_{\textrm{HIGH}}^{L}(l), \mu_{\textrm{HIGH}}^{U}(u), \mu_{\textrm{HIGH}}^{C}(c)\right\}
-\end{equation}
-and the output fuzzy set: 
-\begin{equation}
-\Upsilon_{8}(o) = \min\left\{\mu_{\textrm{ON}}^{O}(o),\upsilon_{8}\right\}
-\end{equation}
-All the rules are resolved and combined as:
-\begin{equation}
-\Upsilon(o) = \max\left\{\Upsilon_{1}(o),\dots,\Upsilon_{8}(o)\right\}
-\end{equation}
-and centroid defuzzification then results in a scalar output value $\hat{o}$. This procedure is repeated for each streamline, yielding $\hat{o}_{i}, i=1,\dots,4$, from which the output of each $\mathrm{FL}_{1}$ (Eq.~\ref{eq:FL1}) is calculated using the membership functions:
-\begin{equation}
-\tilde{\mathbf{o}}_{i} = \left[\mu_{\textrm{OFF}}^{O}(\hat{o}_{i}),\, \mu_{\textrm{NONE}}^{O}(\hat{o}_{i}),\, \mu_{\textrm{ON}}^{O}(\hat{o}_{i})\right]^{T}
-\end{equation}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[height=10.5em]{beta_1}\hfill
-\includegraphics[height=10.5em]{beta_2}
-\caption{Output membership functions used in module $\mathrm{FL}_{1}$. Example output fuzzy sets $\Upsilon_{\!i}$ corresponding to rules $R_i$ from Table~\ref{tab:rules-FL1} are shown as the textured areas. Value $\hat{o}$ (left panel) represents the centroid of the aggregated output fuzzy sets. The resulting output membership values (right panel) serve as input for module $\mathrm{FL}_{2}$.}
-\label{fig:fuzzy-sets-FL1}
-\end{figure}
-
-\begin{table}
-\caption{The set of rules employed by $\mathrm{FL}_{1}$.}
-\label{tab:rules-FL1}
-\centering
-\begin{tabular}{c | c c c | c }
-$R_{i}$ & $l$ & $u$ & $c$ & $o$ \\
-\hline
-1 & LOW  & LOW  & LOW  & OFF \\
-2 & LOW  & LOW  & HIGH & OFF \\
-3 & LOW  & HIGH & LOW  & OFF \\
-\hline
-4 & LOW  & HIGH & HIGH  & NONE \\ 
-5 & HIGH & LOW  & LOW   & NONE \\ 
-6 & HIGH & LOW  & HIGH  & NONE \\ 
-7 & HIGH & HIGH & LOW   & NONE \\ 
-\hline
-8 & HIGH & HIGH & HIGH  & ON \\ 
-\end{tabular}
-\end{table}
-
-\begin{table}
-\caption{The set of rules employed by $\mathrm{FL}_{2}$. Empty entries indicate ``don't care'' (could be OFF, NONE, or ON).}
-\label{tab:rules-FL2}
-\centering
-\begin{tabular}{c | c c c c | c }
-$R_{i}$ & $o_{1}$   & $o_{2}$   & $o_{3}$   & $o_{4}$  & $z$ \\
-\hline
-1 & OFF  & OFF  & OFF  & OFF & NONE \\
-2 & OFF  & OFF  & OFF  & ON  & END  \\
-3 & OFF  & OFF  & ON   & OFF & END  \\
-4 & OFF  & OFF  & ON   & ON  & NONE \\
-\hline
-5 & OFF  & ON   & OFF  & OFF & END  \\
-6 & OFF  & ON   & OFF  & ON  & NONE \\
-7 & OFF  & ON   & ON   & OFF & NONE \\
-8 & OFF  & ON   & ON   & ON  & JUN  \\
-\hline
-9 & ON   & OFF  & OFF  & OFF & END  \\
-10&ON   & OFF  & OFF  & ON  & NONE  \\
-11&ON   & OFF  & ON   & OFF & NONE  \\
-12&ON   & OFF  & ON   & ON  & JUN  \\
-\hline
-13&ON   & ON   & OFF  & OFF & NONE  \\
-14&ON   & ON   & OFF  & ON  & JUN  \\
-15&ON   & ON   & ON   & OFF & JUN  \\
-16&ON   & ON   & ON   & ON  & JUN  \\
-\hline
-17&NONE & NONE &      &      & NONE \\
-18&NONE &      & NONE &      & NONE \\
-19&NONE &      &      & NONE & NONE \\
-20&     & NONE & NONE &      & NONE \\
-21&     & NONE &      & NONE & NONE \\
-22&     &      & NONE & NONE & NONE \\     
-\end{tabular}
-\end{table}
-
-Moving on to the next level, the input to $\mathrm{FL}_{2}$ is the matrix of memberships $\tilde{\mathbf{o}}=\left[\tilde{\mathbf{o}}_{1},\tilde{\mathbf{o}}_{2},\tilde{\mathbf{o}}_{3},\tilde{\mathbf{o}}_{4}\right]$, and the output is the vector $\tilde{\mathbf{z}}$ of memberships to the linguistic terms END (termination), NONE (no critical point), JUN (junction):
-\begin{equation}
-\mathrm{FL}_{2}\!:\ \tilde{\mathbf{o}} \rightarrow \tilde{\mathbf{z}} = \left[z^{\textrm{END}}\!,\, z^{\textrm{NONE}}\!,\, z^{\textrm{JUN}}\right]^T
-\label{eq:FL2}
-\end{equation}
-To calculate these memberships we introduce scalar variable $z$, where $z=1$ corresponds to END, $z=2$ to NONE, and $z=3$ to JUN, and we define corresponding Gaussian membership functions $\mu_{\textrm{END}}^{Z}$, $\mu_{\textrm{NONE}}^{Z}$, and $\mu_{\textrm{JUN}}^{Z}$, centered around $1$, $2$, and $3$, respectively, and with fixed standard deviation $0.4$ as before (Fig.~\ref{fig:fuzzy-sets-FL2}). The rules used by $\mathrm{FL}_{2}$ to associate the input terms OFF, NONE, ON to the output terms END, NONE, JUN are given in Table~\ref{tab:rules-FL2}. They are based on the heuristic assumption that there is a termination (END) if a single streamline is confirmed to correspond to a line-like image structure (ON) and the other three are confirmed to not correspond to such a structure (OFF). Conversely, if at least three are ON, there must be a junction at that location. Finally, if two are ON and two are OFF, or if at least two streamlines are ambiguous (NONE), we assume there is no critical point. Similar to $\mathrm{FL}_{1}$, all the rules of $\mathrm{FL}_{2}$ are evaluated and their results combined as:
-\begin{equation}
-\Upsilon(z) = \max\left\{\Upsilon_{1}(z),\dots,\Upsilon_{22}(z)\right\}
-\end{equation}
-which, after centroid defuzzification, results in a scalar output value $\hat{z}$, from which the output of $\mathrm{FL}_{2}$ (Eq.~\ref{eq:FL2}) is calculated using the membership functions:
-\begin{equation}
-\tilde{\mathbf{z}} = \left[\mu_{\textrm{END}}^{Z}(\hat{z}),\, \mu_{\textrm{NONE}}^{Z}(\hat{z}),\, \mu_{\textrm{JUN}}^{Z}(\hat{z})\right]^{T}
-\end{equation}
-The proposed fuzzy-logic system is applied to each foreground pixel location $(x,y)\in F$ (Section~\ref{subsubsec:foreground-selection}) so that all memberships introduced above may be indexed by $(x,y)$. Based on this we calculate the following two maps:
-\begin{equation}
-I_{\textrm{END}}(x,y)=\left\{
-\begin{array}{l@{\qquad}l}
-z^{\textrm{END}}(x,y) & \textrm{if}\ (x,y)\in F \\
-0 & \textrm{otherwise}
-\end{array}
-\right.
-\end{equation}
-\begin{equation}
-I_{\textrm{JUN}}(x,y)=\left\{
-\begin{array}{l@{\qquad}l}
-z^{\textrm{JUN}}(x,y) & \textrm{if}\ (x,y)\in F \\
-0 & \textrm{otherwise}
-\end{array}
-\right.
-\end{equation}
-which indicate the degree to which any pixel $(x,y)$ belongs to a termination or a junction, respectively.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[height=10.5em]{gamma_1}\hfill
-\includegraphics[height=10.5em]{gamma_2}
-\caption{Output membership functions used in module $\mathrm{FL}_{2}$. Example output fuzzy sets $\Upsilon_{\!i}$ corresponding to rules $R_i$ from Table~\ref{tab:rules-FL2} are shown as the textured areas. Value $\hat{z}$ (left panel) represents the centroid of the aggregated output fuzzy sets. The resulting output membership values (right panel) indicate the degree to which there may be a termination (END), junction (JUN), or neither of these (NONE) at the image pixel location under consideration.}
-\label{fig:fuzzy-sets-FL2}
-\end{figure}
-
-\subsection{Critical-Point Determination}
-\label{sec:CPextraction}
-The ultimate aim of our method is to provide a list of critical points in the neuron image, with each point fully characterized in terms of type, location, size, and main branch direction(s). Since each critical point of a neuronal tree typically covers multiple neighboring pixels in the image, giving rise to a high value at the corresponding pixels in the maps $I_{\textrm{END}}$ and $I_{\textrm{JUN}}$, the final task is to segment the maps and to aggregate the information within each segmented region.
-
-\begin{figure}
-\includegraphics[width=0.45\linewidth]{cp-region}\hfill
-\includegraphics[width=0.48\linewidth]{cp-region-mapping}
-\caption{Critical-point determination. A critical point is characterized by its type, centroid location $(x_C,y_C)$, radius $r_C$, and its main branch directions $\hat{\mathbf{v}}_i$ (left panel, in this case a bifurcation), aggregated from the pixels $(x_p,y_p)$ in the corresponding critical region (right panel).}
-\label{fig:CPdet}
-\end{figure}
-
-Due to noise, labeling imperfections, and structural ambiguities in the original image, the values of neighboring pixels in the maps may vary considerably, and direct thresholding usually does not give satisfactory results. To improve the robustness we first regularize the real-valued scores in the maps by means of local-average filtering with a radius of 3-5 pixels. \marked{Next, max-entropy based automatic thresholding \citep{kapur1985new} is applied to segment the maps, as in contrast with many other thresholding methods we found it to perform well in separating the large but relatively flat (low information) background regions from the much smaller but more fluctuating (high information) regions of interest. The resulting binary images are further processed using a standard connected components algorithm \citep{Sonka-2007} to identify the critical-point regions.}
-
-Each critical region consists of a set of connected pixels $\mathbf{x}_p=(x_p,y_p)$, $p=1,\dots,N_p$, where $N_p$ denotes the number of pixels in the region. From these, the representative critical-point location $\mathbf{x}_C=(x_C,y_C)$ is calculated as:
-\begin{equation}
-\mathbf{x}_C=\frac{1}{N_p}\sum_{p=1}^{N_p}\mathbf{x}_p
-\end{equation}
-while the critical-point size is represented by the radius of the minimum circle surrounding the region:
-\begin{equation}
-r_C = \max_{p}\left\{||\mathbf{w}_p||\right\}
-\end{equation}
-where $\mathbf{w}_p=\mathbf{x}_p-\mathbf{x}_C$ (Fig.~\ref{fig:CPdet}). To obtain \marked{regularized estimates of} the main branch directions $\hat{\mathbf{v}}_i$ for the critical point, we aggregate the directions corresponding to the angular profile peaks $\hat{\alpha}_i$ (Section~\ref{subsubsec:angular-profile}) of all the $\mathbf{x}_p$ in the region as follows. For each $\mathbf{x}_p$ we have $N_{\hat{\alpha}}\leq4$ angular profile peak direction vectors $\mathbf{a}_{p,i}=[\cos\hat{\alpha}_i(\mathbf{x}_p),\sin\hat{\alpha}_i(\mathbf{x}_p)]^T$. Each of these vectors defines a line $\mathbf{a}(t)=\mathbf{x}_{p}+t\,\mathbf{a}_{p,i}$ parameterized by $t\in\mathbb{R}$. We establish the projection of this line onto the circle $||\mathbf{x}-\mathbf{x}_C||^2=r^2_C$ by substituting $\mathbf{x}=\mathbf{a}(t)$ and solving for $t$. From this we calculate the contributing unit vector (Fig.~\ref{fig:CPdet}):
-\begin{equation}
-\mathbf{e}_{p,i}=\frac{1}{r_C}(\mathbf{w}_{p}+t\,\mathbf{a}_{p,i})
-\end{equation}
-which points from $\mathbf{x}_C$ to the intersection point. This is done for all $p=1,\dots,N_p$ in the region and $i=1,\dots,N_{\hat{\alpha}}$ for each $p$, resulting in the set of vectors $\{\mathbf{e}_{p,i}\}$. Next, a recursive mean-shift clustering algorithm \citep{cheng1995mean} is applied to $\{\mathbf{e}_{p,i}\}$, which converges to a set $\{\hat{\mathbf{v}}_{i}\}$, where the cluster vectors $\hat{\mathbf{v}}_{i}$, $i=1,\dots,L$, represent the branches. For a critical region in $I_{\textrm{END}}$, we need only one main branch direction, which we simply take to be the direction $\hat{\mathbf{v}}_1$ to which the largest number of $\mathbf{e}_{p,i}$ were shifted. For a critical region in $I_{\textrm{JUN}}$, we take as the main branch directions the $\hat{\mathbf{v}}_i$ (at least three) to which the largest number of $\mathbf{e}_{p,i}$ were shifted. These calculations are performed for all critical regions.
-
-\section{Implementational Details}
-\label{sec:implementation-details}
-The method was implemented in the Java programming language as a plugin for the image processing and analysis tool ImageJ \citep{abramoff2004image,Schneider-2012}. Since the feature extraction step (Section~\ref{subsec:feature-extraction}), in particular the matched filtering for  angular profile analysis, is quite computationally demanding, we applied parallelization in multiple ways to reduce the running time to acceptable levels (on the order of minutes on a regular PC). Specifically, the directional filtering was split between CPU cores, each taking care of a subset of the directions (depending on the number of available cores). After this, the angular profile analysis and calculation of the features was also split, with each core processing a subset of the foreground image locations. This was sufficient for our experiments. Further improvement in running time (down to real-time if needed) could be achieved by mass parallelization using GPUs (graphical processing units) instead of CPUs.
+%\documentclass[twocolumn,natbib]{svjour3}
+%
+%\usepackage{graphicx}
+%\usepackage{amssymb}
+%\usepackage{amsmath}
+%\usepackage{txfonts}
+%\usepackage{upgreek}
+%\usepackage[caption=false]{subfig}
+%\usepackage[normalem]{ulem}
+%\usepackage{url}
+%\usepackage{array}
+%\usepackage{adjustbox}
+%\usepackage{color}
+%
+%\newcommand{\marked}[1]{\textcolor{red}{#1}}
+%\newcommand{\struck}[1]{\textcolor{red}{\sout{#1}}}
+%
+%\DeclareMathOperator*{\argmin}{arg\,min}
+%\DeclareMathOperator*{\argmax}{arg\,max}
+%
+%\bibliographystyle{ninf}
+%
+%\journalname{Neuroinformatics}
+%
+%\begin{document}
+%
+%\title{Fuzzy-Logic Based Detection and Characterization of Junctions and Terminations in Fluorescence Microscopy Images of Neurons}
+%
+%\author{Miroslav Radojevi\'{c} \and Ihor Smal \and Erik Meijering}
+%
+%\institute{M. Radojevi\'{c} \and I. Smal \and E. Meijering\\
+%              Biomedical Imaging Group Rotterdam\\
+%              Erasmus University Medical Center, Rotterdam, the Netherlands\\
+%              Departments of Medical Informatics and Radiology\\
+%              \email{\{m.radojevic,h.meijering\}@erasmusmc.nl}      
+%}
+%
+%\date{}
+%
+%\maketitle
+%
+%\begin{abstract}
+%Digital reconstruction of neuronal cell morphology is an important step toward understanding the functionality of neuronal networks. Neurons are tree-like structures whose description depends critically on the junctions and terminations, collectively called critical points, making the correct localization and identification of these points a crucial task in the reconstruction process. Here we present a fully automatic method for the integrated detection and characterization of both types of critical points in fluorescence microscopy images of neurons. \marked{In view of the majority of our current studies, which are based on cultured neurons, we describe and evaluate the method for application to two-dimensional (2D) images. The method} relies on directional filtering and angular profile analysis to extract essential features about the main streamlines at any location in an image, and employs fuzzy logic with carefully designed rules to reason about the feature values in order to make well-informed decisions about the presence of a critical point and its type. Experiments on simulated as well as real images of neurons demonstrate the detection performance of our method. A comparison with the output of two existing neuron reconstruction methods reveals that our method achieves substantially higher detection rates and could provide beneficial information to the reconstruction process.
+%\keywords{Neuron reconstruction \and Junction detection \and Bifurcation detection \and Termination detection \and Fuzzy logic \and Fluorescence microscopy \and Image analysis}
+%\end{abstract}
+%
+%\section{Introduction}
+%\label{sec:intro}
+%The complexity and functionality of the brain depend critically on the morphology and related interconnectivity of its neuronal cells \citep{Kandel-2000,Ascoli-2002,Donohue-2008}. To understand how a healthy brain processes information and how this capacity is negatively affected by psychiatric and neurodegenerative diseases \citep{Anderton-1998,lin2010mechanisms,Siskova-2014} it is therefore very important to study neuronal cell morphology. Advanced microscopy imaging techniques allow high-sensitivity visualization of individual neurons and produce vast amounts of image data, which are shifting the bottleneck in neuroscience from the imaging to the data processing \marked{\citep{svoboda2011past, Peng-2011, Senft-2011, halavi2012digital}} and call for a high level of automation. The first processing step toward high-throughput quantitative morphological analysis of neurons is their digital reconstruction from the image data. Many methods have been developed for this in the past decades \citep{meijering2010neuron,donohue2011automated} but the consensus of recent studies is that there is still much room for improvement in both accuracy and computational efficiency \citep{Liu-2011, svoboda2011past}.
+%
+%A key aspect of any neuron reconstruction method is the detection and localization of terminations and junctions of the dendritic (and axonal) tree, collectively called ``critical points'' in this paper (Fig.~\ref{fig:example}), which ultimately determine the topology and faithfulness of the resulting digital representation. Roughly there are two ways to extract these critical points in neuron reconstruction \citep{al2008improved, meijering2010neuron,Basu-2013}. The most often used approach is to start with segmentation or tracing of the elongated image structures and then to infer the critical points, either afterwards or along the way, by searching for attachments and endings in the resulting subsets \citep{Dima-2002, xiong2006automated, narro2007neuronmetrics, vasilkoski2009detection, bas2011principal, chothani2011automated, Dehmelt-2011, ho2011neurphologyj, choromanska2012automatic, xiao2013app2}. This approach depends critically on the accuracy of the initial segmentation or tracing procedure, which usually is not designed to reliably capture critical points in the first place and thus often produces very fragmented results, requiring manual postprocessing to fix issues \citep{Peng-2011,Luisi-2011,Dercksen-2014}. The reverse approach is to first identify critical points in the images and then to use these as seed points for tracing the elongated image structures. Critical points can be obtained either by manual pinpointing, as in semiautomatic tracing methods \marked{\citep{meijering2004design, Schmitt-2004, narro2007neuronmetrics, lu2009semi, peng2010v3d, longair2011simple}}, or by fully automatic detection using sophisticated image filtering and pattern recognition methods (discussed in the next section). The latter approach has barely been explored for neuron reconstruction, but if reliable detectors can be designed, they provide highly valuable information to the reconstruction process.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=\columnwidth]{n01b} % ./fig/n01w is an alternative
+%\caption{Fluorescence microscopy image of a neuron with manually indicated junctions (red circles) and terminations (yellow circles). The radius of each annotated critical-point region reflects the size of the underlying image structure.}
+%\label{fig:example}
+%\end{figure}
+%
+%Here we present a novel method -- which we coin Neuron Pinpointer (NP) -- for fully automatic detection and characterisation of critical points in fluorescence microscopy images of neurons. \marked{We describe and evaluate the method for studies where single (cultured) neurons are imaged in 2D although all aspects of the method can in principle be extended to 3D. The method may also be useful for reconstruction approaches based on 2D projections \citep{Zhou-2015}.} For computational efficiency the method starts with an initial data reduction step, based on local variation analysis, by which obvious background image regions are excluded. In the remaining set of foreground regions the method then explores the local neighborhood of each image pixel and calculates the response to a set of directional filters. Next, an iterative optimization scheme is used for robust peak selection in the resulting angular profile, and a set of corresponding features relevant for the detection task is computed. The feature set is then further processed to make a nonlinear decision on the presence of a critical point and its type (termination or junction) at each foreground image pixel. To conveniently deal with ambiguity and uncertainty in the data, the decision-making is carried out by a fuzzy-logic rule-based system using predefined rules specifically designed for this task. The presented work aims to facilitate the task of automatic neuron reconstruction by contributing a general scheme for extracting critical points that can serve as useful input for any tracing algorithm.
+%
+%This paper is a considerably extended version of our recent conference report \citep{radojevic2014fuzzy}. We have modified the filtering algorithms and fuzzy-logic rules so as to be able to detect both junction and termination points. In addition we here present the full details of our method and an extensive evaluation based on both manually annotated real neuron images and computer generated neuron images. To obtain the latter we here propose a new computational approach based on publicly available expert manual tracings. We start with a brief overview of related work on critical-point detection (Section~\ref{sec:related_work}) and then present the underlying concepts (Section~\ref{sec:proposed-approach}), implementational details (Section~\ref{sec:implementation-details}), and experimental evaluation (Section~\ref{sec:experiments}) of our method, followed by a summary of the conclusions that can be derived from the results (Section~\ref{sec:conclusions}).
+%
+%\section{Related Work}
+%\label{sec:related_work}
+%Detecting topologically critical points in images has been a long-standing problem in many areas of computer vision. Although an in-depth review of the problem and proposed solutions is outside the scope of this paper, we provide a brief discussion in order to put our work into context.
+%
+%Examples of previous work include the design of filters to find image locations where either three or more edges join (``junctions of edges'') \citep{sinzinger2008model, Hansen-2004, laganiere2004detection} or three or more lines join (``junctions of lines'') \citep{yu1998rotated, deschenes2000detection}. In biomedical applications, the predominant type of junction is the bifurcation, with occasional trifurcations, as seen in blood vessel trees, bronchial trees, gland ductal trees, and also in dendritic trees \citep{Koene-2009, Iber-2013}. Hence, research in this area has focused on finding image locations where three (or more) elongated structures join \citep{tsai2004model, agam2005vessel, bevilacqua2005combined, bhuiyan2007automatic, zhou2007vascular, aibinu2010vascular, calvo2011automatic, obaraa2012contrast, su2012junction, azzopardi2013automatic}.
+%
+%A common approach to find bifurcation points is to infer them from an initial processing step that aims to segment the elongated structures. However, the way these structures are segmented may influence the subsequent critical-point inference. Popular image segmentation methods use intensity thresholding and/or morphological processing, in particular skeletonization \citep{hoover2000locating, Dima-2002, He-2003, Weaver-2004, pool2008neuritetracer, bevilacqua2009comparison, Leandro-2009, aibinu2010vascular}, but these typically produce very fragmented results. Popular methods to enhance elongated image structures prior to segmentation include Hessian based analysis \marked{\citep{frangi1998multiscale, xiong2006automated, zhang2007automated, al2008improved, Yuan-2009, turetken2011automated, Myatt-2012, Basu-2013,santamaria2015automatic}}, Lapla\-cean-of-Gaussian filters \citep{chothani2011automated}, Gabor filters \citep{bhuiyan2007automatic,azzopardi2013automatic}, phase congruency analysis \citep{obara2012contrast}, and curvelet based image filtering approaches \citep{Narayanaswamy-2011}. However, being tailored to elongated structures, such filters often yield a less optimal response precisely at the bifurcation points, where the local image structure is more complex than a single ridge. 
+%
+%Several concepts have been proposed to explicitly detect bifurcation points in the images without relying on an initial segmentation of the axonal and dendritic trees. Examples include the usage of circular statistics of phase information \citep{obaraa2012contrast}, steerable wavelet based local symmetry detection \citep{puspoki2013detection}, or combining eigen analysis of the Hessian and correlation matrix \citep{su2012junction}. The problem with existing methods is that they often focus on only one particular type of critical point (for example bifurcations but not terminations), or they use rather rigid geometrical models (for example assuming symmetry), while in practice there are many degrees of freedom \citep{michaelis1994junction}. Image filtering methods for bifurcation detection have also been combined with supervised machine-learning based approaches such as support vector machines \citep{turetken2011automated}, artificial neural networks \citep{bevilacqua2009comparison}, or with multiple classifiers using AdaBoost \citep{zhou2007vascular}, but these lack flexibility in that they require a training stage for each application.
+%
+%Robust neuron tracing requires knowledge of not only the bifurcation points but also the termination points. Since each type of critical point may vary considerably in terms of geometry (orientation and diameter of the branches) and image intensity (often related to the branch diameter), designing or training a dedicated filter for each possible case is impractical, and a more integrated approach is highly desirable for both detection and characterization of the different types of critical points. To the best of our knowledge, no generic methods currently exist for critical-point detection in neuron images. The method proposed in this paper aims to fill this gap and to complement exploratory neuron reconstruction algorithms that initialize on a set of seed points.
+%
+%\section{Proposed Method}
+%\label{sec:proposed-approach}
+%Our proposed method for detection and characterization of critical points consists of three steps: feature extraction (Section~\ref{subsec:feature-extraction}), fuzzy-logic based mapping (Section~\ref{subsec:flrb-detection}), and, finally, critical-point determination (Section~\ref{sec:CPextraction}). Here we describe each step in detail. 
+%
+%\struck{Since in our applications we work with two-dimensional (2D) fluorescence microscopy images of cultured neurons, this is reflected in the method description, but all presented concepts can be extended to work with three-dimensional (3D) images if needed.}
+%
+%\subsection{Feature Extraction}
+%\label{subsec:feature-extraction}
+%The aim of the feature extraction step is to compute a set of quantitative features of the local image structure at each pixel position that helps to discriminate between different types of critical points. Since the tree-like neuronal image structures typically cover only a small portion of the image, we avoid unnecessary computations by first performing a foreground selection step (Section \ref{subsubsec:foreground-selection}), which discards image locations that are very unlikely to contain neuronal structures and keeps only those regions that are worthy of further examination. Next, the angular profile (Section \ref{subsubsec:angular-profile}) of each foreground pixel is constructed, from which the quantitative features are computed.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=\linewidth]{n19-fground-r8-perc75} % try also ./fig/n01-fground-r8-perc85      538x724   85perc
+%\caption{Example of foreground selection. The original image of $560\times780$ pixels is divided into background \marked{(green transparent mask)} and foreground \marked{(gray-scale regions without mask)} using $r_{d}=8$ pixels and the $75^\textrm{th}$ variation percentile as threshold. In this example, 25\% of the total number of pixels is selected for further processing.}
+%\label{fig:foreground-selection}
+%\end{figure}
+%
+%\subsubsection{Foreground Selection}
+%\label{subsubsec:foreground-selection}
+%To determine whether a pixel location $(x,y)$ in a given image $I$ should be considered as foreground or background, we analyze the local intensity variation $\rho(x,y)$ within a circular neighborhood of radius $r_{d}$ centered at that location. To avoid making strong assumptions about the local intensity distribution we chose to use the difference between the $95^\textrm{th}$ and the $5^\textrm{th}$ percentile of the intensities within the neighborhood as the measure of variation:
+%\begin{gather} 
+%\rho(x,y) = \mathcal{P}_{95}(\mathcal{I}_{\!\!xy}) - \mathcal{P}_{5}(\mathcal{I}_{\!\!xy}) \\
+%\mathcal{I}_{\!\!xy} = \left\{\, I(m,n)\ |\ (m-x)^{2}+(n-y)^{2} \leq r_d^2\, \right\} \\
+%x,m \in [0,W-1]\ \textrm{and}\ y,n \in [0,H-1]
+%\end{gather}
+%where $W$ and $H$ denote, respectively, the width and the height of $I$ in pixels. The value of $\rho$ is relatively low within more or less homogeneous regions (background but also the soma) but relatively high in regions containing neuronal branches. Consequently, the histogram of $\rho$ computed over the entire image contains two clusters (representing foreground and background pixels), which can be separated using simple percentile thresholding \citep{doyle1962operations}. The percentile should be chosen such that background pixels (true negatives) are removed as much as possible while at the same time the foreground pixels (true positives) are retained as much as possible (in practice this implies allowing for false positives). We found that in our applications a percentile of around $75$ is a safe threshold (Fig.~\ref{fig:foreground-selection}). \marked{Small gaps in the foreground region are closed by morphological dilation.} The resulting set of foreground pixel locations is denoted by $F$. In our applications the parameter $r_{d}$ is typically set to the diameter of the axonal and dendritic structures observed in the image.
+%
+%\subsubsection{Angular Profile Analysis}
+%\label{subsubsec:angular-profile}
+%For each selected foreground location, a local angular profile is computed and analyzed. The key task here is to assess the presence and properties of any curvilinear image structures passing through the given location. To this end we correlate the image with a set of oriented kernels distributed evenly over a range of angles around that location \citep{radojevic2014fuzzy}. The basic kernel used for this purpose is of size $D\times D$ pixels and has a constant profile in one direction and a Gaussian profile in the orthogonal direction (Fig.~\ref{fig:directional-filtering}):
+%\begin{equation}
+%G(x,y)=\textrm{e}^{-x^2/2\sigma_{\!\!D}^{2}}/S
+%\label{eq:G}
+%\end{equation}
+%where $S$ is a normalization factor such that the sum of $G(x,y)$ over all kernel pixels is unity. We chose the Gaussian both because we observed that the cross-sectional profile of axons and dendrites in our applications is approximately Gaussian-like and because the Gaussian is a theoretically well-justified filter for regularization purposes. The parameters $D$ and $\sigma_{\!D}$ determine the size and shape of the kernel profile and should correspond to the expected branch diameter.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=\linewidth]{filtering}
+%\caption{Geometry involved in the computation of the angular profile. In effect, the value of $p(x,y,\alpha,k,D)$ is the correlation of the image $I(x,y)$ with the kernel $G(m,n)$ of size $D\times D$ pixels, after rotating the kernel patch over angle $\alpha$ and shifting it over $kD$ with respect to $(x,y)$.}
+%\label{fig:directional-filtering}
+%\end{figure}
+%
+%Using the kernel we compute the local angular profile at any pixel location $(x,y)$ in the given image $I$ as:
+%\begin{equation}
+%p(x,y,\alpha,k,D)=\sum_{m}\sum_{n} I(x_{m,n},y_{m,n})\,G(m,n)
+%\label{eq:angularprofile}
+%\end{equation}
+%where the transformed image coordinates are obtained as:
+%\begin{equation}
+%\begin{bmatrix} x_{m,n} \\ y_{m,n} \end{bmatrix} =
+%\begin{bmatrix} x \\ y \end{bmatrix} +
+%kD\begin{bmatrix} \sin\alpha \\ -\!\cos\alpha \end{bmatrix} +
+%\begin{bmatrix} \cos\alpha & -\!\sin\alpha \\ \sin\alpha & \cos\alpha \end{bmatrix}
+%\begin{bmatrix} m \\ n \end{bmatrix}
+%\label{eq:xymn}
+%\end{equation}
+%and the summation is performed over all $(m,n)$ for which the kernel is defined. That is, $p(x,y,\alpha,k,D)$ is the correlation of the image with the kernel patch rotated over angle $\alpha$ and shifted over a distance $kD$ with respect to $(x,y)$ in the direction corresponding to that angle (Fig.~\ref{fig:directional-filtering}). In practice, $p$ is calculated for a discrete set of angles, $\alpha_{i}=i/(2\pi N_{\alpha}),\, i=0,\dots,N_{\alpha}-1$, where $N_{\alpha}$ is automatically set such that the circle with radius $kD$ is sampled with pixel resolution. The parameter $k$ is typically set slightly larger than 0.5 so as to scan the neighborhood around the considered pixel $(x,y)$. To obtain the image intensity at non-integer transformed locations $(x_{m,n},y_{m,n})$, linear interpolation is used.
+%
+%In contrast with previous works, which used differential kernels for directional filtering and profiling \citep{yu1998rotated, can1999rapid, zhang2007automated}, we employ the matched kernel (Eq.~\ref{eq:G}), which avoids noise amplification. Although applying a set of rotated kernels is computationally more demanding than Hessian or steerable filtering based methods, it provides more geometrical flexibility in matching the kernels with the structures of interest while retaining excellent directional sensitivity. In our framework, the computational burden is drastically reduced by the foreground selection step, and further reduction is possible since the filtering process is highly parallelizable.
+%
+%After computing the angular profile we further process it in order to extract several features (Fig.~\ref{fig:feature-extraction}) relevant for critical-point detection and characterization:
+%
+%\paragraph{Peaks.} At each foreground pixel location we first determine how many and in which direction line-like image structures pass through it. This is done by finding the local maxima (``peaks'') in the angular profile at that location. Since the oriented kernels act as low-pass filters, the profile is sufficiently smooth to extract the peaks reliably using the iterative line searching algorithm \citep{flannery1992numerical}. The found peaks correspond to angles $\hat{\alpha}_{i}, i=1,\dots,N_{\hat{\alpha}}$, in which directions the image intensities are the highest. Here $N_{\hat{\alpha}}\leq4$ to accommodate terminations, normal body points, and junctions (bifurcations and crossovers).
+%
+%\paragraph{Likelihood.} For each $\hat{\alpha}_{i}$ we calculate a likelihood $l_i \in \left[ 0, 1 \right]  $ from the angular profile according to:
+%\begin{equation} 
+%l_i = \frac{p(x,y,\hat{\alpha}_{i},k,D)-p_{\min}}{p_{\max}-p_{\min}}
+%\end{equation}
+%where $p_{\min}$ and $p_{\max}$ denote, respectively, the minimum and maximum of $p(x,y,\alpha,k,D)$ over $\alpha$.
+%
+%\paragraph{Energy.} Next we consider the local grid $\uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$ for each $\hat{\alpha}_{i}$ (Fig.~\ref{fig:feature-extraction}), consisting of the transformed coordinates $(x_{m,n},y_{m,n})$ corresponding to $\alpha=\hat{\alpha}_{i}$ (Eq.~\ref{eq:xymn}), and we extract a refined centerline point set $\lambda_{i}$ (or ``streamline'') on this grid by finding for each $n$ the local maximum over $m$:
+%\begin{gather}
+%\label{eq:refine-centerline} 
+%\lambda_{i} = \left\{(x_{\hat{m}_{n},n},y_{\hat{m}_{n},n})\right\}_{n\,\in\,\left[-D/2,D/2\right]}\\[0.5ex]
+%\hat{m}_{n} = \argmax_{m\,\in\,\left[-D/2,D/2\right]} I(x_{m,n},y_{m,n})
+%\label{eq:hatm}
+%\end{gather}
+%We quantify how much the streamline deviates from a straight line by estimating its bending energy $u_{i}\geq0$ as:
+%\begin{equation}
+%u_{i} = \frac{1}{\Updelta m}\sum_{n} \left( \hat{m}_{n-1} - 2\hat{m}_{n} + \hat{m}_{n+1} \right)^2
+%\end{equation}
+%where $\Updelta m$ is the pixel spacing in the direction of $m$ and the summation extends over all $n$ for which the summand can be evaluated. This calculation is a discrete approximation of the integral squared second-order derivative of the centerline function if it were continuously defined.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=\linewidth]{feature-extr}
+%\caption{Flowchart of the feature extraction scheme. The example showcases a bifurcation but the same scheme is used also for terminations. The scheme, which starts with the angular profile $p(x,y,\alpha,k,D)$ and is executed clockwise, is applied to each pixel in the selected foreground regions and results in the set of features $l_i$, $u_i$, and $c_i$, where $i$ indexes the streamlines. See main text for details.}
+%\label{fig:feature-extraction}
+%\end{figure}
+%
+%\paragraph{Correlation.} Given a streamline $\lambda_{i}$ we estimate the orthogonal direction at each point in the set by averaging the orthogonal directions of the two neighboring streamline segments corresponding to that point (that is, from the point to the next point, and from the point to the previous point). Using these direction estimates we sample a refined local grid $\Uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$, consisting of image coordinates $(\tilde{x}_{m,n},\tilde{y}_{m,n})$ relative to the streamline (Fig.~\ref{fig:feature-extraction}), and compute a normalized cross-correlation \citep{lewis1995fast} score $c_{i}\in[-1,1]$ as:
+%\begin{equation} 
+%\label{eq:correlation}
+%c_{i} = \frac{\sum_{m}\sum_{n} \bigl[I(\tilde{x}_{m,n},\tilde{y}_{m,n})-\bar{I}\bigr] \bigl[G(m,n)-\bar{G}\bigr]}{\sqrt{\sum_{m}\sum_{n}\bigl[I(\tilde{x}_{m,n},\tilde{y}_{m,n})-\bar{I}\bigr]^{2}\sum_{m}\sum_{n}\bigl[G(m,n)-\bar{G}\bigr]^{2}}}
+%\end{equation}
+%where, similar to the angular profile calculation (Eq.~\ref{eq:angularprofile}), the summations extend over all $(m,n)$ for which the kernel is defined, and $\bar{I}$ and $\bar{G}$ denote the mean of the image intensities and of the kernel values, respectively. Effectively $c_{i}$ quantifies the degree to which the template $G$ matches a straightened version of the streamline. To cover a range of possible scales (radii of the underlying image structures), we take the largest score of a set of templates with \marked{standard deviations} of the Gaussian profile model \citep{su2012junction} \marked{covering $\left\lbrace 1,\dots,\left\lfloor{\frac{D}{2}}\right\rfloor\right\rbrace $ set of values measured in pixels}.
+%
+%\subsection{Fuzzy-Logic Based Mapping}
+%\label{subsec:flrb-detection}
+%The feature values extracted at each foreground image location subsequently need to be processed in order to assess the presence of a critical point and its type. Recognizing that in practice everything is ``a matter of degree'' \citep{zadeh1975fuzzy}, and allowing for nonlinear input-output mappings, we chose to use fuzzy logic for this purpose. Fuzzy logic has been successfully used in many areas of engineering \citep{mendel1995fuzzy} but to the best of our knowlege has not been explored for neuron critical-point analysis. We briefly describe the basics of fuzzy logic (Section~\ref{sec:FL}) and then present our specific fuzzy-logic system for calculating critical-point maps of neuron images (Section~\ref{sec:cp-detection}).
+%
+%\subsubsection{Basics of Fuzzy Logic}
+%\label{sec:FL}
+%In a fuzzy-logic system (Fig.~\ref{fig:fls-general}), numerical inputs are first expressed in linguistic terms (the fuzzification step), and are then processed based on predefined rules to produce linguistic outputs (the inference step), which are finally turned back into numerical values (the defuzzification step).
+%
+%\paragraph{Fuzzification.} Given an input scalar value $s\in\mathbb{R}$, the fuzzification step results in a vector $\tilde{\mathbf{s}}$ whose elements express the degree of membership of $s$  to input fuzzy sets, each corresponding to a linguistic term describing $s$. A fuzzy set is defined by a membership function $\mu:\mathbb{R}\rightarrow[0,1]$ quantifying the degree to which $s$ can be described by the corresponding linguistic term. Commonly used membership functions are trapezoidal, Gaussian, triangular, and piecewise linear \citep{mendel1995fuzzy}. As an example, we may have linguistic terms LOW and HIGH, representing the subjective notions ``low'' and ``high'', respectively. The degrees to which ``$s$ is low'' (which in this paper we will write as $s=\textrm{LOW}$) and ``$s$ is high'' ($s=\textrm{HIGH}$) are given by membership values $\mu_{\textrm{LOW}}(s)$ and $\mu_{\textrm{HIGH}}(s)$, respectively. The output of the fuzzification step thus becomes $\tilde{\mathbf{s}}=[\mu_{\textrm{LOW}}(s),\mu_{\textrm{HIGH}}(s)]^{T}$.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=\linewidth]{fls-general}
+%\caption{Scheme of a single input/output fuzzy-logic (FL) system. A scalar input value $s$ is converted to a vector $\tilde{\mathbf{s}}$ containing the memberships of $s$ for each of the input fuzzy sets, resulting in a vector $\tilde{\mathbf{z}}$ containing the memberships of $z$ for each of the output fuzzy sets.}
+%\label{fig:fls-general}
+%\end{figure}
+%
+%\paragraph{Inference.} The input fuzzy set memberships are processed by the inference engine to produce a fuzzy output based on rules expressing expert knowledge. The rules can be either explicitly defined or implicitly learned by some training process, and may express nonlinear input-output relationships and involve multiple inputs. In engineering applications, the rules are commonly given as IF-THEN statements about the input and output linguistic terms. For example, the output terms could be OFF, NONE, and ON, indicating whether a certain property of interest is ``off'', ``none'' (expressing ambiguity), or ``on''. A rule could then be:
+%\begin{equation} 
+%\label{eq:rule-prototype}
+%\begin{split}
+%R_{i}\!:\ \ & \textrm{IF}\ (s_{1}=\textrm{HIGH})\ \wedge\ (s_{2}=\textrm{LOW}) \\
+%& \textrm{THEN}\ (z=\textrm{OFF})
+%\end{split}
+%\end{equation}
+%where $z\in\mathbb{R}$ is the variable over the output range. This is not a binary logical statement, where the input and output conditions can be only true or false, but a fuzzy logical statement, where the conditions are expressed in terms of memberships, in this case $\mu_{\textrm{HIGH}}(s_{1})$, $\mu_{\textrm{LOW}}(s_{2})$, and $\mu_{\textrm{OFF}}(z)$. Input conditions are often combined using the operators $\wedge$ (denoting fuzzy intersection) or $\vee$ (denoting fuzzy union), which are commonly defined as, respectively, the minimum and maximum of the arguments \citep{mendel1995fuzzy}. In our example, the IF-part of $R_{i}$ (Eq.~\ref{eq:rule-prototype}) would result in the following intermediate value (degree of verity):
+%\begin{equation}
+%\upsilon_{i} = \min\left\{\mu_{\textrm{HIGH}}(s_{1}),\mu_{\textrm{LOW}}(s_{2})\right\}
+%\end{equation}    
+%This value is then used to constrain the fuzzy set corresponding to the output linguistic term addressed by $R_{i}$, in this case OFF, resulting in the output fuzzy set:
+%\begin{equation}
+%\Upsilon_{\!i}(z) = \min\left\{\mu_{\textrm{OFF}}(z),\upsilon_{i}\right\}
+%\end{equation}
+%In practice there may be many rules $R_{i}, i=1,\dots,N_{R}$, which are aggregated by the inference engine to produce a single output fuzzy set $\Upsilon$. The common way to do this \citep{mendel1995fuzzy} is by means of a weighted fuzzy union:
+%\begin{equation}
+%\Upsilon(z) = \max\left\{w_{1}\Upsilon_{\!1}(z),\dots,w_{N_{R}}\Upsilon_{\!N_{R}}(z)\right\}
+%\end{equation}
+%Although it is possible to assign a different weight to each rule by setting $w_{i}\in[0,1]$, in our applications this is not critical, and therefore we simply use $w_{i}=1$ for all $i$.
+%
+%\paragraph{Defuzzification.} In the final step of the fuzzy-logic system, the fuzzy output $\Upsilon$ is converted back to a scalar output value. Although there are many ways to do this, a common choice is to calculate the centroid \citep{mendel1995fuzzy}:
+%\begin{equation}
+%\label{eq:centroid-general}
+%\hat{z} = \frac{\int z\Upsilon(z)dz}{\int\Upsilon(z)dz} 
+%\end{equation}
+%With this value we can finally calculate the vector of output fuzzy set memberships: $\tilde{\mathbf{z}}=[\mu_{\textrm{OFF}}(\hat{z}),\mu_{\textrm{NONE}}(\hat{z}),\mu_{\textrm{ON}}(\hat{z})]^{T}$.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=0.70\linewidth]{fls-architecture}
+%\caption{Architecture of the proposed fuzzy-logic system for critical-point detection. A cascade of two fuzzy-logic modules ($\textrm{FL}_{1}$ and $\textrm{FL}_{2}$) is used, where the first determines the degree to which streamlines (up to four) are present at the image location under consideration, and based on this information the second determines the degree to which that location corresponds to the possible types of critical points.}
+%\label{fig:fls-architecture}
+%\end{figure}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=0.95\linewidth]{fls-detail}
+%\caption{Architecture of the proposed fuzzy-logic system for processing the information of one streamline. Input feature values are fuzzified into linguistic terms LOW and HIGH, which are translated by the first fuzzy-logic module ($\textrm{FL}_{1}$) into intermediate linguistic terms OFF, NONE, ON, which are finally translated by the second fuzzy-logic module ($\textrm{FL}_{2}$) into linguistic terms END, NONE, JUN.}
+%\label{fig:fls-detail}
+%\end{figure}
+%
+%\subsubsection{Termination and Junction Mapping}
+%\label{sec:cp-detection}
+%To determine the presence and type of critical point at any foreground image location, we use a cascade of two fuzzy-logic systems, representing two decision levels (Fig.~\ref{fig:fls-architecture}). The first level takes as input vectors $\mathbf{s}_{i}=[l_{i},u_{i},c_{i}]$, $i=1,\dots,4$, which contain the features for each of the streamlines extracted in the angular profile analysis step at the image location under consideration (Section~\ref{subsubsec:angular-profile}). For each streamline (Fig.~\ref{fig:fls-detail}), the features are fuzzified ($\mu$) and processed by the first fuzzy-logic module ($\textrm{FL}_{1}$), which determines the degree to which the streamline indeed represents a line-like image structure (ON), or not (OFF), or whether the image structure is ambiguous (NONE). In cases where less than four streamlines were found by the angular profile analysis step, the feature vectors of the nonexisting streamlines are set to $\mathbf{0}$. The fuzzy output for all four streamlines together forms the input for the second decision level, where another fuzzy-logic module ($\textrm{FL}_{2}$) determines the degree to which the image location corresponds to a junction (JUN), or a termination (END), or neither of these (NONE).
+%
+%The input streamline features, $l_{i}$, $u_{i}$, $c_{i}$, are expressed in linguistic terms LOW and HIGH using membership functions $\mu_{\textrm{LOW}}$ and $\mu_{\textrm{HIGH}}$ defined for each type of feature. In our application we use trapezoidal membership functions, each having two inflection points, such that $\mu_{\textrm{LOW}}$ and $\mu_{\textrm{HIGH}}$ are each other's complement (Fig.~\ref{fig:fuzz}). For example, the degrees to which $l_{i}=\textrm{LOW}$ and $l_{i}=\textrm{HIGH}$, are given by $l_{i}^{\textrm{LOW}}=\mu^{L}_{\textrm{LOW}}(l_{i})$ and $l_{i}^{\textrm{HIGH}}=\mu^{L}_{\textrm{HIGH}}(l_{i})=1-l_{i}^{\textrm{LOW}}$, respectively, and because of this complementarity we often simply write $\mu^{L}$ to refer to both membership functions (Fig.~\ref{fig:fls-detail}). Similarly, the membership degrees of $u_{i}$ and $c_{i}$ are given by $\mu^{U}$ and $\mu^{C}$, respectively. Summarizing, we use the following notations and definitions for the fuzzification step:
+%\begin{equation}
+%\begin{array}{lcccl}
+%\mu^{L}\!:\ & l_{i} & \rightarrow & \tilde{\mathbf{l}}_{i} & = \left[l_{i}^{\textrm{LOW}}\!,\, l_{i}^{\textrm{HIGH}}\right]^T \\[1ex]
+%\mu^{U}\!:\ & u_{i} & \rightarrow & \tilde{\mathbf{u}}_{i} & = \left[u_{i}^{\textrm{LOW}}\!,\, u_{i}^{\textrm{HIGH}}\right]^T \\[1ex]
+%\mu^{C}\!:\ & c_{i} & \rightarrow & \tilde{\mathbf{c}}_{i} & = \left[c_{i}^{\textrm{LOW}}\!,\, c_{i}^{\textrm{HIGH}}\right]^T
+%\end{array}
+%\end{equation}
+%and the lower and higher inflection points of $\mu^{L}$ are denoted by $L_{\textrm{LOW}}$ and $L_{\textrm{HIGH}}$, and similarly $U_{\textrm{LOW}}$ and $U_{\textrm{HIGH}}$ for $\mu^{U}$, and $C_{\textrm{LOW}}$ and $C_{\textrm{HIGH}}$ for $\mu^{C}$ (Fig.~\ref{fig:fuzz}).
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[height=10.5em]{L_fuzzification_1}\hfill
+%\includegraphics[height=10.5em]{L_fuzzification_2} \\[3ex]
+%\includegraphics[height=10.5em]{U_fuzzification_1}\hfill
+%\includegraphics[height=10.5em]{U_fuzzification_2} \\[3ex]
+%\includegraphics[height=10.5em]{C_fuzzification_1}\hfill
+%\includegraphics[height=10.5em]{C_fuzzification_2} \\[1ex]
+%\caption{Input membership functions used in the fuzzification step for $\textrm{FL}_{1}$. Example LOW and HIGH membership values are shown (right column) for input values (dashed vertical lines in the plots on the left) $l_{i}=0.35$ (top row), $u_{i}=10$ (middle row), and $c_{i}=0.85$ (bottom row). The inflection points of the membership functions are, respectively, $L_{\textrm{LOW}}=0.05$ and $L_{\textrm{HIGH}}=0.4$ for $\mu^{L}$, $U_{\textrm{HIGH}}=5$ and $U_{\textrm{LOW}}=20$ for $\mu^{U}$, and $C_{\textrm{LOW}}=0.5$ and $C_{\textrm{HIGH}}=0.95$ for $\mu^{C}$. Notice that features $u_{i}$ (the centerline bending energies of the streamlines) are reinterpreted here to express the degree of smoothness (hence the inverted membership functions as compared to the other two).}
+%\label{fig:fuzz}
+%\end{figure}
+%
+%Taken together, the input to $\textrm{FL}_{1}$ is the matrix of memberships $\tilde{\mathbf{s}}_{i}=[\tilde{\mathbf{l}}_{i},\tilde{\mathbf{u}}_{i},\tilde{\mathbf{c}}_{i}]$, and the output is the vector $\tilde{\mathbf{o}}_{i}$ of memberships to the linguistic terms OFF, NONE, ON:
+%\begin{equation}
+%\mathrm{FL}_{1}\!:\ \tilde{\mathbf{s}}_{i} \rightarrow \tilde{\mathbf{o}}_{i} = \left[o_{i}^{\textrm{OFF}}\!,\, o_{i}^{\textrm{NONE}}\!,\, o_{i}^{\textrm{ON}}\right]^T
+%\label{eq:FL1}
+%\end{equation}
+%To calculate these memberships we introduce scalar variable $o$, where $o=0$ corresponds to OFF, $o=1$ to NONE, and $o=2$ to ON, and we define Gaussian membership functions $\mu_{\textrm{OFF}}^{O}$, $\mu_{\textrm{NONE}}^{O}$ and $\mu_{\textrm{ON}}^{O}$, centered around $0$, $1$, and $2$, respectively (Fig.~\ref{fig:fuzzy-sets-FL1}), and with fixed standard deviation $0.4$ so that they sum to about 1 in the interval $[0,2]$. The rules used by $\textrm{FL}_{1}$ to associate the input terms LOW and HIGH to the output terms OFF, NONE, and ON, are given in Table~\ref{tab:rules-FL1}. They are based on the heuristic assumption that a line-like image structure exists (ON) if the evidence represented by all three features support it (HIGH). By contrast, if the likelihood is LOW and at least one other feature is also LOW, this indicates that no such structure exists (OFF). In all remaining cases, some structure may exist, but it is not line-like (NONE). As an example, rule $R_8$ (Table~\ref{tab:rules-FL1}) is given by:
+%\begin{equation}
+%\begin{split}
+%R_8\!:\ \ & \textrm{IF}\ (l=\textrm{HIGH})\ \wedge\ (u=\textrm{HIGH})\ \wedge\ (c=\textrm{HIGH}) \\
+%& \textrm{THEN}\ (o = \textrm{ON})
+%\end{split}
+%\end{equation}
+%which results in the verity value:
+%\begin{equation}
+%\upsilon_{8} = \min\left\{\mu_{\textrm{HIGH}}^{L}(l), \mu_{\textrm{HIGH}}^{U}(u), \mu_{\textrm{HIGH}}^{C}(c)\right\}
+%\end{equation}
+%and the output fuzzy set: 
+%\begin{equation}
+%\Upsilon_{8}(o) = \min\left\{\mu_{\textrm{ON}}^{O}(o),\upsilon_{8}\right\}
+%\end{equation}
+%All the rules are resolved and combined as:
+%\begin{equation}
+%\Upsilon(o) = \max\left\{\Upsilon_{1}(o),\dots,\Upsilon_{8}(o)\right\}
+%\end{equation}
+%and centroid defuzzification then results in a scalar output value $\hat{o}$. This procedure is repeated for each streamline, yielding $\hat{o}_{i}, i=1,\dots,4$, from which the output of each $\mathrm{FL}_{1}$ (Eq.~\ref{eq:FL1}) is calculated using the membership functions:
+%\begin{equation}
+%\tilde{\mathbf{o}}_{i} = \left[\mu_{\textrm{OFF}}^{O}(\hat{o}_{i}),\, \mu_{\textrm{NONE}}^{O}(\hat{o}_{i}),\, \mu_{\textrm{ON}}^{O}(\hat{o}_{i})\right]^{T}
+%\end{equation}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[height=10.5em]{beta_1}\hfill
+%\includegraphics[height=10.5em]{beta_2}
+%\caption{Output membership functions used in module $\mathrm{FL}_{1}$. Example output fuzzy sets $\Upsilon_{\!i}$ corresponding to rules $R_i$ from Table~\ref{tab:rules-FL1} are shown as the textured areas. Value $\hat{o}$ (left panel) represents the centroid of the aggregated output fuzzy sets. The resulting output membership values (right panel) serve as input for module $\mathrm{FL}_{2}$.}
+%\label{fig:fuzzy-sets-FL1}
+%\end{figure}
+%
+%\begin{table}
+%\caption{The set of rules employed by $\mathrm{FL}_{1}$.}
+%\label{tab:rules-FL1}
+%\centering
+%\begin{tabular}{c | c c c | c }
+%$R_{i}$ & $l$ & $u$ & $c$ & $o$ \\
+%\hline
+%1 & LOW  & LOW  & LOW  & OFF \\
+%2 & LOW  & LOW  & HIGH & OFF \\
+%3 & LOW  & HIGH & LOW  & OFF \\
+%\hline
+%4 & LOW  & HIGH & HIGH  & NONE \\ 
+%5 & HIGH & LOW  & LOW   & NONE \\ 
+%6 & HIGH & LOW  & HIGH  & NONE \\ 
+%7 & HIGH & HIGH & LOW   & NONE \\ 
+%\hline
+%8 & HIGH & HIGH & HIGH  & ON \\ 
+%\end{tabular}
+%\end{table}
+%
+%\begin{table}
+%\caption{The set of rules employed by $\mathrm{FL}_{2}$. Empty entries indicate ``don't care'' (could be OFF, NONE, or ON).}
+%\label{tab:rules-FL2}
+%\centering
+%\begin{tabular}{c | c c c c | c }
+%$R_{i}$ & $o_{1}$   & $o_{2}$   & $o_{3}$   & $o_{4}$  & $z$ \\
+%\hline
+%1 & OFF  & OFF  & OFF  & OFF & NONE \\
+%2 & OFF  & OFF  & OFF  & ON  & END  \\
+%3 & OFF  & OFF  & ON   & OFF & END  \\
+%4 & OFF  & OFF  & ON   & ON  & NONE \\
+%\hline
+%5 & OFF  & ON   & OFF  & OFF & END  \\
+%6 & OFF  & ON   & OFF  & ON  & NONE \\
+%7 & OFF  & ON   & ON   & OFF & NONE \\
+%8 & OFF  & ON   & ON   & ON  & JUN  \\
+%\hline
+%9 & ON   & OFF  & OFF  & OFF & END  \\
+%10&ON   & OFF  & OFF  & ON  & NONE  \\
+%11&ON   & OFF  & ON   & OFF & NONE  \\
+%12&ON   & OFF  & ON   & ON  & JUN  \\
+%\hline
+%13&ON   & ON   & OFF  & OFF & NONE  \\
+%14&ON   & ON   & OFF  & ON  & JUN  \\
+%15&ON   & ON   & ON   & OFF & JUN  \\
+%16&ON   & ON   & ON   & ON  & JUN  \\
+%\hline
+%17&NONE & NONE &      &      & NONE \\
+%18&NONE &      & NONE &      & NONE \\
+%19&NONE &      &      & NONE & NONE \\
+%20&     & NONE & NONE &      & NONE \\
+%21&     & NONE &      & NONE & NONE \\
+%22&     &      & NONE & NONE & NONE \\     
+%\end{tabular}
+%\end{table}
+%
+%Moving on to the next level, the input to $\mathrm{FL}_{2}$ is the matrix of memberships $\tilde{\mathbf{o}}=\left[\tilde{\mathbf{o}}_{1},\tilde{\mathbf{o}}_{2},\tilde{\mathbf{o}}_{3},\tilde{\mathbf{o}}_{4}\right]$, and the output is the vector $\tilde{\mathbf{z}}$ of memberships to the linguistic terms END (termination), NONE (no critical point), JUN (junction):
+%\begin{equation}
+%\mathrm{FL}_{2}\!:\ \tilde{\mathbf{o}} \rightarrow \tilde{\mathbf{z}} = \left[z^{\textrm{END}}\!,\, z^{\textrm{NONE}}\!,\, z^{\textrm{JUN}}\right]^T
+%\label{eq:FL2}
+%\end{equation}
+%To calculate these memberships we introduce scalar variable $z$, where $z=1$ corresponds to END, $z=2$ to NONE, and $z=3$ to JUN, and we define corresponding Gaussian membership functions $\mu_{\textrm{END}}^{Z}$, $\mu_{\textrm{NONE}}^{Z}$, and $\mu_{\textrm{JUN}}^{Z}$, centered around $1$, $2$, and $3$, respectively, and with fixed standard deviation $0.4$ as before (Fig.~\ref{fig:fuzzy-sets-FL2}). The rules used by $\mathrm{FL}_{2}$ to associate the input terms OFF, NONE, ON to the output terms END, NONE, JUN are given in Table~\ref{tab:rules-FL2}. They are based on the heuristic assumption that there is a termination (END) if a single streamline is confirmed to correspond to a line-like image structure (ON) and the other three are confirmed to not correspond to such a structure (OFF). Conversely, if at least three are ON, there must be a junction at that location. Finally, if two are ON and two are OFF, or if at least two streamlines are ambiguous (NONE), we assume there is no critical point. Similar to $\mathrm{FL}_{1}$, all the rules of $\mathrm{FL}_{2}$ are evaluated and their results combined as:
+%\begin{equation}
+%\Upsilon(z) = \max\left\{\Upsilon_{1}(z),\dots,\Upsilon_{22}(z)\right\}
+%\end{equation}
+%which, after centroid defuzzification, results in a scalar output value $\hat{z}$, from which the output of $\mathrm{FL}_{2}$ (Eq.~\ref{eq:FL2}) is calculated using the membership functions:
+%\begin{equation}
+%\tilde{\mathbf{z}} = \left[\mu_{\textrm{END}}^{Z}(\hat{z}),\, \mu_{\textrm{NONE}}^{Z}(\hat{z}),\, \mu_{\textrm{JUN}}^{Z}(\hat{z})\right]^{T}
+%\end{equation}
+%The proposed fuzzy-logic system is applied to each foreground pixel location $(x,y)\in F$ (Section~\ref{subsubsec:foreground-selection}) so that all memberships introduced above may be indexed by $(x,y)$. Based on this we calculate the following two maps:
+%\begin{equation}
+%I_{\textrm{END}}(x,y)=\left\{
+%\begin{array}{l@{\qquad}l}
+%z^{\textrm{END}}(x,y) & \textrm{if}\ (x,y)\in F \\
+%0 & \textrm{otherwise}
+%\end{array}
+%\right.
+%\end{equation}
+%\begin{equation}
+%I_{\textrm{JUN}}(x,y)=\left\{
+%\begin{array}{l@{\qquad}l}
+%z^{\textrm{JUN}}(x,y) & \textrm{if}\ (x,y)\in F \\
+%0 & \textrm{otherwise}
+%\end{array}
+%\right.
+%\end{equation}
+%which indicate the degree to which any pixel $(x,y)$ belongs to a termination or a junction, respectively.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[height=10.5em]{gamma_1}\hfill
+%\includegraphics[height=10.5em]{gamma_2}
+%\caption{Output membership functions used in module $\mathrm{FL}_{2}$. Example output fuzzy sets $\Upsilon_{\!i}$ corresponding to rules $R_i$ from Table~\ref{tab:rules-FL2} are shown as the textured areas. Value $\hat{z}$ (left panel) represents the centroid of the aggregated output fuzzy sets. The resulting output membership values (right panel) indicate the degree to which there may be a termination (END), junction (JUN), or neither of these (NONE) at the image pixel location under consideration.}
+%\label{fig:fuzzy-sets-FL2}
+%\end{figure}
+%
+%\subsection{Critical-Point Determination}
+%\label{sec:CPextraction}
+%The ultimate aim of our method is to provide a list of critical points in the neuron image, with each point fully characterized in terms of type, location, size, and main branch direction(s). Since each critical point of a neuronal tree typically covers multiple neighboring pixels in the image, giving rise to a high value at the corresponding pixels in the maps $I_{\textrm{END}}$ and $I_{\textrm{JUN}}$, the final task is to segment the maps and to aggregate the information within each segmented region.
+%
+%\begin{figure}
+%\includegraphics[width=0.45\linewidth]{cp-region}\hfill
+%\includegraphics[width=0.48\linewidth]{cp-region-mapping}
+%\caption{Critical-point determination. A critical point is characterized by its type, centroid location $(x_C,y_C)$, radius $r_C$, and its main branch directions $\hat{\mathbf{v}}_i$ (left panel, in this case a bifurcation), aggregated from the pixels $(x_p,y_p)$ in the corresponding critical region (right panel).}
+%\label{fig:CPdet}
+%\end{figure}
+%
+%Due to noise, labeling imperfections, and structural ambiguities in the original image, the values of neighboring pixels in the maps may vary considerably, and direct thresholding usually does not give satisfactory results. To improve the robustness we first regularize the real-valued scores in the maps by means of local-average filtering with a radius of 3-5 pixels. \marked{Next, max-entropy based automatic thresholding \citep{kapur1985new} is applied to segment the maps, as in contrast with many other thresholding methods we found it to perform well in separating the large but relatively flat (low information) background regions from the much smaller but more fluctuating (high information) regions of interest. The resulting binary images are further processed using a standard connected components algorithm \citep{Sonka-2007} to identify the critical-point regions.}
+%
+%Each critical region consists of a set of connected pixels $\mathbf{x}_p=(x_p,y_p)$, $p=1,\dots,N_p$, where $N_p$ denotes the number of pixels in the region. From these, the representative critical-point location $\mathbf{x}_C=(x_C,y_C)$ is calculated as:
+%\begin{equation}
+%\mathbf{x}_C=\frac{1}{N_p}\sum_{p=1}^{N_p}\mathbf{x}_p
+%\end{equation}
+%while the critical-point size is represented by the radius of the minimum circle surrounding the region:
+%\begin{equation}
+%r_C = \max_{p}\left\{||\mathbf{w}_p||\right\}
+%\end{equation}
+%where $\mathbf{w}_p=\mathbf{x}_p-\mathbf{x}_C$ (Fig.~\ref{fig:CPdet}). To obtain \marked{regularized estimates of} the main branch directions $\hat{\mathbf{v}}_i$ for the critical point, we aggregate the directions corresponding to the angular profile peaks $\hat{\alpha}_i$ (Section~\ref{subsubsec:angular-profile}) of all the $\mathbf{x}_p$ in the region as follows. For each $\mathbf{x}_p$ we have $N_{\hat{\alpha}}\leq4$ angular profile peak direction vectors $\mathbf{a}_{p,i}=[\cos\hat{\alpha}_i(\mathbf{x}_p),\sin\hat{\alpha}_i(\mathbf{x}_p)]^T$. Each of these vectors defines a line $\mathbf{a}(t)=\mathbf{x}_{p}+t\,\mathbf{a}_{p,i}$ parameterized by $t\in\mathbb{R}$. We establish the projection of this line onto the circle $||\mathbf{x}-\mathbf{x}_C||^2=r^2_C$ by substituting $\mathbf{x}=\mathbf{a}(t)$ and solving for $t$. From this we calculate the contributing unit vector (Fig.~\ref{fig:CPdet}):
+%\begin{equation}
+%\mathbf{e}_{p,i}=\frac{1}{r_C}(\mathbf{w}_{p}+t\,\mathbf{a}_{p,i})
+%\end{equation}
+%which points from $\mathbf{x}_C$ to the intersection point. This is done for all $p=1,\dots,N_p$ in the region and $i=1,\dots,N_{\hat{\alpha}}$ for each $p$, resulting in the set of vectors $\{\mathbf{e}_{p,i}\}$. Next, a recursive mean-shift clustering algorithm \citep{cheng1995mean} is applied to $\{\mathbf{e}_{p,i}\}$, which converges to a set $\{\hat{\mathbf{v}}_{i}\}$, where the cluster vectors $\hat{\mathbf{v}}_{i}$, $i=1,\dots,L$, represent the branches. For a critical region in $I_{\textrm{END}}$, we need only one main branch direction, which we simply take to be the direction $\hat{\mathbf{v}}_1$ to which the largest number of $\mathbf{e}_{p,i}$ were shifted. For a critical region in $I_{\textrm{JUN}}$, we take as the main branch directions the $\hat{\mathbf{v}}_i$ (at least three) to which the largest number of $\mathbf{e}_{p,i}$ were shifted. These calculations are performed for all critical regions.
+%
+%\section{Implementational Details}
+%\label{sec:implementation-details}
+%The method was implemented in the Java programming language as a plugin for the image processing and analysis tool ImageJ \citep{abramoff2004image,Schneider-2012}. Since the feature extraction step (Section~\ref{subsec:feature-extraction}), in particular the matched filtering for  angular profile analysis, is quite computationally demanding, we applied parallelization in multiple ways to reduce the running time to acceptable levels (on the order of minutes on a regular PC). Specifically, the directional filtering was split between CPU cores, each taking care of a subset of the directions (depending on the number of available cores). After this, the angular profile analysis and calculation of the features was also split, with each core processing a subset of the foreground image locations. This was sufficient for our experiments. Further improvement in running time (down to real-time if needed) could be achieved by mass parallelization using GPUs (graphical processing units) instead of CPUs.
 % $L_{\mathrm{LOW}}$, $U_{\mathrm{HIGH}}$ and $C_{\mathrm{HIGH}}$
-
-\marked{Essential parameters that need to be set by the user are} the scale parameters $k$ and $D$ (Section~\ref{subsubsec:angular-profile}) and the inflection points $L_{\mathrm{LOW}}$, $L_{\mathrm{HIGH}}$, $U_{\mathrm{LOW}}$, $U_{\mathrm{HIGH}}$, $C_{\mathrm{LOW}}$, and $C_{\mathrm{HIGH}}$ of the input membership functions used by fuzzy-logic module $\textrm{FL}_{1}$ (Section~\ref{sec:cp-detection}). In our applications we set $D$ to the expected neuron diameter in a given set of images while $k=0.7$ was kept fixed. The $L$ inflection points are always in the range $[0,1]$ since the corresponding feature (likelihood) is normalized. Based on ample experience with many data sets we typically set $L_{\mathrm{LOW}}$ close to 0 and $L_{\mathrm{HIGH}}$ around $0.5$ (Fig.~\ref{fig:fuzz}). By contrast, the inflection points $U$ correspond to a feature (centerline bending energy) that is not normalized and may vary widely from $0$ to any positive value. To obtain sensible values for these we rely on the histogram of all calculated energy values in the image. Parameter $U_{\mathrm{LOW}}$ is set to the threshold computed by the well-known triangle algorithm, while typically $U_{\mathrm{HIGH}}\gg U_{\mathrm{LOW}}$. We note that the membership functions defined by these parameters are inverted (Fig.~\ref{fig:fuzz}) such that the energy becomes a measure of smoothness. Finally, the $C$ inflection points correspond again to a feature (correlation) with a fixed output range $[-1,1]$. In our applications we usually set them to $C_{\mathrm{LOW}}\in[0.1,0.5]$ and $C_{\mathrm{HIGH}}=0.95$  (Fig.~\ref{fig:fuzz}).
-
-All other aspects of our method that could be considered as user parameters either follow directly from these essential parameters or are fixed to the standard values mentioned in the text. For example, the radius $r_d$ of the circular neighborhood in the foreground selection step (Section~\ref{subsubsec:foreground-selection}) can be set equal to $D$, and the standard deviation $\sigma_{\!D}$ of the Gaussian profile (Section~\ref{subsubsec:angular-profile}) can be set to $D/6$ to get a representative shape. Also, the output membership functions of $\textrm{FL}_1$ (input to $\textrm{FL}_2$) as well as the output membership functions of $\textrm{FL}_2$ are Gaussians with fixed levels and standard deviation (Section~\ref{sec:cp-detection}), as they are not essentially influencing the performance of the algorithm.
-
-\section{Experimental Results}
-\label{sec:experiments}
-To evaluate the performance of our method in correctly detecting and classifying neuronal critical points we performed experiments with simulated images (using the ground truth available from the simulation) as well as with real fluorescence microscopy images (using manual annotation as the gold standard). After describing the performance measures (Section \ref{subsec:measures}), we present and discuss the results of the evaluation on simulated images, including synthetic triplets (Section \ref{subsec:experiments-triplets}) and neurons (Section \ref{subsec:experiments-simulated}), and on real neuron images (Section \ref{subsec:experiments-real}), as well as the results of a comparison of our method with two other methods (Section \ref{subsec:comparison}).
-
-\subsection{Performance Measures}
-\label{subsec:measures}
-Performance was quantified by counting the correct and incorrect hits and the misses of the detection with respect to the reference data. More specifically, we counted the true-positive (TP), false-positive (FP), and the false-negative (FN) critical-point detections, and we used these to calculate the recall $\textrm{R}=\textrm{TP}/(\textrm{TP}+\textrm{FN})$ and precision $\textrm{P}=\textrm{TP}/(\textrm{TP}+\textrm{FP})$. Both R and P take on values in the range from $0$ (meaning total failure) to $1$ (meaning flawless detection). They are commonly combined in the F-measure \citep{Powers-2011}, defined as the harmonic mean of the two: $\textrm{F}=2\,\textrm{R}\,\textrm{P}/(\textrm{R}+\textrm{P})$. The F-measure was computed separately for each type of critical points considered in this paper, yielding $\textrm{F}_{\textrm{END}}$ for terminations and $\textrm{F}_{\textrm{JUN}}$ for junctions. As a measure of overall performance we also computed the harmonic mean of the two F-measures: $\textrm{F}_{\textrm{BOTH}}=2\,\textrm{F}_{\textrm{END}}\,\textrm{F}_{\textrm{JUN}}/(\textrm{F}_{\textrm{END}}+\textrm{F}_{\textrm{JUN}})$.
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=\linewidth]{triplets-snr-2345}
-\caption{Examples of simulated triplet images and detection results. Each triplet consists of three branches with different diameters which join at one end to form a bifurcation point and with the other ends being termination points. Images were generated at $\textrm{SNR}=2,3,4,5$ (left to right panel). The detection results with our method are indicated as red circles (bifurcation points) and yellow circles (termination points), where the radius of each circle reflects the size of the critical region found by our method.} % for $d_{\max}/d_{\min}\leq2$
-\label{fig:tiplet-images}
-\end{figure*}
-
-\subsection{Evaluation on Simulated Triplet Images}
-\label{subsec:experiments-triplets}
-Before considering full neuron images we first evaluated the performance of our method in detecting terminations and junctions in a very basic configuration as a function of image quality. To this end we used a triplet model, consisting of a single junction modeling a bifurcation, having three branches with arbitrary orientations (angular intervals) and diameters (Fig.~\ref{fig:tiplet-images}). Orientations were randomly sampled from a uniform distribution in the range $[0,2\pi]$ while prohibiting branch overlap. Since in principle the directional filtering step (Section \ref{subsubsec:angular-profile}) uses a fixed kernel size $D$, we wanted to investigate the robustness of the detection for varying ratios $d_{\max}/d_{\min}$ between the maximum and the minimum branch diameter in a triplet. For this experiment we considered ratios \marked{$1,0.33,2,2.5,3$} by taking normalized diameter configurations ($d_1,d_2,d_3$) = \marked{(0.33,0.33,0.33)}, (0.3,0.3, 0.4), (0.2, 0.4,0.4), (0.2,0.3,0.5), (0.2,0.2,0.6), where in each case the actual smallest diameter was set to 3 pixels (the resolution limit) and the other diameters were scaled accordingly. For each configuration we simulated images with $1,000$ well-separated triplets for signal-to-noise ratio levels $\textrm{SNR}=2$, $3$, $4$, $5$ (see cropped examples in Fig.~\ref{fig:tiplet-images}). We chose these levels knowing that $\textrm{SNR}=4$ is a critical level in other detection problems \citep{smal2010quantitative,Chenouard-2014}. Poisson noise was used in simulating fluorescence microscopy imaging of the triplets. From the results of this experiment (Fig.~\ref{fig:results-triplets}) we conclude that our method is very robust for diameter ratios $d_{\max}/d_{\min}\leq2\frac{1}{2}$ and an image quality of $\textrm{SNR}\geq4$. We also conclude that our method is somewhat better in detecting terminations than detecting junctions. Example detection results for $d_{\max}/d_{\min}\leq2$ for the considered SNR levels are shown in Fig.~\ref{fig:tiplet-images}.
-
-\subsection{Evaluation on Simulated Neuron Images}
-\label{subsec:experiments-simulated}
-To evaluate our method on more complex images, but for which we would still know the truth exactly, we simulated the imaging of complete neurons. Although there are various ways this could be done \citep{Koene-2009,vasilkoski2009detection}, we chose to use existing expert reconstructions from the NeuroMorpho.Org database \citep{ascoli2007neuromorpho}. A total of 30 reconstructions from different neuron types were downloaded as SWC files \citep{cannon1998line}, in which the reconstructions are represented as a sequence of connected center-point locations in 3D with corresponding radii in micrometers. Fluorescence microscopy images were generated from these reconstructions in 2D by using a Gaussian point-spread function model and Poisson noise to emulate diffraction-limited optics and photon statistics. For each reconstruction we generated images of $\textrm{SNR}=2$, $3$, $4$, $5$ (Fig.~\ref{fig:nmorpho}). This way we obtained simulated images of neurons for which the termination and junction point locations were known exactly from the SWC files.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.48\linewidth]{triplets_fjun_fend_vs_pratio}\hfill
-\includegraphics[width=0.48\linewidth]{triplets_fboth_vs_snr}
-\caption{Performance of our method in detecting terminations and junctions in simulated images of triplets. The values of $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ are shown (left panel) for the various branch diameter ratios $d_{\max}/d_{\min}$ at $\textrm{SNR}=4$. The distribution of $\textrm{F}_{\textrm{BOTH}}$ values is shown as a box plot (right panel) for the various SNR levels.}
-\label{fig:results-triplets}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.24\linewidth]{dekoninck-snr-2.png}
-\includegraphics[width=0.24\linewidth]{dekoninck-snr-3.png}
-\includegraphics[width=0.24\linewidth]{dekoninck-snr-4.png}
-\includegraphics[width=0.24\linewidth]{dekoninck-snr-5.png}\\
-\includegraphics[width=0.24\linewidth]{strettoi-snr-2.png}
-\includegraphics[width=0.24\linewidth]{strettoi-snr-3.png}
-\includegraphics[width=0.24\linewidth]{strettoi-snr-4.png}
-\includegraphics[width=0.24\linewidth]{strettoi-snr-5.png}\\
-\includegraphics[width=0.24\linewidth]{masland-snr-2.png}
-\includegraphics[width=0.24\linewidth]{masland-snr-3.png}
-\includegraphics[width=0.24\linewidth]{masland-snr-4.png}
-\includegraphics[width=0.24\linewidth]{masland-snr-5.png}\\
-\includegraphics[width=0.24\linewidth]{burdakov-snr-2.png}
-\includegraphics[width=0.24\linewidth]{burdakov-snr-3.png}
-\includegraphics[width=0.24\linewidth]{burdakov-snr-4.png}
-\includegraphics[width=0.24\linewidth]{burdakov-snr-5.png}\\
-\includegraphics[width=0.24\linewidth]{jacobs-snr-2.png}
-\includegraphics[width=0.24\linewidth]{jacobs-snr-3.png}
-\includegraphics[width=0.24\linewidth]{jacobs-snr-4.png}
-\includegraphics[width=0.24\linewidth]{jacobs-snr-5.png}
-\caption{Examples of simulated neuron images based on expert reconstructions from the NeuroMorpho.Org database. The images show a wide range of morphologies (one type per row) and image qualities of $\textrm{SNR}=2$, $3$, $4$, $5$ (from left to right per row).}
-\label{fig:nmorpho}
-\end{figure}
-
-From the evaluation results (Fig.~\ref{fig:results-sim}) we confirm the conclusion from the experiments on triplets that our method performs well for $\textrm{SNR}\geq4$ and is somewhat better in detecting terminations than detecting junctions. For $\textrm{SNR}=4$ we find that the performance for junction detection is $\textrm{F}_{\textrm{JUN}}\approx0.85$ while for termination detection $\textrm{F}_{\textrm{END}}\approx0.95$. The higher performance for termination detection may be explained by the fact that the underlying image structure is usually less ambiguous (a single line-like structure surrounded by darker background) than in the case of junctions (multiple line-like structures that are possibly very close to each other). Example detection results are shown in Fig.~\ref{fig:nmorpho-det}.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.48\linewidth]{nmorpho_snr4}\hfill
-\includegraphics[width=0.48\linewidth]{nmorpho_snr}
-\caption{Performance of our method in detecting terminations and junctions in 30 simulated images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values are shown as box plots for $\textrm{SNR}=4$ (left panel) and in addition the distribution of $\textrm{F}_\textrm{BOTH}$ is shown for $\textrm{SNR}=2$, $3$, $4$, $5$ (right panel).}
-\label{fig:results-sim}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=1.0\linewidth]{det_nmorpho}
-\caption{Example detection results in simulated neuron images at $\textrm{SNR}=4$. The images are contrast enhanced and show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.69, (b) 0.85, (c) 0.85, (d) 0.77, (e) 0.75, (f) 0.68, (g) 0.86.}
-\label{fig:nmorpho-det}
-\end{figure}
-
-\subsection{Evaluation on Real Neuron Images}
-\label{subsec:experiments-real}
-As the ultimate test case we also evaluated our method on real fluorescence microscopy images of neurons from a published study \citep{steiner2002overexpression}. A total of 30 representative images were taken and expert manual annotations of the critical points were obtained to serve as the gold standard in this experiment. Needless to say, real images are generally more challenging than simulated images, as they contain more ambiguities due to labeling and imaging imperfections, and thus we expected our method to show lower performance. Since in this case we have no control over the SNR in the images we report the detection results of all images together. From the evaluation results (Fig.~\ref{fig:results-real}) we find that the median performance in detecting critical points is $\textrm{F}_{\textrm{JUN}}=0.81$ for junctions and $\textrm{F}_{\textrm{END}}=0.73$ for terminations while $\textrm{F}_{\textrm{BOTH}}=0.76$. As expected, these numbers are lower than those of the simulated neuron images. Surprisingly, we observe that in the real images our method is better in detecting junctions than detecting terminations. A possible explanation for this could be that in the simulated images we used a constant intensity for the neuron branches, as a result of which terminations are as bright as junctions but much less ambiguous due to a clear background, while in the real images the terminations are usually much less clear due to labeling imperfections and the fact that the branch tips tend to be thinner and thus less bright than the junctions. This illustrates the limitations of the simulations. Example detection results are shown in Fig.~\ref{fig:real-det}.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.75\linewidth]{overview_real}
-\caption{Performance of our method in detecting terminations and junctions in 30 real fluorescence microscopy images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values for all images together are shown as box plots.}
-\label{fig:results-real}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=1.0\linewidth]{det_real}
-\caption{Example detection results for four real neuron images. The images show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.82, (b) 0.78, (c) 0.68, (d) 0.65.}
-\label{fig:real-det}
-\end{figure}
-
-\subsection{Comparison With Other Methods}
-\label{subsec:comparison}
-Finally we sought to compare the performance of our Neuron Pinpointer (NP) method with other methods. Since we were not aware of other methods explicitly designed to detect and classify critical points in neuron images \marked{before reconstruction}, we considered two existing software tools relevant in this context and we compared their implicit detection capabilities with our explicit method. If our method performs better, this would indicate that the existing methods may be improved by exploiting the output of our method.
-
-\begin{figure*}
-\includegraphics[width=0.32\textwidth]{compareJUN_all}\hfill
-\includegraphics[width=0.32\textwidth]{compareEND_all}\hfill
-\includegraphics[width=0.32\textwidth]{compareBOTH_all}
-\caption{Critical-point detection performance of our method (NP) compared to two other methods (AS and APP2). The median values of $\textrm{F}_{\textrm{JUN}}$ (left plot) are 0.81 (NP), 0.65 (AS), and 0.47 (APP2). The median values of $\textrm{F}_{\textrm{END}}$ (middle plot) are 0.73 (NP), 0.28 (AS), and 0.21 (APP2). Finally, the median values of $\textrm{F}_{\textrm{BOTH}}$ (right plot) are 0.76 (NP), 0.35 (AS), and 0.29 (APP2).}
-\label{fig:comparison-all}
-\end{figure*}
-
-The first tool, AnalyzeSkeleton (AS) \citep{arganda20103d}, available from http://fiji.sc/AnalyzeSkeleton, is an ImageJ plugin for finding and counting all end-points and junctions in a skeleton image. To obtain skeleton images of our neuron images, we used the related skeletonization plugin available from the same developers, http://fiji.sc/Skele\-tonize3D, which is inspired by an advanced thinning algorithm \citep{lee1994building}. The input for the latter is a binary image obtained by segmentation based on smoothing (to reduce noise) and thresholding. For our experiments we considered a range of smoothing scales and manually selected thresholds as well as automatically determined thresholds using the following algorithms from ImageJ: Intermodes, Li, MaxEntropy, RenyiEntropy, Moments, Otsu, Triangle, and Yen. All of these were tried in combination with the AS method and the highest F-scores were used.
-
-The second tool, All-Path-Prunning (APP2) \citep{xiao2013app2}, is a plugin for Vaa3D \citep{peng2010v3d,peng2014extensible}, available from http://www.vaa3d.org/. It was not designed specifically for \marked{a priori} critical-point detection but for fully automatic neuron reconstruction. Nevertheless, in producing a tree representation of a neuron, the reconstruction algorithm must somehow identify the branch end-points and junctions, and for our experiments we can easily retrieve them from the SWC output files. In principle, any neuron reconstruction method is also implicitly a critical-point detection method, and we can quantify its performance by comparing the output tree nodes with the reference data. The interesting question is whether an explicit detector such as NP outperforms the implicit detection carried out in a tool such as APP2. We manually adjusted the user parameters of the tool to get optimal performance in our experiments.
-
-A comparison of the F-scores of NP, AS, and APP2 for the 30 real neuron images used in our experiments is presented in Fig.~\ref{fig:comparison-all}. From the plots we see that the detection rates of our NP method are substantially higher than those of AS and APP2. The difference is especially noticeable for the termination points. More specifically, the difference between $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ is relatively small for NP, but much larger for both AS and APP2. This indicates a clear advantage of using our explicit and integrated approach for detecting critical points, as accurate neuron reconstruction requires accurate detection of both junctions and terminations. However, with the current implementation, this advantage does come at a cost: timing of the three methods on a standard PC (with Intel Core i7-2630QM 2GHz CPU and 6 GB total RAM) revealed that with our images of $10^5$ to $10^6$ pixels in size, NP took about 40 seconds per image on average, while both AS and APP2 took only about 1.5 seconds per image. Fortunately, since virtually all the computation time of our method is spent in the directional filtering step, which is highly parallelizable, this cost can be reduced to any desired level by employing many-core hardware (such as GPUs).
+%
+%\marked{Essential parameters that need to be set by the user are} the scale parameters $k$ and $D$ (Section~\ref{subsubsec:angular-profile}) and the inflection points $L_{\mathrm{LOW}}$, $L_{\mathrm{HIGH}}$, $U_{\mathrm{LOW}}$, $U_{\mathrm{HIGH}}$, $C_{\mathrm{LOW}}$, and $C_{\mathrm{HIGH}}$ of the input membership functions used by fuzzy-logic module $\textrm{FL}_{1}$ (Section~\ref{sec:cp-detection}). In our applications we set $D$ to the expected neuron diameter in a given set of images while $k=0.7$ was kept fixed. The $L$ inflection points are always in the range $[0,1]$ since the corresponding feature (likelihood) is normalized. Based on ample experience with many data sets we typically set $L_{\mathrm{LOW}}$ close to 0 and $L_{\mathrm{HIGH}}$ around $0.5$ (Fig.~\ref{fig:fuzz}). By contrast, the inflection points $U$ correspond to a feature (centerline bending energy) that is not normalized and may vary widely from $0$ to any positive value. To obtain sensible values for these we rely on the histogram of all calculated energy values in the image. Parameter $U_{\mathrm{LOW}}$ is set to the threshold computed by the well-known triangle algorithm, while typically $U_{\mathrm{HIGH}}\gg U_{\mathrm{LOW}}$. We note that the membership functions defined by these parameters are inverted (Fig.~\ref{fig:fuzz}) such that the energy becomes a measure of smoothness. Finally, the $C$ inflection points correspond again to a feature (correlation) with a fixed output range $[-1,1]$. In our applications we usually set them to $C_{\mathrm{LOW}}\in[0.1,0.5]$ and $C_{\mathrm{HIGH}}=0.95$  (Fig.~\ref{fig:fuzz}).
+%
+%All other aspects of our method that could be considered as user parameters either follow directly from these essential parameters or are fixed to the standard values mentioned in the text. For example, the radius $r_d$ of the circular neighborhood in the foreground selection step (Section~\ref{subsubsec:foreground-selection}) can be set equal to $D$, and the standard deviation $\sigma_{\!D}$ of the Gaussian profile (Section~\ref{subsubsec:angular-profile}) can be set to $D/6$ to get a representative shape. Also, the output membership functions of $\textrm{FL}_1$ (input to $\textrm{FL}_2$) as well as the output membership functions of $\textrm{FL}_2$ are Gaussians with fixed levels and standard deviation (Section~\ref{sec:cp-detection}), as they are not essentially influencing the performance of the algorithm.
+%
+%\section{Experimental Results}
+%\label{sec:experiments}
+%To evaluate the performance of our method in correctly detecting and classifying neuronal critical points we performed experiments with simulated images (using the ground truth available from the simulation) as well as with real fluorescence microscopy images (using manual annotation as the gold standard). After describing the performance measures (Section \ref{subsec:measures}), we present and discuss the results of the evaluation on simulated images, including synthetic triplets (Section \ref{subsec:experiments-triplets}) and neurons (Section \ref{subsec:experiments-simulated}), and on real neuron images (Section \ref{subsec:experiments-real}), as well as the results of a comparison of our method with two other methods (Section \ref{subsec:comparison}).
+%
+%\subsection{Performance Measures}
+%\label{subsec:measures}
+%Performance was quantified by counting the correct and incorrect hits and the misses of the detection with respect to the reference data. More specifically, we counted the true-positive (TP), false-positive (FP), and the false-negative (FN) critical-point detections, and we used these to calculate the recall $\textrm{R}=\textrm{TP}/(\textrm{TP}+\textrm{FN})$ and precision $\textrm{P}=\textrm{TP}/(\textrm{TP}+\textrm{FP})$. Both R and P take on values in the range from $0$ (meaning total failure) to $1$ (meaning flawless detection). They are commonly combined in the F-measure \citep{Powers-2011}, defined as the harmonic mean of the two: $\textrm{F}=2\,\textrm{R}\,\textrm{P}/(\textrm{R}+\textrm{P})$. The F-measure was computed separately for each type of critical points considered in this paper, yielding $\textrm{F}_{\textrm{END}}$ for terminations and $\textrm{F}_{\textrm{JUN}}$ for junctions. As a measure of overall performance we also computed the harmonic mean of the two F-measures: $\textrm{F}_{\textrm{BOTH}}=2\,\textrm{F}_{\textrm{END}}\,\textrm{F}_{\textrm{JUN}}/(\textrm{F}_{\textrm{END}}+\textrm{F}_{\textrm{JUN}})$.
+%
+%\begin{figure*}[!t]
+%\centering
+%\includegraphics[width=\linewidth]{triplets-snr-2345}
+%\caption{Examples of simulated triplet images and detection results. Each triplet consists of three branches with different diameters which join at one end to form a bifurcation point and with the other ends being termination points. Images were generated at $\textrm{SNR}=2,3,4,5$ (left to right panel). The detection results with our method are indicated as red circles (bifurcation points) and yellow circles (termination points), where the radius of each circle reflects the size of the critical region found by our method.} % for $d_{\max}/d_{\min}\leq2$
+%\label{fig:tiplet-images}
+%\end{figure*}
+%
+%\subsection{Evaluation on Simulated Triplet Images}
+%\label{subsec:experiments-triplets}
+%Before considering full neuron images we first evaluated the performance of our method in detecting terminations and junctions in a very basic configuration as a function of image quality. To this end we used a triplet model, consisting of a single junction modeling a bifurcation, having three branches with arbitrary orientations (angular intervals) and diameters (Fig.~\ref{fig:tiplet-images}). Orientations were randomly sampled from a uniform distribution in the range $[0,2\pi]$ while prohibiting branch overlap. Since in principle the directional filtering step (Section \ref{subsubsec:angular-profile}) uses a fixed kernel size $D$, we wanted to investigate the robustness of the detection for varying ratios $d_{\max}/d_{\min}$ between the maximum and the minimum branch diameter in a triplet. For this experiment we considered ratios \marked{$1,0.33,2,2.5,3$} by taking normalized diameter configurations ($d_1,d_2,d_3$) = \marked{(0.33,0.33,0.33)}, (0.3,0.3, 0.4), (0.2, 0.4,0.4), (0.2,0.3,0.5), (0.2,0.2,0.6), where in each case the actual smallest diameter was set to 3 pixels (the resolution limit) and the other diameters were scaled accordingly. For each configuration we simulated images with $1,000$ well-separated triplets for signal-to-noise ratio levels $\textrm{SNR}=2$, $3$, $4$, $5$ (see cropped examples in Fig.~\ref{fig:tiplet-images}). We chose these levels knowing that $\textrm{SNR}=4$ is a critical level in other detection problems \citep{smal2010quantitative,Chenouard-2014}. Poisson noise was used in simulating fluorescence microscopy imaging of the triplets. From the results of this experiment (Fig.~\ref{fig:results-triplets}) we conclude that our method is very robust for diameter ratios $d_{\max}/d_{\min}\leq2\frac{1}{2}$ and an image quality of $\textrm{SNR}\geq4$. We also conclude that our method is somewhat better in detecting terminations than detecting junctions. Example detection results for $d_{\max}/d_{\min}\leq2$ for the considered SNR levels are shown in Fig.~\ref{fig:tiplet-images}.
+%
+%\subsection{Evaluation on Simulated Neuron Images}
+%\label{subsec:experiments-simulated}
+%To evaluate our method on more complex images, but for which we would still know the truth exactly, we simulated the imaging of complete neurons. Although there are various ways this could be done \citep{Koene-2009,vasilkoski2009detection}, we chose to use existing expert reconstructions from the NeuroMorpho.Org database \citep{ascoli2007neuromorpho}. A total of 30 reconstructions from different neuron types were downloaded as SWC files \citep{cannon1998line}, in which the reconstructions are represented as a sequence of connected center-point locations in 3D with corresponding radii in micrometers. Fluorescence microscopy images were generated from these reconstructions in 2D by using a Gaussian point-spread function model and Poisson noise to emulate diffraction-limited optics and photon statistics. For each reconstruction we generated images of $\textrm{SNR}=2$, $3$, $4$, $5$ (Fig.~\ref{fig:nmorpho}). This way we obtained simulated images of neurons for which the termination and junction point locations were known exactly from the SWC files.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=0.48\linewidth]{triplets_fjun_fend_vs_pratio}\hfill
+%\includegraphics[width=0.48\linewidth]{triplets_fboth_vs_snr}
+%\caption{Performance of our method in detecting terminations and junctions in simulated images of triplets. The values of $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ are shown (left panel) for the various branch diameter ratios $d_{\max}/d_{\min}$ at $\textrm{SNR}=4$. The distribution of $\textrm{F}_{\textrm{BOTH}}$ values is shown as a box plot (right panel) for the various SNR levels.}
+%\label{fig:results-triplets}
+%\end{figure}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=0.24\linewidth]{dekoninck-snr-2.png}
+%\includegraphics[width=0.24\linewidth]{dekoninck-snr-3.png}
+%\includegraphics[width=0.24\linewidth]{dekoninck-snr-4.png}
+%\includegraphics[width=0.24\linewidth]{dekoninck-snr-5.png}\\
+%\includegraphics[width=0.24\linewidth]{strettoi-snr-2.png}
+%\includegraphics[width=0.24\linewidth]{strettoi-snr-3.png}
+%\includegraphics[width=0.24\linewidth]{strettoi-snr-4.png}
+%\includegraphics[width=0.24\linewidth]{strettoi-snr-5.png}\\
+%\includegraphics[width=0.24\linewidth]{masland-snr-2.png}
+%\includegraphics[width=0.24\linewidth]{masland-snr-3.png}
+%\includegraphics[width=0.24\linewidth]{masland-snr-4.png}
+%\includegraphics[width=0.24\linewidth]{masland-snr-5.png}\\
+%\includegraphics[width=0.24\linewidth]{burdakov-snr-2.png}
+%\includegraphics[width=0.24\linewidth]{burdakov-snr-3.png}
+%\includegraphics[width=0.24\linewidth]{burdakov-snr-4.png}
+%\includegraphics[width=0.24\linewidth]{burdakov-snr-5.png}\\
+%\includegraphics[width=0.24\linewidth]{jacobs-snr-2.png}
+%\includegraphics[width=0.24\linewidth]{jacobs-snr-3.png}
+%\includegraphics[width=0.24\linewidth]{jacobs-snr-4.png}
+%\includegraphics[width=0.24\linewidth]{jacobs-snr-5.png}
+%\caption{Examples of simulated neuron images based on expert reconstructions from the NeuroMorpho.Org database. The images show a wide range of morphologies (one type per row) and image qualities of $\textrm{SNR}=2$, $3$, $4$, $5$ (from left to right per row).}
+%\label{fig:nmorpho}
+%\end{figure}
+%
+%From the evaluation results (Fig.~\ref{fig:results-sim}) we confirm the conclusion from the experiments on triplets that our method performs well for $\textrm{SNR}\geq4$ and is somewhat better in detecting terminations than detecting junctions. For $\textrm{SNR}=4$ we find that the performance for junction detection is $\textrm{F}_{\textrm{JUN}}\approx0.85$ while for termination detection $\textrm{F}_{\textrm{END}}\approx0.95$. The higher performance for termination detection may be explained by the fact that the underlying image structure is usually less ambiguous (a single line-like structure surrounded by darker background) than in the case of junctions (multiple line-like structures that are possibly very close to each other). Example detection results are shown in Fig.~\ref{fig:nmorpho-det}.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=0.48\linewidth]{nmorpho_snr4}\hfill
+%\includegraphics[width=0.48\linewidth]{nmorpho_snr}
+%\caption{Performance of our method in detecting terminations and junctions in 30 simulated images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values are shown as box plots for $\textrm{SNR}=4$ (left panel) and in addition the distribution of $\textrm{F}_\textrm{BOTH}$ is shown for $\textrm{SNR}=2$, $3$, $4$, $5$ (right panel).}
+%\label{fig:results-sim}
+%\end{figure}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=1.0\linewidth]{det_nmorpho}
+%\caption{Example detection results in simulated neuron images at $\textrm{SNR}=4$. The images are contrast enhanced and show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.69, (b) 0.85, (c) 0.85, (d) 0.77, (e) 0.75, (f) 0.68, (g) 0.86.}
+%\label{fig:nmorpho-det}
+%\end{figure}
+%
+%\subsection{Evaluation on Real Neuron Images}
+%\label{subsec:experiments-real}
+%As the ultimate test case we also evaluated our method on real fluorescence microscopy images of neurons from a published study \citep{steiner2002overexpression}. A total of 30 representative images were taken and expert manual annotations of the critical points were obtained to serve as the gold standard in this experiment. Needless to say, real images are generally more challenging than simulated images, as they contain more ambiguities due to labeling and imaging imperfections, and thus we expected our method to show lower performance. Since in this case we have no control over the SNR in the images we report the detection results of all images together. From the evaluation results (Fig.~\ref{fig:results-real}) we find that the median performance in detecting critical points is $\textrm{F}_{\textrm{JUN}}=0.81$ for junctions and $\textrm{F}_{\textrm{END}}=0.73$ for terminations while $\textrm{F}_{\textrm{BOTH}}=0.76$. As expected, these numbers are lower than those of the simulated neuron images. Surprisingly, we observe that in the real images our method is better in detecting junctions than detecting terminations. A possible explanation for this could be that in the simulated images we used a constant intensity for the neuron branches, as a result of which terminations are as bright as junctions but much less ambiguous due to a clear background, while in the real images the terminations are usually much less clear due to labeling imperfections and the fact that the branch tips tend to be thinner and thus less bright than the junctions. This illustrates the limitations of the simulations. Example detection results are shown in Fig.~\ref{fig:real-det}.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=0.75\linewidth]{overview_real}
+%\caption{Performance of our method in detecting terminations and junctions in 30 real fluorescence microscopy images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values for all images together are shown as box plots.}
+%\label{fig:results-real}
+%\end{figure}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=1.0\linewidth]{det_real}
+%\caption{Example detection results for four real neuron images. The images show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.82, (b) 0.78, (c) 0.68, (d) 0.65.}
+%\label{fig:real-det}
+%\end{figure}
+%
+%\subsection{Comparison With Other Methods}
+%\label{subsec:comparison}
+%Finally we sought to compare the performance of our Neuron Pinpointer (NP) method with other methods. Since we were not aware of other methods explicitly designed to detect and classify critical points in neuron images \marked{before reconstruction}, we considered two existing software tools relevant in this context and we compared their implicit detection capabilities with our explicit method. If our method performs better, this would indicate that the existing methods may be improved by exploiting the output of our method.
+%
+%\begin{figure*}
+%\includegraphics[width=0.32\textwidth]{compareJUN_all}\hfill
+%\includegraphics[width=0.32\textwidth]{compareEND_all}\hfill
+%\includegraphics[width=0.32\textwidth]{compareBOTH_all}
+%\caption{Critical-point detection performance of our method (NP) compared to two other methods (AS and APP2). The median values of $\textrm{F}_{\textrm{JUN}}$ (left plot) are 0.81 (NP), 0.65 (AS), and 0.47 (APP2). The median values of $\textrm{F}_{\textrm{END}}$ (middle plot) are 0.73 (NP), 0.28 (AS), and 0.21 (APP2). Finally, the median values of $\textrm{F}_{\textrm{BOTH}}$ (right plot) are 0.76 (NP), 0.35 (AS), and 0.29 (APP2).}
+%\label{fig:comparison-all}
+%\end{figure*}
+%
+%The first tool, AnalyzeSkeleton (AS) \citep{arganda20103d}, available from http://fiji.sc/AnalyzeSkeleton, is an ImageJ plugin for finding and counting all end-points and junctions in a skeleton image. To obtain skeleton images of our neuron images, we used the related skeletonization plugin available from the same developers, http://fiji.sc/Skele\-tonize3D, which is inspired by an advanced thinning algorithm \citep{lee1994building}. The input for the latter is a binary image obtained by segmentation based on smoothing (to reduce noise) and thresholding. For our experiments we considered a range of smoothing scales and manually selected thresholds as well as automatically determined thresholds using the following algorithms from ImageJ: Intermodes, Li, MaxEntropy, RenyiEntropy, Moments, Otsu, Triangle, and Yen. All of these were tried in combination with the AS method and the highest F-scores were used.
+%
+%The second tool, All-Path-Prunning (APP2) \citep{xiao2013app2}, is a plugin for Vaa3D \citep{peng2010v3d,peng2014extensible}, available from http://www.vaa3d.org/. It was not designed specifically for \marked{a priori} critical-point detection but for fully automatic neuron reconstruction. Nevertheless, in producing a tree representation of a neuron, the reconstruction algorithm must somehow identify the branch end-points and junctions, and for our experiments we can easily retrieve them from the SWC output files. In principle, any neuron reconstruction method is also implicitly a critical-point detection method, and we can quantify its performance by comparing the output tree nodes with the reference data. The interesting question is whether an explicit detector such as NP outperforms the implicit detection carried out in a tool such as APP2. We manually adjusted the user parameters of the tool to get optimal performance in our experiments.
+%
+%A comparison of the F-scores of NP, AS, and APP2 for the 30 real neuron images used in our experiments is presented in Fig.~\ref{fig:comparison-all}. From the plots we see that the detection rates of our NP method are substantially higher than those of AS and APP2. The difference is especially noticeable for the termination points. More specifically, the difference between $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ is relatively small for NP, but much larger for both AS and APP2. This indicates a clear advantage of using our explicit and integrated approach for detecting critical points, as accurate neuron reconstruction requires accurate detection of both junctions and terminations. However, with the current implementation, this advantage does come at a cost: timing of the three methods on a standard PC (with Intel Core i7-2630QM 2GHz CPU and 6 GB total RAM) revealed that with our images of $10^5$ to $10^6$ pixels in size, NP took about 40 seconds per image on average, while both AS and APP2 took only about 1.5 seconds per image. Fortunately, since virtually all the computation time of our method is spent in the directional filtering step, which is highly parallelizable, this cost can be reduced to any desired level by employing many-core hardware (such as GPUs).
 % Intel(R) Core(TM) i7-2630QM CPU @ 2.00GHz (laptop)
 % Intel(R) Xeon(R) CPU E5620  @ 2.40GHz (Dell at EMC)
 % $8\times2$ GHz cores
-\section{Conclusions} 
-\label{sec:conclusions}
-We have presented a novel method for solving the important problem of detecting and characterizing critical points in the tree-like structures in neuron microscopy images. Based on a directional filtering and feature extraction algorithm in combination with a two-stage fuzzy-logic based reasoning system, it provides an integrated framework for the simultaneous identification of both terminations and junctions. From the results of experiments on simulated as well as real fluorescence microscopy images of neurons, we conclude that our method achieves substantially higher detection rates than the rates that can be inferred from existing neuron reconstruction methods. This is true for both junction points and termination points, but especially for the latter, which are of key importance in obtaining faithful reconstructions. Altogether, the results suggest that our method may provide important clues to improve the performance of reconstruction methods.
-
-Actual integration of our detection method with existing tracing methods was outside the scope of the present study, but we are currently in the process of developing a new neuron tracing method and, in that context, we aim to perform an extensive evaluation of the beneficial effects of the presented method also on existing tracing methods. For this purpose we also aim to extend our method to 3D, \marked{where the exact same workflow could be used, except that the angular profile analysis and the final critical-point determination step would involve two angles (azimuth and elevation) instead of one. Also, it would require mass parallelization of the image filtering step to keep the running times of the method acceptable, but this should be straightforward in view of the highly parallel nature of this step.}
-
-Although we focused on neuron analysis in this work, our method may also be potentially useful for other applications involving tree-like image structures, such as blood vessel or bronchial tree analysis, but this requires further exploration. \marked{For this purpose it may be helpful to increase the robustness of the detection method to larger branch diameter ratios than tested in this paper. This could be done, for example, by using multiscale filtering approaches, or by selective morphological thinning (or thickening).}
-
-\marked{The software implementation of the presented method is available as an ImageJ plugin from \url{https://bitbucket.org/miroslavradojevic/npinpoint}}.
-
-\begin{acknowledgements}
-This work was funded by the Netherlands Organization for Scientific Reseach (NWO grant 612.001.018 awarded to Erik Meijering).
-\end{acknowledgements}
-
-\bibliography{lit}  
-
-\end{document}
+%\section{Conclusions} 
+%\label{sec:conclusions}
+%We have presented a novel method for solving the important problem of detecting and characterizing critical points in the tree-like structures in neuron microscopy images. Based on a directional filtering and feature extraction algorithm in combination with a two-stage fuzzy-logic based reasoning system, it provides an integrated framework for the simultaneous identification of both terminations and junctions. From the results of experiments on simulated as well as real fluorescence microscopy images of neurons, we conclude that our method achieves substantially higher detection rates than the rates that can be inferred from existing neuron reconstruction methods. This is true for both junction points and termination points, but especially for the latter, which are of key importance in obtaining faithful reconstructions. Altogether, the results suggest that our method may provide important clues to improve the performance of reconstruction methods.
+%
+%Actual integration of our detection method with existing tracing methods was outside the scope of the present study, but we are currently in the process of developing a new neuron tracing method and, in that context, we aim to perform an extensive evaluation of the beneficial effects of the presented method also on existing tracing methods. For this purpose we also aim to extend our method to 3D, \marked{where the exact same workflow could be used, except that the angular profile analysis and the final critical-point determination step would involve two angles (azimuth and elevation) instead of one. Also, it would require mass parallelization of the image filtering step to keep the running times of the method acceptable, but this should be straightforward in view of the highly parallel nature of this step.}
+%
+%Although we focused on neuron analysis in this work, our method may also be potentially useful for other applications involving tree-like image structures, such as blood vessel or bronchial tree analysis, but this requires further exploration. \marked{For this purpose it may be helpful to increase the robustness of the detection method to larger branch diameter ratios than tested in this paper. This could be done, for example, by using multiscale filtering approaches, or by selective morphological thinning (or thickening).}
+%
+%\marked{The software implementation of the presented method is available as an ImageJ plugin from \url{https://bitbucket.org/miroslavradojevic/npinpoint}}.
+%
+%\begin{acknowledgements}
+%This work was funded by the Netherlands Organization for Scientific Reseach (NWO grant 612.001.018 awarded to Erik Meijering).
+%\end{acknowledgements}
+%
+%\bibliography{lit}  
+%
+%\end{document}
