@@ -37,6 +37,7 @@
 \usepackage[english]{babel}
 \usepackage[caption=false]{subfig}
 \usepackage[mathscr]{euscript}
+\usepackage{glossaries}
 
 \bibliographystyle{./styfiles/mybibstyle}
 
@@ -101,9 +102,13 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 %------------------------------------------------------------------
+\makeglossaries
+\loadglsentries{abbreviations}
 
 % ************************************************************************
-%\includeonly{./chapter1/chapter1,./chapter2/chapter2,./bibliography}
+\includeonly{./titlepage,
+	./chapter1/chapter1,
+	./bibliography}
 
 % ************************************************************************
 \begin{document}
@@ -117,7 +122,7 @@
 \include{./formalpage}
 \include{./preface}
 \include{./contents}
-\include{./abbreviations}
+\printglossary[style=long]
 
 % ************************************************************************
 \pagenumbering{arabic}
