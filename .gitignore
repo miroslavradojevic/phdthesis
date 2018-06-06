@@ -13,5 +13,6 @@ phdthesis.pdf
 cover/cover.pdf
 *.gls
 *.glg
+*.glo
 *.nlo
 *.ist
