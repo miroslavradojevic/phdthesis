@@ -24,9 +24,7 @@
 \usepackage{./styfiles/dropping}
 \usepackage{lettrine}
 \usepackage{afterpage}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{amsmath}
+\usepackage{amssymb,amsfonts,amsmath}
 \usepackage{array}
 \usepackage[dutch,english]{babel}
 \usepackage{cite}
@@ -41,6 +39,9 @@
 \usepackage[mathscr]{euscript}
 \usepackage{glossaries}
 \usepackage{url}
+\usepackage{afterpage,pagecolor}% for the coverpage bacground color
+%\usepackage{geometry}
+
 
 \bibliographystyle{./styfiles/mybibstyle}
 
@@ -94,6 +95,17 @@
 \rule{\textwidth}{0.4pt}
 }
 
+%\newenvironment{changemargin}[2]{%
+%	\begin{list}{}{%
+%			\setlength{\topsep}{0pt}%
+%			\setlength{\leftmargin}{#1}%
+%			\setlength{\rightmargin}{#2}%
+%			\setlength{\listparindent}{\parindent}%
+%			\setlength{\itemindent}{\parindent}%
+%			\setlength{\parsep}{\parskip}%
+%		}%
+%		\item[]}{\end{list}}
+
 %------------------------------------------------------------------
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand{\blue}[1]{\textcolor{blue}{#1}}
@@ -105,14 +117,16 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 %------------------------------------------------------------------
+\definecolor{backgroundColor}{RGB}{255, 255, 232}
+%------------------------------------------------------------------
 \makeglossaries
 \loadglsentries{abbreviations}
 
 % ************************************************************************
-\includeonly{./titlepage,
-	./chapter1/chapter1,
-	./chapter2/chapter2,
-	./bibliography}
+%\includeonly{./titlepage,
+%	./chapter1/chapter1,
+%	./chapter2/chapter2,
+%	./bibliography}
 
 % ************************************************************************
 \begin{document}
@@ -121,6 +135,7 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
+\include{./coverpage}
 \include{./titlepage}
 \include{./colophon}
 \include{./formalpage}

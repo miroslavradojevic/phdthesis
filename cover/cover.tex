@@ -3,34 +3,40 @@
 % Cover Page
 %
 % ************************************************************************
-\documentclass[12pt, oneside]{report}
-\usepackage[top=2cm, bottom=1cm, outer=1cm, inner=1cm]{geometry}
-\usepackage{background}
-\usepackage{color,pagecolor}%[usenames, dvipsnames]
+\documentclass[10pt, oneside]{report}
+\usepackage[top=2cm, bottom=2cm, outer=1cm, inner=1cm]{geometry}
+\usepackage{color,pagecolor,graphicx}% background
 
-\definecolor{red}{rgb}{1.0, 0.0, 0.0}
-\definecolor{background}{RGB}{255, 255, 232}
+\definecolor{backgroundColor}{RGB}{255, 255, 232} % {rgb}{1.0, 0.0, 0.0}
 
-\backgroundsetup{
-	scale=1,
-	%color=background,
-	opacity=1,
-	angle=0,
-	contents={
-		\includegraphics[height=0.6\paperheight]{syziphus}% width=\paperwidth,
-	}
-}
+% disable embedding background contents on each page, use only pagecolor
+%\backgroundsetup{
+%	scale=1,
+%	%color=background,
+%	opacity=1,
+%	angle=0,
+%	contents={
+%		\includegraphics[height=0.6\paperheight]{syziphus}% width=\paperwidth,
+%	}
+%}
 
 \begin{document}
-	\pagecolor{background}% yellow!30!orange
-	\BgThispage
+	\pagecolor{backgroundColor}
+	%\BgThispage
 	\thispagestyle{empty}
 	\begin{center}
 		{\Huge\bf Methods for Automated Neuron Image Analysis\\}% \\[0.3ex]
 	\end{center}
+	
 	\vfill
+	
+	\begin{center}
+		\includegraphics[height=0.9\linewidth]{syziphus}
+	\end{center}
+	
+	\vfill
+	
 	\begin{center}
 		{\Large\bf Miroslav Radojevi\'{c}}
 	\end{center}
-%	\textcolor{red}{text in pure red color}
 \end{document}
