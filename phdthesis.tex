@@ -37,9 +37,9 @@
 \usepackage[english]{babel}
 \usepackage[caption=false]{subfig}
 \usepackage[mathscr]{euscript}
-\usepackage{glossaries}
-\usepackage{url}
-\usepackage{afterpage,pagecolor}% for the coverpage bacground color
+\usepackage{url}%hyperref
+\usepackage[toc]{glossaries}
+\usepackage{pagecolor}% for the coverpage bacground color
 %\usepackage{geometry}
 
 
@@ -141,7 +141,9 @@
 \include{./formalpage}
 \include{./preface}
 \include{./contents}
-\printglossary[style=long]
+\glsaddall
+\printglossaries
+%\printglossary[style=long]
 
 % ************************************************************************
 \pagenumbering{arabic}
@@ -153,14 +155,15 @@
 \graphicspath{{./chapter2/}}
 \include{./chapter2/chapter2}
 
-\graphicspath{{./chapter3/}}
-\include{./chapter3/chapter3}
+%\graphicspath{{./chapter3/}}
+%\include{./chapter3/chapter3}
 
-\graphicspath{{./chapter4/}}
-\include{./chapter4/chapter4}
+%\graphicspath{{./chapter4/}}
+%\include{./chapter4/chapter4}
 
-\graphicspath{{./chapter5/}}
-\include{./chapter5/chapter5}
+%\graphicspath{{./chapter5/}}
+%\include{./chapter5/chapter5}
+
 
 \include{./bibliography}
 \include{./summary/summary}
