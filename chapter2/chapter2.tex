@@ -357,7 +357,7 @@ The ultimate aim of the introduced method is to provide a list of critical point
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{1em}}c@{\hspace{1em}}}
-	\includegraphics[height=0.25\columnwidth]{cp-region} & %\hfill
+	\includegraphics[height=0.25\columnwidth]{cp-region} &
 	\includegraphics[height=0.25\columnwidth]{cp-region-mapping}
 	\end{tabular}
 	\caption{Critical-point determination. A critical point is characterized by its type, centroid location $(x_C,y_C)$, radius $r_C$, and its main branch directions $\hat{\mathbf{v}}_i$ (left panel, in this case a bifurcation), aggregated from the pixels $(x_p,y_p)$ in the corresponding critical region (right panel).}
@@ -388,10 +388,10 @@ Essential parameters that need to be set by the user are the scale parameters $k
 
 All other aspects of the method that could be considered as user parameters either follow directly from these essential parameters or are fixed to the standard values mentioned in the text. For example, the radius $r_d$ of the circular neighborhood in the foreground selection step (Section~\ref{subsubsec:foreground-selection}) can be set equal to $D$, and the standard deviation $\sigma_{\!D}$ of the Gaussian profile (Section~\ref{subsubsec:angular-profile}) can be set to $D/6$ to get a representative shape. Also, the output membership functions of $\textrm{FL}_1$ (input to $\textrm{FL}_2$) as well as the output membership functions of $\textrm{FL}_2$ are Gaussians with fixed levels and standard deviation (Section~\ref{sec:cp-detection}), as they are not essentially influencing the performance of the algorithm.
 
-\begin{figure*}[!b]
+\begin{figure*}[t!]
 	\centering
 	\includegraphics[width=\columnwidth]{triplets-snr-2345}
-	\caption{Examples of simulated triplet images and detection results. Each triplet consists of three branches with different diameters which join at one end to form a bifurcation point and with the other ends being termination points. Images were generated at $\textrm{SNR}=2,3,4,5$ (left to right panel). The detection results with our method are indicated as red circles (bifurcation points) and yellow circles (termination points), where the radius of each circle reflects the size of the critical region found by our method.} % for $d_{\max}/d_{\min}\leq2$
+	\caption{Examples of simulated triplet images and detection results. Each triplet consists of three branches with different diameters which join at one end to form a bifurcation point and with the other ends being termination points. Images were generated at $\textrm{SNR}=2,3,4,5$ (left to right panel). The detection results with our method are indicated as red circles (bifurcation points) and yellow circles (termination points), where the radius of each circle reflects the size of the critical region found by our method.}
 	\label{fig:tiplet-images}
 \end{figure*}
 
@@ -403,110 +403,106 @@ To evaluate the performance of Neuron Pinpointer method in correctly detecting a
 \label{subsec:performance-measures}
 Performance was quantified by counting the correct and incorrect hits and the misses of the detection with respect to the reference data. More specifically, the true-positive (TP), false-positive (FP), and the false-negative (FN) critical-point detections had been counted, and used to calculate the recall $\textrm{R}=\textrm{TP}/(\textrm{TP}+\textrm{FN})$ and precision $\textrm{P}=\textrm{TP}/(\textrm{TP}+\textrm{FP})$. Both R and P take on values in the range from $0$ (meaning total failure) to $1$ (meaning flawless detection). They are commonly combined in the F-measure \cite{powers2011evaluation}, defined as the harmonic mean of the two: $\textrm{F}=2\,\textrm{R}\,\textrm{P}/(\textrm{R}+\textrm{P})$. The F-measure was computed separately for each type of critical points considered in this paper, yielding $\textrm{F}_{\textrm{END}}$ for terminations and $\textrm{F}_{\textrm{JUN}}$ for junctions. As a measure of overall performance, the harmonic mean of the two F-measures: $\textrm{F}_{\textrm{BOTH}}=2\,\textrm{F}_{\textrm{END}}\,\textrm{F}_{\textrm{JUN}}/(\textrm{F}_{\textrm{END}}+\textrm{F}_{\textrm{JUN}})$ is also computed.
 
-\subsection{Evaluation on Simulated Triplet Images}
-\label{subsec:experiments-triplets}
-Before considering full neuron imagery the performance of the method was first evaluated at detecting terminations and junctions in a very basic configuration as a function of image quality. To this end, a triplet model was used, consisting of a single junction modeling a bifurcation, having three branches with arbitrary orientations (angular intervals) and diameters (Fig.~\ref{fig:tiplet-images}). Orientations were randomly sampled from a uniform distribution in the range $[0, 2\pi]$ while prohibiting branch overlap. Since in principle the directional filtering step (Section \ref{subsubsec:angular-profile}) uses a fixed kernel size $D$, (TODO we wanted) to investigate the robustness of the detection for varying ratios $d_{\max}/d_{\min}$ between the maximum and the minimum branch diameter in a triplet. For this experiment we considered ratios $1,0.33,2,2.5,3$ by taking normalized diameter configurations ($d_1,d_2,d_3$) = (0.33,0.33,0.33), (0.3,0.3, 0.4), (0.2, 0.4,0.4), (0.2,0.3,0.5), (0.2,0.2,0.6), where in each case the actual smallest diameter was set to 3 pixels (the resolution limit) and the other diameters were scaled accordingly. For each configuration we simulated images with $1,000$ well-separated triplets for signal-to-noise ratio levels $\textrm{SNR}=2$, $3$, $4$, $5$ (see cropped examples in Fig.~\ref{fig:tiplet-images}). We chose these levels knowing that $\textrm{SNR}=4$ is a critical level in other detection problems \cite{smal2010quantitative, chenouard2014objective}. Poisson noise was used in simulating fluorescence microscopy imaging of the triplets. From the results of this experiment (Fig.~\ref{fig:results-triplets}) we conclude that our method is very robust for diameter ratios $d_{\max}/d_{\min}\leq2\frac{1}{2}$ and an image quality of $\textrm{SNR}\geq4$. We also conclude that our method is somewhat better in detecting terminations than detecting junctions. Example detection results for $d_{\max}/d_{\min}\leq2$ for the considered SNR levels are shown in Fig.~\ref{fig:tiplet-images}.
-
-\subsection{Evaluation on Simulated Neuron Images}
-\label{subsec:experiments-simulated}
-To evaluate our method on more complex images, but for which we would still know the truth exactly, we simulated the imaging of complete neurons. Although there are various ways this could be done \cite{koene2009netmorph, vasilkoski2009detection}, we chose to use existing expert reconstructions from the NeuroMorpho.Org database \cite{ascoli2007neuromorpho}. A total of 30 reconstructions from different neuron types were downloaded as SWC files \cite{cannon1998line}, in which the reconstructions are represented as a sequence of connected center-point locations in 3D with corresponding radii in micrometers. Fluorescence microscopy images were generated from these reconstructions in 2D by using a Gaussian point-spread function model and Poisson noise to emulate diffraction-limited optics and photon statistics. For each reconstruction we generated images of $\textrm{SNR}=2$, $3$, $4$, $5$ (Fig.~\ref{fig:nmorpho}). This way we obtained simulated images of neurons for which the termination and junction point locations were known exactly from the SWC files.
-
-\begin{figure}[!t]
+\begin{figure}[!b]
 	\centering
 	\includegraphics[width=0.48\linewidth]{triplets_fjun_fend_vs_pratio}\hfill
 	\includegraphics[width=0.48\linewidth]{triplets_fboth_vs_snr}
-	\caption{Performance of our method in detecting terminations and junctions in simulated images of triplets. The values of $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ are shown (left panel) for the various branch diameter ratios $d_{\max}/d_{\min}$ at $\textrm{SNR}=4$. The distribution of $\textrm{F}_{\textrm{BOTH}}$ values is shown as a box plot (right panel) for the various SNR levels.}
+	\caption{Performance of the method in detecting terminations and junctions in simulated images of triplets. The values of $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ are shown (left panel) for the various branch diameter ratios $d_{\max}/d_{\min}$ at $\textrm{SNR} = 4$. The distribution of $\textrm{F}_{\textrm{BOTH}}$ values is shown as a box plot (right panel) for the various SNR levels.}
 	\label{fig:results-triplets}
 \end{figure}
 
-\begin{figure}[!t]
+\subsection{Evaluation on Simulated Triplet Images}
+\label{subsec:experiments-triplets}
+Before considering full neuron imagery the performance of the method was first evaluated at detecting terminations and junctions in a very basic configuration as a function of image quality. To this end, a triplet model was used, consisting of a single junction modeling a bifurcation, having three branches with arbitrary orientations (angular intervals) and diameters (Fig.~\ref{fig:tiplet-images}). Orientations were randomly sampled from a uniform distribution in the range $[0, 2\pi]$ while prohibiting branch overlap. Since in principle the directional filtering step (Section \ref{subsubsec:angular-profile}) uses a fixed kernel size $D$, the intent was to investigate the detection robustness for varying ratios $d_{\max}/d_{\min}$ between the maximum and the minimum branch diameter in a triplet. For such experiment, $1,0.33,2,2.5,3$ ratios were considered by taking normalized diameter configurations ($d_1,d_2,d_3$) = (0.33,0.33,0.33), (0.3,0.3, 0.4), (0.2, 0.4,0.4), (0.2,0.3,0.5), (0.2,0.2,0.6), where in each case the actual smallest diameter was set to 3 pixels (the resolution limit) and the other diameters were scaled accordingly. A set of images was simulated for each configuration containing $1,000$ well-separated triplets for signal-to-noise ratio levels $\textrm{SNR}=2$, $3$, $4$, $5$ (see cropped examples in Fig.~\ref{fig:tiplet-images}). These levels are chosen knowing that $\textrm{SNR}=4$ is a critical level in other detection problems \cite{smal2010quantitative, chenouard2014objective}. Poisson noise was used in simulating fluorescence microscopy imaging of the triplets. The obtained results of this experiment (Fig.~\ref{fig:results-triplets}) lead to the conclusion that the method is fairly robust for diameter ratios $d_{\max}/d_{\min}\leq2\frac{1}{2}$ and an image quality of $\textrm{SNR} \geq 4$. Based on the detection rates, it is also possible to draw a conclusuion that our method is somewhat better in detecting terminations than detecting junctions in synthetic images. Example detection results for $d_{\max}/d_{\min}\leq2$ for the considered SNR levels are shown in Fig.~\ref{fig:tiplet-images}.
+
+\begin{figure}[!h]
 	\centering
-	\includegraphics[width=0.24\linewidth]{dekoninck-snr-2.png}
-	\includegraphics[width=0.24\linewidth]{dekoninck-snr-3.png}
-	\includegraphics[width=0.24\linewidth]{dekoninck-snr-4.png}
-	\includegraphics[width=0.24\linewidth]{dekoninck-snr-5.png}\\
-	\includegraphics[width=0.24\linewidth]{strettoi-snr-2.png}
-	\includegraphics[width=0.24\linewidth]{strettoi-snr-3.png}
-	\includegraphics[width=0.24\linewidth]{strettoi-snr-4.png}
-	\includegraphics[width=0.24\linewidth]{strettoi-snr-5.png}\\
-	\includegraphics[width=0.24\linewidth]{masland-snr-2.png}
-	\includegraphics[width=0.24\linewidth]{masland-snr-3.png}
-	\includegraphics[width=0.24\linewidth]{masland-snr-4.png}
-	\includegraphics[width=0.24\linewidth]{masland-snr-5.png}\\
-	\includegraphics[width=0.24\linewidth]{burdakov-snr-2.png}
-	\includegraphics[width=0.24\linewidth]{burdakov-snr-3.png}
-	\includegraphics[width=0.24\linewidth]{burdakov-snr-4.png}
-	\includegraphics[width=0.24\linewidth]{burdakov-snr-5.png}\\
-	\includegraphics[width=0.24\linewidth]{jacobs-snr-2.png}
-	\includegraphics[width=0.24\linewidth]{jacobs-snr-3.png}
-	\includegraphics[width=0.24\linewidth]{jacobs-snr-4.png}
-	\includegraphics[width=0.24\linewidth]{jacobs-snr-5.png}
+	\includegraphics[width=0.2\columnwidth]{dekoninck-snr-2.png}
+	\includegraphics[width=0.2\columnwidth]{dekoninck-snr-3.png}
+	\includegraphics[width=0.2\columnwidth]{dekoninck-snr-4.png}
+	\includegraphics[width=0.2\columnwidth]{dekoninck-snr-5.png}\\[0.1ex]
+	\includegraphics[width=0.2\columnwidth]{strettoi-snr-2.png}
+	\includegraphics[width=0.2\columnwidth]{strettoi-snr-3.png}
+	\includegraphics[width=0.2\columnwidth]{strettoi-snr-4.png}
+	\includegraphics[width=0.2\columnwidth]{strettoi-snr-5.png}\\[0.1ex]
+	\includegraphics[width=0.2\columnwidth]{masland-snr-2.png}
+	\includegraphics[width=0.2\columnwidth]{masland-snr-3.png}
+	\includegraphics[width=0.2\columnwidth]{masland-snr-4.png}
+	\includegraphics[width=0.2\columnwidth]{masland-snr-5.png}\\[0.1ex]
+	\includegraphics[width=0.2\columnwidth]{burdakov-snr-2.png}
+	\includegraphics[width=0.2\columnwidth]{burdakov-snr-3.png}
+	\includegraphics[width=0.2\columnwidth]{burdakov-snr-4.png}
+	\includegraphics[width=0.2\columnwidth]{burdakov-snr-5.png}\\[0.1ex]
+	\includegraphics[width=0.2\columnwidth]{jacobs-snr-2.png}
+	\includegraphics[width=0.2\columnwidth]{jacobs-snr-3.png}
+	\includegraphics[width=0.2\columnwidth]{jacobs-snr-4.png}
+	\includegraphics[width=0.2\columnwidth]{jacobs-snr-5.png}
 	\caption{Examples of simulated neuron images based on expert reconstructions from the NeuroMorpho.Org database. The images show a wide range of morphologies (one type per row) and image qualities of $\textrm{SNR}=2$, $3$, $4$, $5$ (from left to right per row).}
 	\label{fig:nmorpho}
 \end{figure}
 
-From the evaluation results (Fig.~\ref{fig:results-sim}) we confirm the conclusion from the experiments on triplets that our method performs well for $\textrm{SNR}\geq4$ and is somewhat better in detecting terminations than detecting junctions. For $\textrm{SNR}=4$ we find that the performance for junction detection is $\textrm{F}_{\textrm{JUN}}\approx0.85$ while for termination detection $\textrm{F}_{\textrm{END}}\approx0.95$. The higher performance for termination detection may be explained by the fact that the underlying image structure is usually less ambiguous (a single line-like structure surrounded by darker background) than in the case of junctions (multiple line-like structures that are possibly very close to each other). Example detection results are shown in Fig.~\ref{fig:nmorpho-det}.
-
-\begin{figure}[!t]
+\begin{figure}[!h]
 	\centering
-	\includegraphics[width=0.48\linewidth]{nmorpho_snr4}%\hfill
-	\includegraphics[width=0.48\linewidth]{nmorpho_snr}
-	\caption{Performance of our method in detecting terminations and junctions in 30 simulated images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values are shown as box plots for $\textrm{SNR}=4$ (left panel) and in addition the distribution of $\textrm{F}_\textrm{BOTH}$ is shown for $\textrm{SNR}=2$, $3$, $4$, $5$ (right panel).}
+	\begin{tabular}{c@{\hspace{1em}}c@{\hspace{1em}}}
+		\includegraphics[width=0.4\columnwidth]{nmorpho_snr4} &
+		\includegraphics[width=0.4\columnwidth]{nmorpho_snr}
+	\end{tabular}
+	\caption{Performance of the method in detecting terminations and junctions in 30 simulated images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values are shown as box plots for $\textrm{SNR}=4$ (left panel) and in addition the distribution of $\textrm{F}_\textrm{BOTH}$ is shown for $\textrm{SNR}=2$, $3$, $4$, $5$ (right panel).}
 	\label{fig:results-sim}
 \end{figure}
 
+\subsection{Evaluation on Simulated Neuron Images}
+\label{subsec:experiments-simulated}
+To evaluate the method on more complex images, with the known ground truth, the imaging of complete neurons was simulated. Although there are various ways this could be done \cite{koene2009netmorph, vasilkoski2009detection}, the existing expert reconstructions from the NeuroMorpho.Org database \cite{ascoli2007neuromorpho} were used. A total of 30 reconstructions from different neuron types were downloaded as SWC files \cite{cannon1998line}, in which the reconstructions are represented as a sequence of connected center-point locations in 3D with corresponding radii in micrometers. Fluorescence microscopy images were generated from these reconstructions in 2D by using a Gaussian point-spread function model and Poisson noise to emulate diffraction-limited optics and photon statistics. For each reconstruction, the images of $\textrm{SNR}=2$, $3$, $4$, $5$ (Fig.~\ref{fig:nmorpho}) were generated. The simulated images of neurons are obtained this way, each with the exactly known location of the termination and junction point, extrapolated from the source SWC file.
 
-\begin{figure}[!t]
+\begin{figure}%[!h]
 	\centering
-	\includegraphics[width=0.5\columnwidth]{det_nmorpho}
-	\caption{Example detection results in simulated neuron images at $\textrm{SNR}=4$. The images are contrast enhanced and show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.69, (b) 0.85, (c) 0.85, (d) 0.77, (e) 0.75, (f) 0.68, (g) 0.86.}
-	\label{fig:nmorpho-det}
+		\includegraphics[width=0.9\textwidth,height=0.9\textheight,keepaspectratio]{det_nmorpho}
+			\caption{Example detections for simulated neuron images at $\textrm{SNR}=4$. The showcased images are contrast enhanced and show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.69, (b) 0.85, (c) 0.85, (d) 0.77, (e) 0.75, (f) 0.68, (g) 0.86.}
+	\label{fig:det-syn}
 \end{figure}
 
-\subsection{Evaluation on Real Neuron Images}
-\label{subsec:experiments-real}
-As the ultimate test case we also evaluated our method on real fluorescence microscopy images of neurons from a published study \cite{steiner2002overexpression}. A total of 30 representative images were taken and expert manual annotations of the critical points were obtained to serve as the gold standard in this experiment. Needless to say, real images are generally more challenging than simulated images, as they contain more ambiguities due to labeling and imaging imperfections, and thus we expected our method to show lower performance. Since in this case we have no control over the SNR in the images we report the detection results of all images together. From the evaluation results (Fig.~\ref{fig:results-real}) we find that the median performance in detecting critical points is $\textrm{F}_{\textrm{JUN}}=0.81$ for junctions and $\textrm{F}_{\textrm{END}}=0.73$ for terminations while $\textrm{F}_{\textrm{BOTH}}=0.76$. As expected, these numbers are lower than those of the simulated neuron images. Surprisingly, we observe that in the real images our method is better in detecting junctions than detecting terminations. A possible explanation for this could be that in the simulated images we used a constant intensity for the neuron branches, as a result of which terminations are as bright as junctions but much less ambiguous due to a clear background, while in the real images the terminations are usually much less clear due to labeling imperfections and the fact that the branch tips tend to be thinner and thus less bright than the junctions. This illustrates the limitations of the simulations. Example detection results are shown in Fig.~\ref{fig:real-det}.
-
-\begin{figure}[!t]
+The evaluation results (Fig.~\ref{fig:results-sim}) confirm the conclusion from the experiments on triplets that the method performs well for $\textrm{SNR} \geq 4$ and is somewhat better in detecting terminations than detecting junctions. For $\textrm{SNR} = 4$ the performance for junction detection is $\textrm{F}_{\textrm{JUN}} \approx 0.85$ while for termination detection $\textrm{F}_{\textrm{END}} \approx 0.95$. The higher performance for termination detection may be explained by the fact that the underlying image structure is usually less ambiguous (a single line-like structure surrounded by darker background) than in the case of junctions (multiple line-like structures that are possibly very close to each other). Example detection results are shown in Fig.~\ref{fig:nmorpho-det}.
+\begin{figure}[!h]
 	\centering
 	\includegraphics[width=0.5\columnwidth]{overview_real}
-	\caption{Performance of our method in detecting terminations and junctions in 30 real fluorescence microscopy images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values for all images together are shown as box plots.}
+	\caption{Performance of the method in detecting terminations and junctions in 30 real fluorescence microscopy images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values for all images together are shown as box plots.}
 	\label{fig:results-real}
 \end{figure}
-
-\begin{figure}[!t]
+\subsection{Evaluation on Real Neuron Images}
+\label{subsec:experiments-real}
+As the ultimate test case, the method was also evaluated on real fluorescence microscopy images of neurons from a published study \cite{steiner2002overexpression}. A total of 30 representative images were taken and expert manual annotations of the critical points were obtained to serve as the gold standard in this experiment. Naturally, real images are generally more challenging than simulated images, as they contain more ambiguities due to labeling and imaging imperfections, and thus the lower performance was expected. Since in this case there is no control over the SNR in the images, the detection results are reported for all images together. The evaluation results (Fig.~\ref{fig:results-real}) indicate that the median performance in detecting critical points is $\textrm{F}_{\textrm{JUN}}=0.81$ for junctions and $\textrm{F}_{\textrm{END}}=0.73$ for terminations while $\textrm{F}_{\textrm{BOTH}}=0.76$. As expected, these numbers are lower than those of the simulated neuron images. Surprisingly, the junction detection performance with the real images is better than the termination detection which had not been the case with the synthetic neurons. A possible explanation for this could be that in the simulated images a constant intensity was used for the neuron branches, as a result of which terminations are as bright as junctions but much less ambiguous due to a clear background, while in the real images the terminations are usually much less clear due to labeling imperfections and the fact that the branch tips tend to be thinner and thus less bright than the junctions. This illustrates the limitations of the simulations. Example detection results are shown in the right column of the Fig.~\ref{fig:det-real}.
+\begin{figure}%[!h]
 	\centering
-	\includegraphics[width=0.5\columnwidth]{det_real}
-	\caption{Example detection results for four real neuron images. The images show the detected terminations (yellow circles) and junctions (red circles) as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.82, (b) 0.78, (c) 0.68, (d) 0.65.}
-	\label{fig:real-det}
+	\includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{det_real}
+	\caption{Example detections for four real neuron images. The detected terminations (yellow circles) and junctions (red circles) are shown as overlays with fixed radius for better visibility. The value of $\textrm{F}_\textrm{BOTH}$ in these examples is (a) 0.82, (b) 0.78, (c) 0.68, (d) 0.65.}
+	\label{fig:det-real}
 \end{figure}
-
-\subsection{Comparison With Other Methods}% (NP)
+\subsection{Comparison With Other Methods}
 \label{subsec:comparison}
-Finally we sought to compare the performance of our Neuron Pinpointer method with other methods. Since we were not aware of other methods explicitly designed to detect and classify critical points in neuron images before reconstruction, we considered two existing software tools relevant in this context and we compared their implicit detection capabilities with our explicit method. If our method performs better, this would indicate that the existing methods may be improved by exploiting the output of our method.
+Finally the performance comparison of the Neuron Pinpointer method against other methods is conduct. Being not aware of other methods explicitly designed to detect and classify critical points in neuron images before reconstruction, two existing software tools relevant in this context were considered and their implicit detection capabilities compared with the presented explicit method. If NP indicates better performance, this would indicate that the existing methods may be improved by exploiting the output of the method.
 
-\begin{figure*}
-	\includegraphics[width=0.32\textwidth]{compareJUN_all}%\hfill
-	\includegraphics[width=0.32\textwidth]{compareEND_all}%\hfill
-	\includegraphics[width=0.32\textwidth]{compareBOTH_all}
+\begin{figure}%[!h]
+	\centering
+	\includegraphics[width=0.33\columnwidth]{compareJUN_all}%\hfill
+	\includegraphics[width=0.33\columnwidth]{compareEND_all}%\hfill
+	\includegraphics[width=0.33\columnwidth]{compareBOTH_all}
 	\caption{Critical-point detection performance of our method (NP) compared to two other methods (AS and APP2). The median values of $\textrm{F}_{\textrm{JUN}}$ (left plot) are 0.81 (NP), 0.65 (AS), and 0.47 (APP2). The median values of $\textrm{F}_{\textrm{END}}$ (middle plot) are 0.73 (NP), 0.28 (AS), and 0.21 (APP2). Finally, the median values of $\textrm{F}_{\textrm{BOTH}}$ (right plot) are 0.76 (NP), 0.35 (AS), and 0.29 (APP2).}
 	\label{fig:comparison-all}
-\end{figure*}
+\end{figure}
 
-The first tool, AnalyzeSkeleton (AS) \cite{arganda20103d}, available from http://fiji.sc/AnalyzeSkeleton, is an ImageJ plugin for finding and counting all end-points and junctions in a skeleton image. To obtain skeleton images of our neuron images, we used the related skeletonization plugin available from the same developers, http://fiji.sc/Skele\-tonize3D, which is inspired by an advanced thinning algorithm \cite{lee1994building}. The input for the latter is a binary image obtained by segmentation based on smoothing (to reduce noise) and thresholding. For our experiments we considered a range of smoothing scales and manually selected thresholds as well as automatically determined thresholds using the following algorithms from ImageJ: Intermodes, Li, MaxEntropy, RenyiEntropy, Moments, Otsu, Triangle, and Yen. All of these were tried in combination with the AS method and the highest F-scores were used.
+The first tool, AnalyzeSkeleton (AS)\footnote{available from http://fiji.sc/AnalyzeSkeleton} \cite{arganda20103d}, is an ImageJ plugin for finding and counting all end-points and junctions in a skeleton image. To obtain skeleton images of the neuron images used for this study, the related skeletonization method\footnote{http://fiji.sc/Skeletonize3D} inspired by an advanced thinning algorithm \cite{lee1994building} was used. The input for the latter is a binary image obtained by segmentation based on smoothing (to reduce noise) and thresholding. We considered a range of smoothing scales in the experiments and manually selected thresholds as well as automatically determined thresholds using the following algorithms from ImageJ: Intermodes, Li, MaxEntropy, RenyiEntropy, Moments, Otsu, Triangle, and Yen. All of these were tried in combination with the AS method and the highest F-scores were used.
 
-The second tool, All-Path-Prunning (APP2) \cite{xiao2013app2}, is a plugin for Vaa3D \cite{peng2010v3d, peng2014extensible}, available from http://www.vaa3d.org/. It was not designed specifically for a priori critical-point detection but for fully automatic neuron reconstruction. Nevertheless, in producing a tree representation of a neuron, the reconstruction algorithm must somehow identify the branch end-points and junctions, and for our experiments we can easily retrieve them from the SWC output files. In principle, any neuron reconstruction method is also implicitly a critical-point detection method, and we can quantify its performance by comparing the output tree nodes with the reference data. The interesting question is whether an explicit detector such as NP outperforms the implicit detection carried out in a tool such as APP2. We manually adjusted the user parameters of the tool to get optimal performance in our experiments.
+The second tool, All-Path-Prunning (APP2) \cite{xiao2013app2}, is a plugin for Vaa3D\footnote{available from http://www.vaa3d.org/} \cite{peng2010v3d, peng2014extensible}. It was not designed specifically for a priori critical-point detection but for fully automatic neuron reconstruction. Nevertheless, in producing a tree representation of a neuron, the reconstruction algorithm must somehow identify the branch end-points and junctions, and for aforementioned experiments it is straightforward to retrieve them from the SWC output files. In principle, any neuron reconstruction method is also implicitly a critical-point detection method, and its performance could be quantified by comparing the output tree nodes with the reference data. The interesting question is whether an explicit detector such as NP outperforms the implicit detection carried out in a tool such as APP2. The user parameters of the tool were manually adjusted to get optimal performance in our experiments.
 
-A comparison of the F-scores of NP, AS, and APP2 for the 30 real neuron images used in our experiments is presented in Fig.~\ref{fig:comparison-all}. From the plots we see that the detection rates of our NP method are substantially higher than those of AS and APP2. The difference is especially noticeable for the termination points. More specifically, the difference between $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ is relatively small for NP, but much larger for both AS and APP2. This indicates a clear advantage of using our explicit and integrated approach for detecting critical points, as accurate neuron reconstruction requires accurate detection of both junctions and terminations. However, with the current implementation, this advantage does come at a cost: timing of the three methods on a standard PC (with Intel Core i7-2630QM 2GHz CPU and 6 GB total RAM) revealed that with our images of $10^5$ to $10^6$ pixels in size, NP took about 40 seconds per image on average, while both AS and APP2 took only about 1.5 seconds per image. Fortunately, since virtually all the computation time of our method is spent in the directional filtering step, which is highly parallelizable, this cost can be reduced to any desired level by employing many-core hardware (such as GPUs).
+A comparison of the F-scores of NP, AS, and APP2 for the 30 real neuron images used throughout the experiments is presented in Fig.~\ref{fig:comparison-all}. The plots indicate that the detection rates of the NP method are substantially higher than those of AS and APP2. The difference is especially noticeable for the termination points. More specifically, the difference between $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ is relatively small for NP, but much larger for both AS and APP2. This indicates a clear advantage of using presented explicit and integrated approach for detecting critical points, as accurate neuron reconstruction requires accurate detection of both junctions and terminations. However, with the current implementation, this advantage does come at a cost: timing of the three methods on a standard PC (with Intel Core i7-2630QM 2GHz CPU and 6 GB total RAM) revealed that with our images of $10^5$ to $10^6$ pixels in size, NP took about 40 seconds per image on average, while both AS and APP2 took only about 1.5 seconds per image. Fortunately, since virtually all the computation time of our method is spent in the directional filtering step, which is highly parallelizable, this cost can be reduced to any desired level by employing many-core hardware (such as GPUs).
+
 \section{Conclusions} 
 \label{sec:conclusions}
-We have presented a novel method for solving the important problem of detecting and characterizing critical points in the tree-like structures in neuron microscopy images. Based on a directional filtering and feature extraction algorithm in combination with a two-stage fuzzy-logic based reasoning system, it provides an integrated framework for the simultaneous identification of both terminations and junctions. From the results of experiments on simulated as well as real fluorescence microscopy images of neurons, we conclude that our method achieves substantially higher detection rates than the rates that can be inferred from existing neuron reconstruction methods. This is true for both junction points and termination points, but especially for the latter, which are of key importance in obtaining faithful reconstructions. Altogether, the results suggest that our method may provide important clues to improve the performance of reconstruction methods.
+A novel method for solving the important problem of detecting and characterizing critical points in the tree-like structures in neuron microscopy images is presented in this chapter. Based on directional filtering and feature extraction algorithm in combination with a two-stage fuzzy-logic based reasoning system, it provides an integrated framework for the simultaneous identification of both terminations and junctions. Based on the experimentation on simulated as well as real fluorescence microscopy images, it is possible to conclude that the showcased method achieves substantially higher detection rates than the rates that can be inferred from existing neuron reconstruction methods. This is true for both junction points and termination points, but especially for the latter, which are of key importance in obtaining faithful reconstructions. Altogether, the obtained results suggest that NP may provide important clues to improve the performance of reconstruction methods. Actual integration of the detection method with existing tracing methods was outside the scope of this particular study, but the ultimate aim is to evaluate the described methodology more from the context of the neuron tracing and neuron reconstruction aid tool as well as adjust the processing for the 3D imagery. Although the main focus in this work was the neuron analysis, introduced methodology may also be potentially useful for other applications involving tree-like image structures, such as blood vessel or bronchial tree analysis. However, such applications require further exploration. For this purpose it may be helpful to increase the robustness of the detection method to larger branch diameter ratios than tested in this paper. This could be done, for example, by using multiscale filtering approaches, or by selective morphological thinning (or thickening). The software implementation of the presented method is available as an ImageJ plugin \footnote{available from https://bitbucket.org/miroslavradojevic/npinpoint}.
+%but we are currently in the process of developing a new neuron tracing method and, in that context, we aim to perform an extensive evaluation of the beneficial effects of the presented method also on existing tracing methods. For this purpose we also aim to extend our method to 3D, where the exact same workflow could be used, except that the angular profile analysis and the final critical-point determination step would involve two angles (azimuth and elevation) instead of one. Also, it would require mass parallelization of the image filtering step to keep the running times of the method acceptable, but this should be straightforward in view of the highly parallel nature of this step.
 
-Actual integration of our detection method with existing tracing methods was outside the scope of the present study, but we are currently in the process of developing a new neuron tracing method and, in that context, we aim to perform an extensive evaluation of the beneficial effects of the presented method also on existing tracing methods. For this purpose we also aim to extend our method to 3D, where the exact same workflow could be used, except that the angular profile analysis and the final critical-point determination step would involve two angles (azimuth and elevation) instead of one. Also, it would require mass parallelization of the image filtering step to keep the running times of the method acceptable, but this should be straightforward in view of the highly parallel nature of this step.
 
-Although we focused on neuron analysis in this work, our method may also be potentially useful for other applications involving tree-like image structures, such as blood vessel or bronchial tree analysis, but this requires further exploration. For this purpose it may be helpful to increase the robustness of the detection method to larger branch diameter ratios than tested in this paper. This could be done, for example, by using multiscale filtering approaches, or by selective morphological thinning (or thickening).
-
-The software implementation of the presented method is available as an ImageJ plugin from \url{https://bitbucket.org/miroslavradojevic/npinpoint}.
 
 
 
