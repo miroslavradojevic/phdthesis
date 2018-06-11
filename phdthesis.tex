@@ -123,10 +123,7 @@
 \loadglsentries{abbreviations}
 
 % ************************************************************************
-\includeonly{%./titlepage,
-%	./chapter1/chapter1,
-	./chapter2/chapter2,
-	./bibliography}
+%\includeonly{}
 
 % ************************************************************************
 \begin{document}
@@ -135,15 +132,15 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-\include{./coverpage}
-\include{./titlepage}
-\include{./colophon}
-\include{./formalpage}
-\include{./preface}
-\include{./contents}
-\glsaddall
-\printglossaries
-%\printglossary[style=long]
+%\include{./coverpage}
+%\include{./titlepage}
+%\include{./colophon}
+%\include{./formalpage}
+%\include{./preface}
+%\include{./contents}
+%\glsaddall
+%\printglossaries
+\printglossary[style=long]
 
 % ************************************************************************
 \pagenumbering{arabic}
@@ -155,8 +152,8 @@
 \graphicspath{{./chapter2/}}
 \include{./chapter2/chapter2}
 
-%\graphicspath{{./chapter3/}}
-%\include{./chapter3/chapter3}
+\graphicspath{{./chapter3/}}
+\include{./chapter3/chapter3}
 
 %\graphicspath{{./chapter4/}}
 %\include{./chapter4/chapter4}
@@ -166,11 +163,11 @@
 
 
 \include{./bibliography}
-\include{./summary/summary}
-\include{./summary/samenvatting}
-\include{./portfolio/portfolio}
-\include{./publications/publications}
-\include{./curriculum/curriculum}
+%\include{./summary/summary}
+%\include{./summary/samenvatting}
+%\include{./portfolio/portfolio}
+%\include{./publications/publications}
+%\include{./curriculum/curriculum}
 
 % ************************************************************************
 \end{document}
