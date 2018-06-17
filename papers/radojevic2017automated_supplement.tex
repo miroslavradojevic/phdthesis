@@ -1,132 +1,73 @@
 % ************************************************************************
-\documentclass[12pt,oneside,letterpaper]{article}
+%\documentclass[12pt,oneside,letterpaper]{article}
 % ************************************************************************
-
-\usepackage[small,bf]{caption}
-\renewcommand{\thefigure}{S\arabic{figure}}
-\usepackage{cite}
-\usepackage{times}
-\usepackage{helvet}
-\usepackage{epsf}
-\usepackage{graphicx}
-\usepackage{graphbox}
-\usepackage{amsmath}
-\usepackage[mathscr]{euscript}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
+%\usepackage[small,bf]{caption}
+%\renewcommand{\thefigure}{S\arabic{figure}}
+%\usepackage{cite}
+%\usepackage{times}
+%\usepackage{helvet}
+%\usepackage{epsf}
+%\usepackage{graphicx}
+%\usepackage{graphbox}
+%\usepackage{amsmath}
+%\usepackage[mathscr]{euscript}
+%\usepackage{algorithm}
+%\usepackage{algpseudocode}
 %\usepackage{multirow}
+% ************************************************************************
+%\columnsep        0.0in
+%\evensidemargin   0.0in
+%\footskip         0.2in
+%\headheight       0.3in
+%\headsep          0.3in
+%\hoffset          0.0in
+%\marginparpush    0.0in
+%\marginparsep     0.0in
+%\marginparwidth   0.0in
+%\oddsidemargin    0.0in
+%\paperheight     11.0in
+%\paperwidth       8.5in
+%\tabcolsep        0.0in
+%\textheight       8.8in
+%\textwidth        6.5in
+%\topmargin        0.0in
+%\voffset         -0.25in
+%\parindent        0.0em
+%\parskip          0.0em
+% ************************************************************************
+%\usepackage{fancyhdr}
+%\pagestyle{fancyplain}
+%\renewcommand{\sectionmark}[1]{}{}
+%\renewcommand{\subsectionmark}[1]{}
+%\lhead[\fancyplain{}{}]{\fancyplain{}{}}
+%\chead[\fancyplain{}{}]{\fancyplain{}{}}
+%\rhead[\fancyplain{}{}]{\fancyplain{}{}}
+%\lfoot[\fancyplain{}{}]{\fancyplain{}{}}
+%\cfoot[\fancyplain{}{}]{\fancyplain{}{\thepage}}
+%\rfoot[\fancyplain{}{}]{\fancyplain{}{}}
+%\renewcommand{\headrulewidth}{0pt}
+%\renewcommand{\footrulewidth}{0pt}
 
 % ************************************************************************
-
-\columnsep        0.0in
-\evensidemargin   0.0in
-\footskip         0.2in
-\headheight       0.3in
-\headsep          0.3in
-\hoffset          0.0in
-\marginparpush    0.0in
-\marginparsep     0.0in
-\marginparwidth   0.0in
-\oddsidemargin    0.0in
-\paperheight     11.0in
-\paperwidth       8.5in
-\tabcolsep        0.0in
-\textheight       8.8in
-\textwidth        6.5in
-\topmargin        0.0in
-\voffset         -0.25in
-\parindent        0.0em
-\parskip          0.0em
-
+%\begin{document}
 % ************************************************************************
-
-\usepackage{fancyhdr}
-\pagestyle{fancyplain}
-\renewcommand{\sectionmark}[1]{}{}
-\renewcommand{\subsectionmark}[1]{}
-\lhead[\fancyplain{}{}]{\fancyplain{}{}}
-\chead[\fancyplain{}{}]{\fancyplain{}{}}
-\rhead[\fancyplain{}{}]{\fancyplain{}{}}
-\lfoot[\fancyplain{}{}]{\fancyplain{}{}}
-\cfoot[\fancyplain{}{}]{\fancyplain{}{\thepage}}
-\rfoot[\fancyplain{}{}]{\fancyplain{}{}}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
-
-% ************************************************************************
-\begin{document}
-% ************************************************************************
-
-\thispagestyle{empty}
-
-\begin{center}
-
-\vspace*{10\baselineskip}
-
-{\huge\sffamily Automated neuron tracing using\\[0.5em] probability hypothesis density filtering}
-
-\vspace{2\baselineskip}
-
-{\large Miroslav Radojevi{\'c} and Erik Meijering}
-
-\vspace{2\baselineskip}
-
-{\large\bfseries Supplementary Information}
-
-\end{center}
-
-% ************************************************************************
-\renewcommand{\baselinestretch}{1.5}
-% ************************************************************************
-\clearpage
-\vspace*{8\baselineskip}
-\begin{algorithm}
-\caption{Neuron tracing}\label{alg:delin}
-\begin{algorithmic}[1]
-\State{}{$k=0$}\Comment{Initialize}
-\State{}{$\lbrace \omega_{0|0}^n, \mathrm{x}_{0|0}^n \rbrace_{n=1}^{\rho N_0}$}\Comment{Initial particle and observation set}
-\State{}{$\lbrace \hat{\mathrm{x}}_{0,i} \rbrace_{i=1}^{N_{0}}$}\Comment{Initial estimate}
-\Repeat
-\State{}{$k=k+1$}
-\State{}{$\mathrm{p}_{i}^{n} \sim h(\mathrm{p} | \hat{\mathrm{x}}_{k-1,i}) \quad n \in \left[ 1, \rho N_{k-1}\right]$}\Comment{Draw observation particles} \label{alg:line:draw-obs-particles} 
-\State{}{$\mathrm{p}_{i,j}^n \in \mathscr{C}_j , \quad j \in \left[ 1, M_k \right], \quad n \in \left[ 1, |\mathscr{C}_j| \right]$}\Comment{Cluster observation particles}
-\State{}{$\mathrm{z}_{k,j} = \left[ \mathrm{p}_{i,j}^{\hat{n}}, \tau(\mathrm{p}_{i,j}^{\hat{n}}) \right]$}\Comment{Select representative sample} \label{alg:line:construct-obs} 
-\State{}{$\mathrm{Z}_{k} = \lbrace \mathrm{z}_{k,j},\dots, \mathrm{z}_{k,M_k}  \rbrace$}\Comment{Construct observations}
-\State{}{$\lbrace \omega_{k|k}^n, \mathrm{x}_{k|k}^n \rbrace_{n=1}^{\rho N_{k}}, \nu_{k}, \lbrace \hat{\mathrm{x}}_{k,i} \rbrace_{i=1}^{N_k} \leftarrow$ SMC-PHD$(\lbrace \omega_{k-1|k-1}^n, \mathrm{x}_{k-1|k-1}^n \rbrace_{n=1}^{\rho N_{k-1}}, \mathrm{Z}_{k})$}\Comment{Algorithm~\ref{alg:smc-phd}}
-\Until{$\left[ \nu_{k} \right] = 0$} \Comment{$\left[ \cdot \right] \equiv $ nearest integer}
-\end{algorithmic}
-\end{algorithm}
-
-% ************************************************************************
-\clearpage
-\vspace*{3\baselineskip}
-\begin{algorithm}
-\caption{SMC-PHD filtering}\label{alg:smc-phd}
-\begin{algorithmic}[1]
-\State{Input:}{$\lbrace ( \omega_{k-1|k-1}^n, \mathrm{x}_{k-1|k-1}^n ) \rbrace_{n=1}^{\rho N_{k-1}}, \lbrace \mathrm{z}_{k,j}  \rbrace_{j=1}^{M_k}$}
-\Comment{$D_{k-1}(\mathrm{x})$ approx. observation $\mathrm{Z}_k$}
-\For{$n=1,\dots,\rho N_{k-1}$} 
-\For{$m=1,\dots,\eta$}
-\State{}{$i = (n-1)\eta+m$}
-\State{Draw: }{$\mathrm{x}_{k|k-1,\mathrm{p}} \sim \pi_{k|k-1}(\mathrm{x}|\mathrm{x}_{k-1|k-1}^{n}) \rightarrow \mathrm{x}_{k|k-1,\mathrm{p}}^{i}$}\Comment{Persistent object particles} \label{alg:line:pred-p} 
-\State{Compute: }{$\omega_{k|k-1, \mathrm{p}}^{i} = p_S \tfrac{1}{\eta} \omega_{k-1|k-1}^{n}$}
-\State{Draw: }{$\mathrm{x}_{k|k-1,\mathrm{s}} \sim \beta_{k|k-1}(\mathrm{x}|\mathrm{x}_{k-1|k-1}^{n}) \rightarrow \mathrm{x}_{k|k-1,\mathrm{s}}^{i}$}\Comment{Spawning object particles} \label{alg:line:pred-s} 
-\State{Compute: }{$\omega_{k|k-1, \mathrm{s}}^{i} = p_S \tfrac{1}{\eta} \omega_{k-1|k-1}^{n}$}
-\EndFor
-\EndFor
-\State{$\lbrace(\omega_{k|k-1}^n, \mathrm{x}_{k|k-1}^n)\rbrace_{n=1}^{S_k} = \lbrace(\omega_{k|k-1,\mathrm{p}}^n, \mathrm{x}_{k|k-1,\mathrm{p}}^n)\rbrace_{n=1}^{\rho \eta N_{k-1}} \cup \lbrace(\omega_{k|k-1,\mathrm{s}}^n, \mathrm{x}_{k|k-1,\mathrm{s}}^n)\rbrace_{n=1}^{\rho \eta N_{k-1}}$}{} \Comment{Union of particle sets}
-\For{$n=1,\dots,S_k$} % \limits
-\State{Update: }{$\omega_{k|k}^n = (1-p_D)\omega_{k|k-1}^n+\sum\limits_{\mathrm{z} \in \mathrm{Z}_k}\tfrac{p_D g_k(\mathrm{z}|\mathrm{x}_{k|k-1}^n) \omega_{k|k-1}^n}{C_k(\mathrm{z}) + \sum_{n=1}^{S_k}p_D g_k(\mathrm{z}|\mathrm{x}_{k|k-1}^n)\omega_{k|k-1}^n }$}\label{alg:line:particle-update}
-\EndFor
-\State{}{$\nu_k = \sum\limits_{n=1}^{S_{k}} \omega_{k|k}^n$} \Comment{Cardinality calculation}
-%\State{}{$N_{k} = \rho$} \Comment{}
-\State{Estimate: }{$\hat{\mathrm{x}}_{k,i} \leftarrow \lbrace  \omega_{k|k}^n, \mathrm{x}_{k|k-1}^n  \rbrace_{n=1}^{S_k}$}\Comment{Mean-shift clustering}
-% $N_k$ times 
-\State{Resample: }{$N_k=\left[ \nu_k \right], \lbrace  \omega_{k|k}^n  , \mathrm{x}_{k|k-1}^n  \rbrace_{n=1}^{S_k} \rightarrow \lbrace \omega_{k|k}^n ,  \mathrm{x}_{k|k}^n\rbrace_{n=1}^{\rho N_k}, \omega_{k|k}^n = \nu_k / (\rho N_k) $\\} \Comment{Systematic resampling with $\rho$ particles per object}
-\end{algorithmic}
-\end{algorithm}
-
-% ************************************************************************
+%\thispagestyle{empty}
+%
+%\begin{center}
+%
+%\vspace*{10\baselineskip}
+%
+%{\huge\sffamily Automated neuron tracing using\\[0.5em] probability hypothesis density filtering}
+%
+%\vspace{2\baselineskip}
+%
+%{\large Miroslav Radojevi{\'c} and Erik Meijering}
+%
+%\vspace{2\baselineskip}
+%
+%{\large\bfseries Supplementary Information}
+%
+%\end{center}
 \clearpage
 \begin{figure}[!t]
 \centering

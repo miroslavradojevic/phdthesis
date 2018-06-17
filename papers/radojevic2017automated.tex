@@ -108,25 +108,25 @@
 %\subsubsection{SMC-PHD algorithm}
 %\label{ssec:smc-phd-rec}
 %The proposed method implements neuron tracing by SMC-PHD filtering. It is based on an approximation of $D_{k|k}(\mathrm{x})$ in (\ref{eq:smc-approx}) using $N=\rho N_k$ particles, where $N_k$ denotes the number of objects to be filtered, and $\rho$ the number of particles per object. That is, the state of object $i$ at iteration $k$, denoted $\mathrm{x}_{k,i}$, is represented by $\rho$ random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$ (Fig.~\ref{fig:dynamics-model}A). The multi-object state transition in the prediction step (\ref{eq:phd-pred}) is a collection of single-object transitions (Fig.~\ref{fig:dynamics-model}B) that are approximated with transitions at the particle level (Fig.~\ref{fig:dynamics-model}C). More specifically, at the initial iteration $k=0$, $N_0$ seeds are selected and $\rho$ particles are sampled in a circular neighborhood with radius $r_0$ around each seed location using the tubularity value for importance sampling to determine the weights, resulting in the weighted particle set $\lbrace\omega_{0|0}^n,\mathrm{x}_{0|0}^n\rbrace_{n=1}^{\rho N_0}$. The initial local orientation of each particle, $\mathrm{v}_{\mathrm{x}_{0|0}^n}$, is the unit vector pointing from the seed location to the particle location $\mathrm{p}_{\mathrm{x}_{0|0}^n}$. Subsequently, the prediction (\ref{eq:phd-pred}) and update (\ref{eq:phd-update}) steps are executed for iterations $k=1,2,3,\dots$, until convergence. The transition and observation models (described next) allow to incorporate application-specific knowledge in this process. At iteration $k$, the set of weighted particles $\lbrace \omega_{k-1|k-1}^n, \mathrm{x}_{k-1|k-1}^n \rbrace_{n=1}^{\rho N_{k-1}}$ from iteration $k-1$ is used to predict $\eta$ new particles for each persistent and spawned object (Fig.~\ref{fig:dynamics-model}C). In the update step (\ref{eq:phd-update}), a set of observations $\lbrace \mathrm{z}_{k,j}\rbrace_{j=1}^{M_k}$ is used to update the predicted particle weights, followed by estimation of the states $\lbrace \hat{\mathrm{x}}_{k,i}\rbrace_{i=1}^{N_k}$. For details we refer to the algorithm pseudo codes in the supplementary information.
-
-\subsubsection{Transition model}
-\label{sssec:prediction-model}
-In the prediction step (\ref{eq:phd-pred}), three types of objects are assumed: newborn, persisting, and spawned objects \citep{vo2005sequential,vo2006gaussian}. In our algorithm, by design (since we use seeding), newborn objects are not considered, hence $\gamma_{k|k-1}(\mathrm{x})=0$.
-
-Persisting objects in the current iteration correspond directly to existing objects in the previous iteration. In our algorithm, the transition density for predicting persistent object $\mathrm{x}$ given object $\mathrm{x'}$ in the previous iteration, is calculated as
-\begin{equation}
-\label{eq:persist-prediction}
-\pi_{k|k-1}(\mathrm{x}|\mathrm{x'}; \kappa, r_k) = \frac{1}{\tilde{\pi}} e^{\frac{-(\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}}  \vert - r_k)^2  }{2 (r_k/3)^2}} \frac{e^{\kappa (\mathrm{v}_{\mathrm{x}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)}
-\end{equation}
-where $\tilde{\pi}$ is a normalization factor such that the sum of $\pi_{k|k-1}$ over $\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity, and $I_0$ is the zero-order Bessel function of the first kind. The first factor corresponds to a radial profile that peaks at the prediction step size $r_k$. The second factor is a circular normal distribution (von Mises) parametrized with the unit direction vector $\mathrm{v}_{\mathrm{x'}}$ from the previous iteration and circular variance $\kappa$. Here, $\mathrm{v}_{\mathrm{x}} = (\mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}})/\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert$, which connects the predicted location $\mathrm{p}_{\mathrm{x}}$ with the location $\mathrm{p}_{\mathrm{x'}}$ from the previous iteration. Particles $\mathrm{x}_{k|k-1,\mathrm{p}}^{n}$ (Fig.~\ref{fig:dynamics-model}C) are drawn using $\pi_{k|k-1}$ as importance sampling function.
-
-A spawned object is a new instance derived (spawned) from an existing object in the previous iteration. This allows dealing with bifurcations during tracing. In our algorithm, the transition density for predicting a spawned object $\mathrm{x}$ given $\mathrm{x'}$ in the previous iteration, is calculated as
-\begin{multline}
-\label{eq:spawn-prediction}
-\beta_{k|k-1}(\mathrm{x}|\mathrm{x'}; \kappa, r_k) = \frac{1}{\tilde{\beta}} e^{\frac{-(\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert-r_k)^2}{2(r_k/3)^2}} \cdot \\[-0.5\baselineskip]
-\prod\limits_{i=0}^{1} \left( 1 - \frac{e^{\kappa (-1^i \mathrm{v}_{\mathrm{x}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)} \right)
-\end{multline}
-where $\tilde{\beta}$ is a normalization factor such that the sum of $\beta_{k|k-1}$ over $\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity. The first factor has the same form as in (\ref{eq:persist-prediction}) and the second factor is the aggregate of the complementary circular normal distributions used for spawning objects in positive and negative direction. An example of the intensity profile of $\pi_{k|k-1}$ and $\beta_{k|k-1}$ is shown in supplementary Fig.~S1. Particles $\mathrm{x}_{k|k-1,\mathrm{s}}^{n}$ (Fig.~\ref{fig:dynamics-model}C) are drawn using $\beta_{k|k-1}$ as importance sampling function.
+%
+%\subsubsection{Transition model}
+%\label{sssec:prediction-model}
+%In the prediction step (\ref{eq:phd-pred}), three types of objects are assumed: newborn, persisting, and spawned objects \citep{vo2005sequential,vo2006gaussian}. In our algorithm, by design (since we use seeding), newborn objects are not considered, hence $\gamma_{k|k-1}(\mathrm{x})=0$.
+%
+%Persisting objects in the current iteration correspond directly to existing objects in the previous iteration. In our algorithm, the transition density for predicting persistent object $\mathrm{x}$ given object $\mathrm{x'}$ in the previous iteration, is calculated as
+%\begin{equation}
+%\label{eq:persist-prediction}
+%\pi_{k|k-1}(\mathrm{x}|\mathrm{x'}; \kappa, r_k) = \frac{1}{\tilde{\pi}} e^{\frac{-(\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}}  \vert - r_k)^2  }{2 (r_k/3)^2}} \frac{e^{\kappa (\mathrm{v}_{\mathrm{x}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)}
+%\end{equation}
+%where $\tilde{\pi}$ is a normalization factor such that the sum of $\pi_{k|k-1}$ over $\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity, and $I_0$ is the zero-order Bessel function of the first kind. The first factor corresponds to a radial profile that peaks at the prediction step size $r_k$. The second factor is a circular normal distribution (von Mises) parametrized with the unit direction vector $\mathrm{v}_{\mathrm{x'}}$ from the previous iteration and circular variance $\kappa$. Here, $\mathrm{v}_{\mathrm{x}} = (\mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}})/\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert$, which connects the predicted location $\mathrm{p}_{\mathrm{x}}$ with the location $\mathrm{p}_{\mathrm{x'}}$ from the previous iteration. Particles $\mathrm{x}_{k|k-1,\mathrm{p}}^{n}$ (Fig.~\ref{fig:dynamics-model}C) are drawn using $\pi_{k|k-1}$ as importance sampling function.
+%
+%A spawned object is a new instance derived (spawned) from an existing object in the previous iteration. This allows dealing with bifurcations during tracing. In our algorithm, the transition density for predicting a spawned object $\mathrm{x}$ given $\mathrm{x'}$ in the previous iteration, is calculated as
+%\begin{multline}
+%\label{eq:spawn-prediction}
+%\beta_{k|k-1}(\mathrm{x}|\mathrm{x'}; \kappa, r_k) = \frac{1}{\tilde{\beta}} e^{\frac{-(\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert-r_k)^2}{2(r_k/3)^2}} \cdot \\[-0.5\baselineskip]
+%\prod\limits_{i=0}^{1} \left( 1 - \frac{e^{\kappa (-1^i \mathrm{v}_{\mathrm{x}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)} \right)
+%\end{multline}
+%where $\tilde{\beta}$ is a normalization factor such that the sum of $\beta_{k|k-1}$ over $\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity. The first factor has the same form as in (\ref{eq:persist-prediction}) and the second factor is the aggregate of the complementary circular normal distributions used for spawning objects in positive and negative direction. An example of the intensity profile of $\pi_{k|k-1}$ and $\beta_{k|k-1}$ is shown in supplementary Fig.~S1. Particles $\mathrm{x}_{k|k-1,\mathrm{s}}^{n}$ (Fig.~\ref{fig:dynamics-model}C) are drawn using $\beta_{k|k-1}$ as importance sampling function.
 
 \subsubsection{Observation model}
 \label{sssec:observation-model}
