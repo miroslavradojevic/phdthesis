@@ -30,89 +30,84 @@
 %
 %Existing approaches to tracing neurons in images can be broadly divided into global and local approaches. Global approaches consider the problem from the whole-image perspective and typically involve global image segmentation \citep{Wearne-2005, Basu-2013, De-2016} or global optimization strategies \citep{turetken2011automated, xiao2013app2}. Local approaches, on the other hand, use local image exploration strategies starting from seed points \citep{peng2011automatic, Choromanska-2012, yang2013distance} to find segments of the neuronal tree, which are then merged into a full tree representation. Both approaches have advantages and disadvantages and they are often combined to profit from their complementarity \citep{zhao2011automated, Jimenez-2015}.
 %
-A wide variety of computational concepts have been proposed in developing automated neuron tracing methods, whether global or local \citep{acciai2016automated}. These include active contours \citep{Cai-2006, wang2011broadly, Luo-2015}, tubular models \citep{Santamaria-2015}, principal curves \citep{Bas-2011, quan2015neurogps}, perceptual grouping \citep{Narayanaswamy-2011}, path pruning \citep{peng2011automatic, xiao2013app2}, critical point detection \citep{Al-Kofahi-2008, Radojevic-2016}, voxel scooping \citep{Rodriguez-2009}, dynamic and integer programming \citep{Zhang-2007, turetken2012automated}, active learning \citep{gala2014active}, graph optimization \citep{turetken2011automated, chothani2011automated}, tubularity flow field segmentation \citep{mukherjee2015tubularity}, marked point processes \citep{basu2016neurite}, iterative back-tracking \citep{liu2016rivulet}, and more. Space limitations do not permit a full discussion of all these concepts, but a key characteristic relevant to the present paper is that the vast majority of them are deterministic by nature. That is, they utilize models and algorithms that always assume or pass through the exact same sequence of states. While this behavior may seem virtuous and practically convenient, it is nonetheless not very realistic and not necessarily advantageous, for several reasons. For starters, expert human annotators, which are still considered to be the gold standard in evaluating methods, do not operate deterministically: their output will be (slightly) different every time they repeat a task. Also, any deterministic model is typically a (gross) simplification of reality, and consequently lacks flexibility in dealing with data variability. Finally, since every run of a deterministic algorithm will yield exactly the same output, it is not possible to accumulate evidence from multiple iterations.
-
-In this paper we propose a new method for neuron tracing in optical microscopy images that operates probabilistically rather than deterministically. Focusing on delineating the branch centerlines, it utilizes a Bayesian approach to blend two sources of information: the model (based on prior knowledge) and the measurements (from the image data). The main novelty is that it combines the problems of neuron segment detection and linking into one framework by performing simultaneous multi-object tracking. Traditional multi-object (also referred to as multi-target) tracking techniques \citep{mahler2007statistical,stone2013bayesian} typically assume the number of objects to be known and/or they explicitly associate measurements with objects which are then Bayesian filtered individually \citep{bar1995multitarget}. Since in our application the number of objects (neuron segments) is unknown a priori, we use a different approach, based on filtering the so-called probability hypothesis density (PHD) function \citep{mahler2003multitarget}. PHD filtering has gained popularity in recent years as a robust approach to tracking, since it is able to compensate for missing detections and to remove noise and clutter, while reducing the computational complexity from exponential to linear as the number of objects grows. Applications include radar and sonar tracking \citep{tobias2005probability, clark2007particle}, video surveillance \citep{maggio2008efficient, Wang-2008}, and even motion tracking in microscopy \citep{Wood-2012, Schlangen-2016}, but to the best of our knowledge it has not been explored yet for neuron tracing. Moreover, our application differs fundamentally from other works in the sense that the filtering is applied in space rather than in time.  The proposed method is evaluated on a variety of real image data (both 2D and 3D) taking expert manual annotations as the gold standard. Its performance is compared with several state-of-the-art tools for neuron tracing \citep{chothani2011automated, xiao2013app2, quan2015neurogps}.
-
+%A wide variety of computational concepts have been proposed in developing automated neuron tracing methods, whether global or local \citep{acciai2016automated}. These include active contours \citep{Cai-2006, wang2011broadly, Luo-2015}, tubular models \citep{Santamaria-2015}, principal curves \citep{Bas-2011, quan2015neurogps}, perceptual grouping \citep{Narayanaswamy-2011}, path pruning \citep{peng2011automatic, xiao2013app2}, critical point detection \citep{Al-Kofahi-2008, Radojevic-2016}, voxel scooping \citep{Rodriguez-2009}, dynamic and integer programming \citep{Zhang-2007, turetken2012automated}, active learning \citep{gala2014active}, graph optimization \citep{turetken2011automated, chothani2011automated}, tubularity flow field segmentation \citep{mukherjee2015tubularity}, marked point processes \citep{basu2016neurite}, iterative back-tracking \citep{liu2016rivulet}, and more. Space limitations do not permit a full discussion of all these concepts, but a key characteristic relevant to the present paper is that the vast majority of them are deterministic by nature. That is, they utilize models and algorithms that always assume or pass through the exact same sequence of states. While this behavior may seem virtuous and practically convenient, it is nonetheless not very realistic and not necessarily advantageous, for several reasons. For starters, expert human annotators, which are still considered to be the gold standard in evaluating methods, do not operate deterministically: their output will be (slightly) different every time they repeat a task. Also, any deterministic model is typically a (gross) simplification of reality, and consequently lacks flexibility in dealing with data variability. Finally, since every run of a deterministic algorithm will yield exactly the same output, it is not possible to accumulate evidence from multiple iterations.
+%
+%In this paper we propose a new method for neuron tracing in optical microscopy images that operates probabilistically rather than deterministically. Focusing on delineating the branch centerlines, it utilizes a Bayesian approach to blend two sources of information: the model (based on prior knowledge) and the measurements (from the image data). The main novelty is that it combines the problems of neuron segment detection and linking into one framework by performing simultaneous multi-object tracking. Traditional multi-object (also referred to as multi-target) tracking techniques \citep{mahler2007statistical,stone2013bayesian} typically assume the number of objects to be known and/or they explicitly associate measurements with objects which are then Bayesian filtered individually \citep{bar1995multitarget}. Since in our application the number of objects (neuron segments) is unknown a priori, we use a different approach, based on filtering the so-called probability hypothesis density (PHD) function \citep{mahler2003multitarget}. PHD filtering has gained popularity in recent years as a robust approach to tracking, since it is able to compensate for missing detections and to remove noise and clutter, while reducing the computational complexity from exponential to linear as the number of objects grows. Applications include radar and sonar tracking \citep{tobias2005probability, clark2007particle}, video surveillance \citep{maggio2008efficient, Wang-2008}, and even motion tracking in microscopy \citep{Wood-2012, Schlangen-2016}, but to the best of our knowledge it has not been explored yet for neuron tracing. Moreover, our application differs fundamentally from other works in the sense that the filtering is applied in space rather than in time.  The proposed method is evaluated on a variety of real image data (both 2D and 3D) taking expert manual annotations as the gold standard. Its performance is compared with several state-of-the-art tools for neuron tracing \citep{chothani2011automated, xiao2013app2, quan2015neurogps}.
 %\section{Methods}\label{sec:methods}
-
 %\subsection{Multi-object Bayesian filtering} \label{ssec:multi-obj-bay-filt}
-We consider single-object tracking as a Bayesian inference problem \citep{bar2004estimation, sarkka2013bayesian}. The key idea is to estimate the posterior probability density function (pdf) $f_{k|k}(\mathrm{x}_k | \mathrm{z}_{1:k})$, where $\mathrm{x}_k$ denotes the object state at iteration $k$, and $\mathrm{z}_{1:k}$ the sequence of observations from iterations $1$ to $k$ inclusive. Estimation is accomplished by sequentially applying prior knowledge to predict the state in the next iteration and updating this estimate with available observations. Similarly, multi-object tracking can be formulated as the problem of updating predictions of the multi-object state $\mathrm{X}_k = \{\mathrm{x}_{k,1},\ldots,\mathrm{x}_{k,N_k}\}$ with multi-object observations $\mathrm{Z}_k = \{\mathrm{z}_{k,1},\ldots,\mathrm{z}_{k,M_k}\}$, where $N_k$ and $M_k$ denote the number of objects and observations at iteration $k$, respectively. Formally:
-\vspace{-0.5\baselineskip}
-\begin{multline}
-\label{eq:prediction}
-\textrm{Prediction:}\quad f_{k|k-1}(\mathrm{X}_k | \mathrm{Z}_{1:k-1}) = \\ 
-\int\!\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1}) f_{k-1|k-1}(\mathrm{X}_{k-1}|\mathrm{Z}_{1:k-1}) \delta\mathrm{X}_{k-1}
-\end{multline}
-\vspace{-2\baselineskip}
-\begin{multline}
-\label{eq:update}
-\textrm{Update:}\quad f_{k|k}(\mathrm{X}_k|\mathrm{Z}_{1:k}) = \\
-\frac{\vartheta_k(\mathrm{Z}_k|\mathrm{X}_k) f_{k|k-1}(\mathrm{X}_k|\mathrm{Z}_{1:k-1})}{\int\!\vartheta_k(\mathrm{Z}_k|\mathrm{X})f_{k|k-1}(\mathrm{X}|\mathrm{Z}_{1:k-1}) \delta\mathrm{X}}\qquad\qquad
-\end{multline}
-where $\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1})$ denotes the multi-object state transition probability and $\vartheta_k(\mathrm{Z}_k|\mathrm{X}_k)$ the multi-object likelihood. Filtering the multi-object posterior $f_{k|k}(\mathrm{X}_k | \mathrm{Z}_{1:k})$ suffers from serious practical obstacles, as the multi-object state can be very high-dimensional and hard to sample and integrate efficiently. Moreover, it is necessary to take into account changes in object numbers, which adds an often intractable combinatorial burden. Thus more feasible solutions are needed.
+%We consider single-object tracking as a Bayesian inference problem \citep{bar2004estimation, sarkka2013bayesian}. The key idea is to estimate the posterior probability density function (pdf) $f_{k|k}(\mathrm{x}_k | \mathrm{z}_{1:k})$, where $\mathrm{x}_k$ denotes the object state at iteration $k$, and $\mathrm{z}_{1:k}$ the sequence of observations from iterations $1$ to $k$ inclusive. Estimation is accomplished by sequentially applying prior knowledge to predict the state in the next iteration and updating this estimate with available observations. Similarly, multi-object tracking can be formulated as the problem of updating predictions of the multi-object state $\mathrm{X}_k = \{\mathrm{x}_{k,1},\ldots,\mathrm{x}_{k,N_k}\}$ with multi-object observations $\mathrm{Z}_k = \{\mathrm{z}_{k,1},\ldots,\mathrm{z}_{k,M_k}\}$, where $N_k$ and $M_k$ denote the number of objects and observations at iteration $k$, respectively. Formally:
+%\vspace{-0.5\baselineskip}
+%\begin{multline}
+%\label{eq:prediction}
+%\textrm{Prediction:}\quad f_{k|k-1}(\mathrm{X}_k | \mathrm{Z}_{1:k-1}) = \\ 
+%\int\!\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1}) f_{k-1|k-1}(\mathrm{X}_{k-1}|\mathrm{Z}_{1:k-1}) \delta\mathrm{X}_{k-1}
+%\end{multline}
+%\vspace{-2\baselineskip}
+%\begin{multline}
+%\label{eq:update}
+%\textrm{Update:}\quad f_{k|k}(\mathrm{X}_k|\mathrm{Z}_{1:k}) = \\
+%\frac{\vartheta_k(\mathrm{Z}_k|\mathrm{X}_k) f_{k|k-1}(\mathrm{X}_k|\mathrm{Z}_{1:k-1})}{\int\!\vartheta_k(\mathrm{Z}_k|\mathrm{X})f_{k|k-1}(\mathrm{X}|\mathrm{Z}_{1:k-1}) \delta\mathrm{X}}\qquad\qquad
+%\end{multline}
+%where $\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1})$ denotes the multi-object state transition probability and $\vartheta_k(\mathrm{Z}_k|\mathrm{X}_k)$ the multi-object likelihood. Filtering the multi-object posterior $f_{k|k}(\mathrm{X}_k | \mathrm{Z}_{1:k})$ suffers from serious practical obstacles, as the multi-object state can be very high-dimensional and hard to sample and integrate efficiently. Moreover, it is necessary to take into account changes in object numbers, which adds an often intractable combinatorial burden. Thus more feasible solutions are needed.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=\columnwidth]{./fig/method}
+%\vspace{-1.5\baselineskip}
+%\caption{Method overview. Each multi-object filtering round is initialized with $N_0$ seeds. If the seed pool is not exhausted by the end of the current round, a new round is started, and this is repeated until all seeds have been processed.}
+%\label{fig:method}
+%\end{figure}
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{./fig/method}
-\vspace{-1.5\baselineskip}
-\caption{Method overview. Each multi-object filtering round is initialized with $N_0$ seeds. If the seed pool is not exhausted by the end of the current round, a new round is started, and this is repeated until all seeds have been processed.}
-\label{fig:method}
-\end{figure}
-
-\begin{figure*}[!b]
-\centering
-\includegraphics[width=.9\linewidth]{./fig/dynmodel}
-\vspace{-0.5\baselineskip}
-\caption{PHD filtering using a particle representation. (A) Each object $i$ at iteration $k$ has a state $\mathrm{x}_{k,i}$ that is represented by random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$. (B) In the transition from iteration $k-1$ to $k$ an object ($\mathrm{x}'$) may disappear ($\emptyset$), persist ($\mathrm{x}_{\mathrm{p}}$), or spawn ($\mathrm{x}_{\mathrm{s}}$) according to the corresponding transition functions. Here $p_S$ is shorthand notation for $p_{S,k|k-1}(\mathrm{x}')$, since in practice a constant is used (Table~\ref{tab:params}). (C) For each particle a prediction $\mathrm{x}_{k-1|k-1}^n \rightarrow \mathrm{x}_{k|k-1}^n$ is made within radius $r_k$ according to the transition functions for persistence (p) and spawning (s).}
-\label{fig:dynamics-model}
-\end{figure*}
-
-\subsection{Probability hypothesis density filtering}\label{ssec:prob-hyp-den}
-To overcome the difficulties of direct multi-object Bayesian filtering, we propose instead to filter the first-order statistical moment of the multi-object posterior $f_{k|k}(\mathrm{X}_{k}|\mathrm{Z}_{1:k})$, computed as
-\begin{equation}
-D_{k|k}(\mathrm{x}|\mathrm{Z}_{1:k}) = \int\!\delta_{\mathrm{X}}(\mathrm{x})f_{k|k}(\mathrm{X}|\mathrm{Z}_{1:k})\delta\mathrm{X}
-\label{eq:Dkk}
-\end{equation}
-where $\delta_{\mathrm{X}}$ denotes the sum of Dirac deltas at elements of $\mathrm{X}$. For the sake of notational convenience we abbreviate the left-hand side of (\ref{eq:Dkk}) to $D_{k|k}(\mathrm{x})$ in the sequel. This function, known as the probability hypothesis density (PHD) \citep{mahler2003multitarget}, is a non-negative function whose integral $\int\!D_{k|k}(\mathrm{x})\mathrm{d}\mathrm{x}$ yields the expected number of objects $\nu_{k}\in\mathbb{R}$. PHD filtering allows for joint detection and estimation of an unknown and varying number of objects and their individual states using the Bayesian prediction and update framework. Here, multi-object state $\mathrm{X}_k$ and observation $\mathrm{Z}_k$ are modeled as so-called random finite sets (RFS), with randomness in set size as well as set element values \citep{bar1995multitarget}, accommodating phenomena such as object initiation, clutter, and partitioning (spawning). Formally stated, PHD filtering proceeds as follows:
-\vspace{-0.5\baselineskip}
-\begin{multline}
-\label{eq:phd-pred}
-\textrm{Prediction:}\quad D_{k|k-1}(\mathrm{x}) = \gamma_{k|k-1}(\mathrm{x})\ + \\
-\langle \beta_{k|k-1}(\mathrm{x}|\cdot) + p_{S,k|k-1}(\cdot)\pi_{k|k-1}(\mathrm{x}|\cdot),D_{k-1|k-1}(\cdot) \rangle
-\end{multline}
-\vspace{-2\baselineskip}
-\begin{multline}
-\label{eq:phd-update}
-\textrm{Update:}\quad D_{k|k}(\mathrm{x}) = (1-p_{D,k}(\mathrm{x})) D_{k|k-1}(\mathrm{x})\ + \\
-\sum\limits_{\mathrm{z}\in\mathrm{Z}_k}\!\frac{p_{D,k}(\mathrm{x})g_k(\mathrm{z}|\mathrm{x}) D_{k|k-1}(\mathrm{x}) }{C_k(\mathrm{z})+\langle p_{D,k}(\cdot)g_k(\mathrm{z}|\cdot),D_{k|k-1}(\cdot) \rangle}
-\end{multline}
-where $\gamma_{k|k-1}$ denotes the intensity function of newborn objects from iteration $k-1$ to $k$, $\beta_{k|k-1}$ the spawning object transition density, $p_{S,k|k-1}$ the object survival probability, $\pi_{k|k-1}$ the single-object transition density, $p_{D,k}$ the object detection probability, $g_k$ the single-object likelihood, $C_k$ the clutter intensity function, and $\langle g(\cdot),f(\cdot) \rangle \equiv \int\!f(\xi)g(\xi)\mathrm{d}\xi$ (see e.g.\ \citet{vo2006gaussian} for details). An analytical solution to (\ref{eq:phd-pred})-(\ref{eq:phd-update}) is provided by the Gaussian-mixture PHD (GM-PHD) filter \citep{vo2006gaussian} but it is based on linear Gaussian assumptions regarding object birth and dynamics. A more general solution is offered by sequential Monte-Carlo PHD (SMC-PHD) filtering \citep{vo2005sequential, ristic2010improved, zajic2003particle}, which approximates the PHD with a set of $N$ random particles $\mathrm{x}_{k|k}^{n}$ and corresponding weights $\omega_{k|k}^{n}$ as
-\begin{equation}
-\label{eq:smc-approx}
-D_{k|k}(\mathrm{x}) \approx \sum\limits_{n=1}^{N} \omega_{k|k}^{n} \delta_{\mathrm{x}_{k|k}^{n}}\!(\mathrm{x})
-\end{equation}
-so that the classic particle filtering scheme \citep{doucet2000sequential, arulampalam2002tutorial, ristic2004beyond} can be applied.
-
-\subsection{PHD-filtering based neuron tracing}
-\label{ssec:proposed-neur-trac-meth}
-
-\subsubsection{Definition and initialization}
-\label{sssec:initialization}
-The multi-object filtering scheme we propose for neuron tracing defines the object state as an oriented location:
-\begin{equation}
-\label{eq:obj-state}
-\mathrm{x} = \left[ \mathrm{p}_{\mathrm{x}}, \mathrm{v}_{\mathrm{x}} \right] = \left[x, y, z, v_x, v_y, v_z\right] 
-\end{equation}
-where $\mathrm{p}_{\mathrm{x}}=[x, y, z]$ denotes the location and $\mathrm{v}_{\mathrm{x}}=[v_x, v_y, v_z]$ the local orientation of a tubular segment. Filtering starts from a set of $N_0$ seeds (Fig.~\ref{fig:method}) sampled from a seed pool consisting of the local maxima of the tubularity image $\tau(x,y,z)$ computed from the original image using Hessian-based multiscale line filtering \citep{Sato-1998} and min-max normalized to $[0,1]$. Local maxima are sorted in descending order so that seeds with high tubularity (meaning high confidence in the underlying image structure being a neuron branch) are processed first. To avoid seeds being selected too close together, in other words to ensure good spatial coverage of the neuron with seeds, for each selected seed (while going from top to bottom of the sorted list) the seeds within a circular neighborhood with radius $r_0$ are ignored in the current round. If, after SMC-PHD filtering (described next), the seed pool is not exhausted, a new round is started by selecting a new set of seeds. During filtering, the observation consists of the location and corresponding tubularity value:
-\begin{equation}
-\label{eq:observation}
-\mathrm{z} = \left[ \mathrm{p}_{\mathrm{z}}, \tau_{\mathrm{z}} \right] = \left[x, y, z, \tau\right]
-\end{equation}
-
-\subsubsection{SMC-PHD algorithm}
-\label{ssec:smc-phd-rec}
-The proposed method implements neuron tracing by SMC-PHD filtering. It is based on an approximation of $D_{k|k}(\mathrm{x})$ in (\ref{eq:smc-approx}) using $N=\rho N_k$ particles, where $N_k$ denotes the number of objects to be filtered, and $\rho$ the number of particles per object. That is, the state of object $i$ at iteration $k$, denoted $\mathrm{x}_{k,i}$, is represented by $\rho$ random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$ (Fig.~\ref{fig:dynamics-model}A). The multi-object state transition in the prediction step (\ref{eq:phd-pred}) is a collection of single-object transitions (Fig.~\ref{fig:dynamics-model}B) that are approximated with transitions at the particle level (Fig.~\ref{fig:dynamics-model}C). More specifically, at the initial iteration $k=0$, $N_0$ seeds are selected and $\rho$ particles are sampled in a circular neighborhood with radius $r_0$ around each seed location using the tubularity value for importance sampling to determine the weights, resulting in the weighted particle set $\lbrace\omega_{0|0}^n,\mathrm{x}_{0|0}^n\rbrace_{n=1}^{\rho N_0}$. The initial local orientation of each particle, $\mathrm{v}_{\mathrm{x}_{0|0}^n}$, is the unit vector pointing from the seed location to the particle location $\mathrm{p}_{\mathrm{x}_{0|0}^n}$. Subsequently, the prediction (\ref{eq:phd-pred}) and update (\ref{eq:phd-update}) steps are executed for iterations $k=1,2,3,\dots$, until convergence. The transition and observation models (described next) allow to incorporate application-specific knowledge in this process. At iteration $k$, the set of weighted particles $\lbrace \omega_{k-1|k-1}^n, \mathrm{x}_{k-1|k-1}^n \rbrace_{n=1}^{\rho N_{k-1}}$ from iteration $k-1$ is used to predict $\eta$ new particles for each persistent and spawned object (Fig.~\ref{fig:dynamics-model}C). In the update step (\ref{eq:phd-update}), a set of observations $\lbrace \mathrm{z}_{k,j}\rbrace_{j=1}^{M_k}$ is used to update the predicted particle weights, followed by estimation of the states $\lbrace \hat{\mathrm{x}}_{k,i}\rbrace_{i=1}^{N_k}$. For details we refer to the algorithm pseudo codes in the supplementary information.
+%\begin{figure*}[!b]
+%\centering
+%\includegraphics[width=.9\linewidth]{./fig/dynmodel}
+%\vspace{-0.5\baselineskip}
+%\caption{PHD filtering using a particle representation. (A) Each object $i$ at iteration $k$ has a state $\mathrm{x}_{k,i}$ that is represented by random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$. (B) In the transition from iteration $k-1$ to $k$ an object ($\mathrm{x}'$) may disappear ($\emptyset$), persist ($\mathrm{x}_{\mathrm{p}}$), or spawn ($\mathrm{x}_{\mathrm{s}}$) according to the corresponding transition functions. Here $p_S$ is shorthand notation for $p_{S,k|k-1}(\mathrm{x}')$, since in practice a constant is used (Table~\ref{tab:params}). (C) For each particle a prediction $\mathrm{x}_{k-1|k-1}^n \rightarrow \mathrm{x}_{k|k-1}^n$ is made within radius $r_k$ according to the transition functions for persistence (p) and spawning (s).}
+%\label{fig:dynamics-model}
+%\end{figure*}
+%
+%\subsection{Probability hypothesis density filtering}\label{ssec:prob-hyp-den}
+%To overcome the difficulties of direct multi-object Bayesian filtering, we propose instead to filter the first-order statistical moment of the multi-object posterior $f_{k|k}(\mathrm{X}_{k}|\mathrm{Z}_{1:k})$, computed as
+%\begin{equation}
+%D_{k|k}(\mathrm{x}|\mathrm{Z}_{1:k}) = \int\!\delta_{\mathrm{X}}(\mathrm{x})f_{k|k}(\mathrm{X}|\mathrm{Z}_{1:k})\delta\mathrm{X}
+%\label{eq:Dkk}
+%\end{equation}
+%where $\delta_{\mathrm{X}}$ denotes the sum of Dirac deltas at elements of $\mathrm{X}$. For the sake of notational convenience we abbreviate the left-hand side of (\ref{eq:Dkk}) to $D_{k|k}(\mathrm{x})$ in the sequel. This function, known as the probability hypothesis density (PHD) \citep{mahler2003multitarget}, is a non-negative function whose integral $\int\!D_{k|k}(\mathrm{x})\mathrm{d}\mathrm{x}$ yields the expected number of objects $\nu_{k}\in\mathbb{R}$. PHD filtering allows for joint detection and estimation of an unknown and varying number of objects and their individual states using the Bayesian prediction and update framework. Here, multi-object state $\mathrm{X}_k$ and observation $\mathrm{Z}_k$ are modeled as so-called random finite sets (RFS), with randomness in set size as well as set element values \citep{bar1995multitarget}, accommodating phenomena such as object initiation, clutter, and partitioning (spawning). Formally stated, PHD filtering proceeds as follows:
+%\vspace{-0.5\baselineskip}
+%\begin{multline}
+%\label{eq:phd-pred}
+%\textrm{Prediction:}\quad D_{k|k-1}(\mathrm{x}) = \gamma_{k|k-1}(\mathrm{x})\ + \\
+%\langle \beta_{k|k-1}(\mathrm{x}|\cdot) + p_{S,k|k-1}(\cdot)\pi_{k|k-1}(\mathrm{x}|\cdot),D_{k-1|k-1}(\cdot) \rangle
+%\end{multline}
+%\vspace{-2\baselineskip}
+%\begin{multline}
+%\label{eq:phd-update}
+%\textrm{Update:}\quad D_{k|k}(\mathrm{x}) = (1-p_{D,k}(\mathrm{x})) D_{k|k-1}(\mathrm{x})\ + \\
+%\sum\limits_{\mathrm{z}\in\mathrm{Z}_k}\!\frac{p_{D,k}(\mathrm{x})g_k(\mathrm{z}|\mathrm{x}) D_{k|k-1}(\mathrm{x}) }{C_k(\mathrm{z})+\langle p_{D,k}(\cdot)g_k(\mathrm{z}|\cdot),D_{k|k-1}(\cdot) \rangle}
+%\end{multline}
+%where $\gamma_{k|k-1}$ denotes the intensity function of newborn objects from iteration $k-1$ to $k$, $\beta_{k|k-1}$ the spawning object transition density, $p_{S,k|k-1}$ the object survival probability, $\pi_{k|k-1}$ the single-object transition density, $p_{D,k}$ the object detection probability, $g_k$ the single-object likelihood, $C_k$ the clutter intensity function, and $\langle g(\cdot),f(\cdot) \rangle \equiv \int\!f(\xi)g(\xi)\mathrm{d}\xi$ (see e.g.\ \citet{vo2006gaussian} for details). An analytical solution to (\ref{eq:phd-pred})-(\ref{eq:phd-update}) is provided by the Gaussian-mixture PHD (GM-PHD) filter \citep{vo2006gaussian} but it is based on linear Gaussian assumptions regarding object birth and dynamics. A more general solution is offered by sequential Monte-Carlo PHD (SMC-PHD) filtering \citep{vo2005sequential, ristic2010improved, zajic2003particle}, which approximates the PHD with a set of $N$ random particles $\mathrm{x}_{k|k}^{n}$ and corresponding weights $\omega_{k|k}^{n}$ as
+%\begin{equation}
+%\label{eq:smc-approx}
+%D_{k|k}(\mathrm{x}) \approx \sum\limits_{n=1}^{N} \omega_{k|k}^{n} \delta_{\mathrm{x}_{k|k}^{n}}\!(\mathrm{x})
+%\end{equation}
+%so that the classic particle filtering scheme \citep{doucet2000sequential, arulampalam2002tutorial, ristic2004beyond} can be applied.
+%\subsection{PHD-filtering based neuron tracing}
+%\label{ssec:proposed-neur-trac-meth}
+%\subsubsection{Definition and initialization}
+%\label{sssec:initialization}
+%The multi-object filtering scheme we propose for neuron tracing defines the object state as an oriented location:
+%\begin{equation}
+%\label{eq:obj-state}
+%\mathrm{x} = \left[ \mathrm{p}_{\mathrm{x}}, \mathrm{v}_{\mathrm{x}} \right] = \left[x, y, z, v_x, v_y, v_z\right] 
+%\end{equation}
+%where $\mathrm{p}_{\mathrm{x}}=[x, y, z]$ denotes the location and $\mathrm{v}_{\mathrm{x}}=[v_x, v_y, v_z]$ the local orientation of a tubular segment. Filtering starts from a set of $N_0$ seeds (Fig.~\ref{fig:method}) sampled from a seed pool consisting of the local maxima of the tubularity image $\tau(x,y,z)$ computed from the original image using Hessian-based multiscale line filtering \citep{Sato-1998} and min-max normalized to $[0,1]$. Local maxima are sorted in descending order so that seeds with high tubularity (meaning high confidence in the underlying image structure being a neuron branch) are processed first. To avoid seeds being selected too close together, in other words to ensure good spatial coverage of the neuron with seeds, for each selected seed (while going from top to bottom of the sorted list) the seeds within a circular neighborhood with radius $r_0$ are ignored in the current round. If, after SMC-PHD filtering (described next), the seed pool is not exhausted, a new round is started by selecting a new set of seeds. During filtfig:methodering, the observation consists of the location and corresponding tubularity value:
+%\begin{equation}
+%\label{eq:observation}
+%\mathrm{z} = \left[ \mathrm{p}_{\mathrm{z}}, \tau_{\mathrm{z}} \right] = \left[x, y, z, \tau\right]
+%\end{equation}
+%\subsubsection{SMC-PHD algorithm}
+%\label{ssec:smc-phd-rec}
+%The proposed method implements neuron tracing by SMC-PHD filtering. It is based on an approximation of $D_{k|k}(\mathrm{x})$ in (\ref{eq:smc-approx}) using $N=\rho N_k$ particles, where $N_k$ denotes the number of objects to be filtered, and $\rho$ the number of particles per object. That is, the state of object $i$ at iteration $k$, denoted $\mathrm{x}_{k,i}$, is represented by $\rho$ random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$ (Fig.~\ref{fig:dynamics-model}A). The multi-object state transition in the prediction step (\ref{eq:phd-pred}) is a collection of single-object transitions (Fig.~\ref{fig:dynamics-model}B) that are approximated with transitions at the particle level (Fig.~\ref{fig:dynamics-model}C). More specifically, at the initial iteration $k=0$, $N_0$ seeds are selected and $\rho$ particles are sampled in a circular neighborhood with radius $r_0$ around each seed location using the tubularity value for importance sampling to determine the weights, resulting in the weighted particle set $\lbrace\omega_{0|0}^n,\mathrm{x}_{0|0}^n\rbrace_{n=1}^{\rho N_0}$. The initial local orientation of each particle, $\mathrm{v}_{\mathrm{x}_{0|0}^n}$, is the unit vector pointing from the seed location to the particle location $\mathrm{p}_{\mathrm{x}_{0|0}^n}$. Subsequently, the prediction (\ref{eq:phd-pred}) and update (\ref{eq:phd-update}) steps are executed for iterations $k=1,2,3,\dots$, until convergence. The transition and observation models (described next) allow to incorporate application-specific knowledge in this process. At iteration $k$, the set of weighted particles $\lbrace \omega_{k-1|k-1}^n, \mathrm{x}_{k-1|k-1}^n \rbrace_{n=1}^{\rho N_{k-1}}$ from iteration $k-1$ is used to predict $\eta$ new particles for each persistent and spawned object (Fig.~\ref{fig:dynamics-model}C). In the update step (\ref{eq:phd-update}), a set of observations $\lbrace \mathrm{z}_{k,j}\rbrace_{j=1}^{M_k}$ is used to update the predicted particle weights, followed by estimation of the states $\lbrace \hat{\mathrm{x}}_{k,i}\rbrace_{i=1}^{N_k}$. For details we refer to the algorithm pseudo codes in the supplementary information.
 
 \subsubsection{Transition model}
 \label{sssec:prediction-model}
