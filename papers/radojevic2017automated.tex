@@ -1,50 +1,42 @@
-\documentclass[noinfo,nocrop,final]{bioinfo}
-\copyrightyear{2016}
-\pubyear{2016}
-
-\usepackage[english]{babel}
-\usepackage[hyphens]{url}\urlstyle{same}
-\usepackage[mathscr]{euscript}
-
-%\newcommand{\marked}[1]{\textcolor{red}{#1}}
-\newcommand{\struck}[1]{\textcolor{red}{\sout{#1}}}
-
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\argmax}{arg\,max}
-
-\access{Advance Access Publication Date: Day Month Year}
-\appnotes{Original Paper}
-
-\begin{document}
-\firstpage{1}
-\subtitle{Bioimage informatics}
-\title[Automated neuron tracing using PHD filtering]{Automated neuron tracing using probability hypothesis density filtering}
-\author[M. Radojevi\'{c} \textit{et~al}.]{Miroslav Radojevi\'{c}\,$^{\text{\sfb 1}}$ and Erik Meijering\,$^{\text{\sfb 1,}*}$}
-\address{$^{\text{\sf 1}}$Biomedical Imaging Group Rotterdam, Departments of Medical Informatics and Radiology, Erasmus University Medical Center, 3000 CA Rotterdam, the Netherlands.}
-\corresp{$^\ast$To whom correspondence should be addressed.}
-\history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
-\editor{Associate Editor: XXXXXXX}
-
-\abstract{\textbf{Motivation:} The functionality of neurons and their role in neuronal networks is tightly connected to the cell morphology. A fundamental problem in many neurobiological studies aiming to unravel this connection is the digital reconstruction of neuronal cell morphology from microscopic image data. Many methods have been developed for this, but they are far from perfect, and better methods are needed.\\
-\textbf{Results:} Here we present a new method for tracing neuron centerlines needed for full reconstruction. The method uses a fundamentally different approach than previous methods by considering neuron tracing as a Bayesian multi-object tracking problem. The problem is solved using probability hypothesis density filtering. Results of experiments on 2D and 3D fluorescence microscopy image data sets of real neurons indicate the proposed method performs comparably or even better than the state of the art.\\
-\textbf{Availability and implementation:} Software implementing the proposed neuron tracing method was written in the Java programming language as a plugin for the ImageJ platform. Source code is freely available for non-commercial use at \url{https://bitbucket.org/miroslavradojevic/phd}.\\
-\textbf{Supplementary information:} Available at \emph{Bioinformatics} online.\\
-\textbf{Contact:} \href{meijering@imagescience.org}{meijering@imagescience.org} }
-\maketitle
-
-\section{Introduction}
-
-Accurate reconstruction of the tree-like structure of neuronal cells from optical microscopy images is a crucial step in automating the analysis of single neuron morphology or the connectivity of neuronal networks \citep{meijering2010neuron, donohue2011automated, Peng-2015}. Microscopic images provide detailed information about the geometrical and topological properties of the neuronal arbors. Extracting and representing this information in a faithful and convenient digital format is key to many studies \citep{ascoli2002computational, ascoli2007neuromorpho, svoboda2011past, senft2011brief,halavi2012digital, Lu-2015}, as digital reconstructions enable neurobiologists to use computational approaches in addressing open issues in brain research, such as the relation between neuron structure and function, and the effects of neurodegenerative disease processes and drug compounds on neuron development and connectivity.
-
-Existing approaches to tracing neurons in images can be broadly divided into global and local approaches. Global approaches consider the problem from the whole-image perspective and typically involve global image segmentation \citep{Wearne-2005, Basu-2013, De-2016} or global optimization strategies \citep{turetken2011automated, xiao2013app2}. Local approaches, on the other hand, use local image exploration strategies starting from seed points \citep{peng2011automatic, Choromanska-2012, yang2013distance} to find segments of the neuronal tree, which are then merged into a full tree representation. Both approaches have advantages and disadvantages and they are often combined to profit from their complementarity \citep{zhao2011automated, Jimenez-2015}.
-
+%\documentclass[noinfo,nocrop,final]{bioinfo}
+%\copyrightyear{2016}
+%\pubyear{2016}
+%\usepackage[english]{babel}
+%\usepackage[hyphens]{url}\urlstyle{same}
+%\usepackage[mathscr]{euscript}
+%\newcommand{\struck}[1]{\textcolor{red}{\sout{#1}}}
+%\DeclareMathOperator*{\argmin}{arg\,min}
+%\DeclareMathOperator*{\argmax}{arg\,max}
+%\access{Advance Access Publication Date: Day Month Year}
+%\appnotes{Original Paper}
+%\begin{document}
+%\firstpage{1}
+%\subtitle{Bioimage informatics}
+%\title[Automated neuron tracing using PHD filtering]{Automated neuron tracing using probability hypothesis density filtering}
+%\author[M. Radojevi\'{c} \textit{et~al}.]{Miroslav Radojevi\'{c}\,$^{\text{\sfb 1}}$ and Erik Meijering\,$^{\text{\sfb 1,}*}$}
+%\address{$^{\text{\sf 1}}$Biomedical Imaging Group Rotterdam, Departments of Medical Informatics and Radiology, Erasmus University Medical Center, 3000 CA Rotterdam, the Netherlands.}
+%\corresp{$^\ast$To whom correspondence should be addressed.}
+%\history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
+%\editor{Associate Editor: XXXXXXX}
+%
+%\abstract{\textbf{Motivation:} The functionality of neurons and their role in neuronal networks is tightly connected to the cell morphology. A fundamental problem in many neurobiological studies aiming to unravel this connection is the digital reconstruction of neuronal cell morphology from microscopic image data. Many methods have been developed for this, but they are far from perfect, and better methods are needed.\\
+%\textbf{Results:} Here we present a new method for tracing neuron centerlines needed for full reconstruction. The method uses a fundamentally different approach than previous methods by considering neuron tracing as a Bayesian multi-object tracking problem. The problem is solved using probability hypothesis density filtering. Results of experiments on 2D and 3D fluorescence microscopy image data sets of real neurons indicate the proposed method performs comparably or even better than the state of the art.\\
+%\textbf{Availability and implementation:} Software implementing the proposed neuron tracing method was written in the Java programming language as a plugin for the ImageJ platform. Source code is freely available for non-commercial use at \url{https://bitbucket.org/miroslavradojevic/phd}.\\
+%\textbf{Supplementary information:} Available at \emph{Bioinformatics} online.\\
+%\textbf{Contact:} \href{meijering@imagescience.org}{meijering@imagescience.org} }
+%\maketitle
+%\section{Introduction}
+%Accurate reconstruction of the tree-like structure of neuronal cells from optical microscopy images is a crucial step in automating the analysis of single neuron morphology or the connectivity of neuronal networks \citep{meijering2010neuron, donohue2011automated, Peng-2015}. Microscopic images provide detailed information about the geometrical and topological properties of the neuronal arbors. Extracting and representing this information in a faithful and convenient digital format is key to many studies \citep{ascoli2002computational, ascoli2007neuromorpho, svoboda2011past, senft2011brief,halavi2012digital, Lu-2015}, as digital reconstructions enable neurobiologists to use computational approaches in addressing open issues in brain research, such as the relation between neuron structure and function, and the effects of neurodegenerative disease processes and drug compounds on neuron development and connectivity.
+%
+%Existing approaches to tracing neurons in images can be broadly divided into global and local approaches. Global approaches consider the problem from the whole-image perspective and typically involve global image segmentation \citep{Wearne-2005, Basu-2013, De-2016} or global optimization strategies \citep{turetken2011automated, xiao2013app2}. Local approaches, on the other hand, use local image exploration strategies starting from seed points \citep{peng2011automatic, Choromanska-2012, yang2013distance} to find segments of the neuronal tree, which are then merged into a full tree representation. Both approaches have advantages and disadvantages and they are often combined to profit from their complementarity \citep{zhao2011automated, Jimenez-2015}.
+%
 A wide variety of computational concepts have been proposed in developing automated neuron tracing methods, whether global or local \citep{acciai2016automated}. These include active contours \citep{Cai-2006, wang2011broadly, Luo-2015}, tubular models \citep{Santamaria-2015}, principal curves \citep{Bas-2011, quan2015neurogps}, perceptual grouping \citep{Narayanaswamy-2011}, path pruning \citep{peng2011automatic, xiao2013app2}, critical point detection \citep{Al-Kofahi-2008, Radojevic-2016}, voxel scooping \citep{Rodriguez-2009}, dynamic and integer programming \citep{Zhang-2007, turetken2012automated}, active learning \citep{gala2014active}, graph optimization \citep{turetken2011automated, chothani2011automated}, tubularity flow field segmentation \citep{mukherjee2015tubularity}, marked point processes \citep{basu2016neurite}, iterative back-tracking \citep{liu2016rivulet}, and more. Space limitations do not permit a full discussion of all these concepts, but a key characteristic relevant to the present paper is that the vast majority of them are deterministic by nature. That is, they utilize models and algorithms that always assume or pass through the exact same sequence of states. While this behavior may seem virtuous and practically convenient, it is nonetheless not very realistic and not necessarily advantageous, for several reasons. For starters, expert human annotators, which are still considered to be the gold standard in evaluating methods, do not operate deterministically: their output will be (slightly) different every time they repeat a task. Also, any deterministic model is typically a (gross) simplification of reality, and consequently lacks flexibility in dealing with data variability. Finally, since every run of a deterministic algorithm will yield exactly the same output, it is not possible to accumulate evidence from multiple iterations.
 
 In this paper we propose a new method for neuron tracing in optical microscopy images that operates probabilistically rather than deterministically. Focusing on delineating the branch centerlines, it utilizes a Bayesian approach to blend two sources of information: the model (based on prior knowledge) and the measurements (from the image data). The main novelty is that it combines the problems of neuron segment detection and linking into one framework by performing simultaneous multi-object tracking. Traditional multi-object (also referred to as multi-target) tracking techniques \citep{mahler2007statistical,stone2013bayesian} typically assume the number of objects to be known and/or they explicitly associate measurements with objects which are then Bayesian filtered individually \citep{bar1995multitarget}. Since in our application the number of objects (neuron segments) is unknown a priori, we use a different approach, based on filtering the so-called probability hypothesis density (PHD) function \citep{mahler2003multitarget}. PHD filtering has gained popularity in recent years as a robust approach to tracking, since it is able to compensate for missing detections and to remove noise and clutter, while reducing the computational complexity from exponential to linear as the number of objects grows. Applications include radar and sonar tracking \citep{tobias2005probability, clark2007particle}, video surveillance \citep{maggio2008efficient, Wang-2008}, and even motion tracking in microscopy \citep{Wood-2012, Schlangen-2016}, but to the best of our knowledge it has not been explored yet for neuron tracing. Moreover, our application differs fundamentally from other works in the sense that the filtering is applied in space rather than in time.  The proposed method is evaluated on a variety of real image data (both 2D and 3D) taking expert manual annotations as the gold standard. Its performance is compared with several state-of-the-art tools for neuron tracing \citep{chothani2011automated, xiao2013app2, quan2015neurogps}.
 
-\section{Methods}\label{sec:methods}
+%\section{Methods}\label{sec:methods}
 
-\subsection{Multi-object Bayesian filtering} \label{ssec:multi-obj-bay-filt}
+%\subsection{Multi-object Bayesian filtering} \label{ssec:multi-obj-bay-filt}
 We consider single-object tracking as a Bayesian inference problem \citep{bar2004estimation, sarkka2013bayesian}. The key idea is to estimate the posterior probability density function (pdf) $f_{k|k}(\mathrm{x}_k | \mathrm{z}_{1:k})$, where $\mathrm{x}_k$ denotes the object state at iteration $k$, and $\mathrm{z}_{1:k}$ the sequence of observations from iterations $1$ to $k$ inclusive. Estimation is accomplished by sequentially applying prior knowledge to predict the state in the next iteration and updating this estimate with available observations. Similarly, multi-object tracking can be formulated as the problem of updating predictions of the multi-object state $\mathrm{X}_k = \{\mathrm{x}_{k,1},\ldots,\mathrm{x}_{k,N_k}\}$ with multi-object observations $\mathrm{Z}_k = \{\mathrm{z}_{k,1},\ldots,\mathrm{z}_{k,M_k}\}$, where $N_k$ and $M_k$ denote the number of objects and observations at iteration $k$, respectively. Formally:
 \vspace{-0.5\baselineskip}
 \begin{multline}
