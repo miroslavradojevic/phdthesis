@@ -127,38 +127,37 @@
 %\prod\limits_{i=0}^{1} \left( 1 - \frac{e^{\kappa (-1^i \mathrm{v}_{\mathrm{x}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)} \right)
 %\end{multline}
 %where $\tilde{\beta}$ is a normalization factor such that the sum of $\beta_{k|k-1}$ over $\vert \mathrm{p}_{\mathrm{x}} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity. The first factor has the same form as in (\ref{eq:persist-prediction}) and the second factor is the aggregate of the complementary circular normal distributions used for spawning objects in positive and negative direction. An example of the intensity profile of $\pi_{k|k-1}$ and $\beta_{k|k-1}$ is shown in supplementary Fig.~S1. Particles $\mathrm{x}_{k|k-1,\mathrm{s}}^{n}$ (Fig.~\ref{fig:dynamics-model}C) are drawn using $\beta_{k|k-1}$ as importance sampling function.
-
-\subsubsection{Observation model}
-\label{sssec:observation-model}
-In the update step (\ref{eq:phd-update}), a set of observations $\{\mathrm{z}_{k,j}\}_{j=1}^{M_k}$ is used to update the predictions from (\ref{eq:phd-pred}). Observations have a corrective role as they carry information about the neuron centerline locations and corresponding tubularity values (\ref{eq:observation}). In our algorithm we use
-\begin{equation}
-\label{eq:observation-importance-sampling}
-h(\mathrm{p} | \mathrm{x'}; \kappa, r_k) = \frac{1}{\tilde{h}} e^{\frac{ -(\vert \mathrm{p} - \mathrm{p}_{\mathrm{x'}}  \vert - r_k)^2  }{2 (r_k/3)^2}} \frac{e^{\kappa (\mathrm{v}_{\mathrm{p}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)} \tau(\mathrm{p})
-\end{equation}
-as the importance sampling function to obtain the observations, where $\tilde{h}$ is a normalization factor such that the sum of $h$ over $\vert \mathrm{p} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity, and $\mathrm{v}_{\mathrm{p}}=(\mathrm{p}-\mathrm{p}_{\mathrm{x'}})/\vert \mathrm{p}-\mathrm{p}_{\mathrm{x'}}\vert$. The first two factors have the same form as in (\ref{eq:persist-prediction}) but here $\kappa$ is typically lower to make the update step more restrictive than the prediction step. The third factor is the normalized tubularity measure $\tau$ \citep{Sato-1998} at location $\mathrm{p}$, which makes the observations correspond preferably to regions with high tubularity, which are indeed more likely to contain neuron structures.
-
-To obtain the observations at iteration $k$, for each object $i$ from the previous iteration a set of particles $\{\mathrm{p}_{i}^{n}\}_{n=1}^{\rho N_{k-1}}$ is drawn from $h$ using $\mathrm{x'}=\hat{\mathrm{x}}_{k-1,i}$ (the object state estimate), with particle weight proportional to the tubularity value at that location. All these particles together are subsequently clustered in an unsupervised manner using mean-shifting \citep{cheng1995mean}, resulting in a set of clusters $\lbrace \mathscr{C}_j \rbrace_{j=1}^{M_k}$, with each cluster $\mathscr{C}_j$ having a subset $\lbrace\mathrm{p}_{i,j}^n\rbrace_{n=1}^{|\mathscr{C}_j|}$ of the particles. For each cluster, a representative sample $\mathrm{p}_{i,j}^{\hat{n}}$ is calculated using least-squares optimization,
-\begin{equation}
-\label{eq:n-measure} % \setminus \lbrace n \rbrace
-\hat{n} = \argmin_n \!\!\!\!\!\sum\limits_{m \in \left[ 1, |\mathscr{C}_j| \right]}\!\!\!\!\! \theta(\mathrm{p}_{i,j}^m, \mathrm{p}_{\hat{\mathrm{x}}_{k-1,i}}, \mathrm{p}_{i,j}^n)
-\end{equation} % e^{-\frac{}{2\sigma_{\theta}^2}}
-where $\theta(\mathrm{p}_0, \mathrm{p}_1, \mathrm{p}_2)$ denotes the squared Euclidean distance from point $\mathrm{p}_0$ to the line segment defined by $\mathrm{p}_1$ and $\mathrm{p}_2$, calculated as
-\begin{multline}
-\label{eq:theta}
-\theta(\mathrm{p}_0, \mathrm{p}_1, \mathrm{p}_2) = \\
-\begin{cases}
-	\vert \mathrm{p}_0 - \mathrm{p}_1 \vert^2 & \textrm{if\ } (\mathrm{p}_0-\mathrm{p}_1) \cdot (\mathrm{p}_2-\mathrm{p}_1) \leq 0 \\
-	\vert \mathrm{p}_0 - \mathrm{p}_2 \vert^2 & \textrm{if\ } (\mathrm{p}_0-\mathrm{p}_2) \cdot (\mathrm{p}_1-\mathrm{p}_2) \leq 0 \\
-	\frac{\vert(\mathrm{p}_2-\mathrm{p}_1) \times (\mathrm{p}_1-\mathrm{p}_0)\vert^2}{\vert\mathrm{p}_2-\mathrm{p}_1\vert^2} & \textrm{otherwise}
-\end{cases}
-\end{multline}
-so that the line segment that best fits the cluster elements determines the selected location. From this the observation is obtained as $\mathrm{z}_{k,j} = [\mathrm{p}_{i,j}^{\hat{n}}, \tau(\mathrm{p}_{i,j}^{\hat{n}})]$. The process is illustrated in supplementary Fig.~S2.
-
-For the single-object likelihood in (\ref{eq:phd-update}) we use a Gaussian function centered at the spatial location of the observation, $g_k(\mathrm{z}|\mathrm{x})=\exp(-\vert\mathrm{p}_{\mathrm{z}}-\mathrm{p}_{\mathrm{x}}\vert^2/2\sigma_{\mathrm{z}}^2)$, giving more importance to predictions closer to $\mathrm{z}$. The clutter intensity function is defined as an exponential dependency on the observation tubularity value, $C_k(\mathrm{z})=\exp(-K_{c}\tau_{\mathrm{z}})$, implying that the clutter increases as the tubularity value goes to zero. In practice, clutter plays a role in detecting terminal points, causing tracings with low particle weights (due to their proximity to regions with low tubularity values) to not be resampled and thus dropped after the update step.
-
-\subsubsection{Implementation details}
-\label{sssec:implementation-details}
-Algorithms~1 and 2 in the supplementary information provide a step-by-step overview of our PHD-filtering based neuron tracing method. For testing purposes the method was implemented in Java as a plugin for ImageJ \citep{abramoff2004image}. The method has several parameters for which default parameters are given in Table~\ref{tab:params}. In our experience most of them do not require extensive tuning and for the experiments we used default values. An important aspect of any SMC-based algorithm is to use a sufficient number of particles in the approximations. In our experiments we found that values of 10-20 are sufficient for $\rho$ and $\eta$ since the objects of interest in our application (neurons) are approximately 1D structures in 3D space and therefore are easily covered. Higher values can lead to higher accuracy and precision but at proportionally higher computational cost. The most important parameters are the numbers of seeds $N_0$ and rounds (Fig.~\ref{fig:method}) and in the experiments (described next) we have tested the performance of our algorithm for different values of these parameters.
+%
+%\subsubsection{Observation model}
+%\label{sssec:observation-model}
+%In the update step (\ref{eq:phd-update}), a set of observations $\{\mathrm{z}_{k,j}\}_{j=1}^{M_k}$ is used to update the predictions from (\ref{eq:phd-pred}). Observations have a corrective role as they carry information about the neuron centerline locations and corresponding tubularity values (\ref{eq:observation}). In our algorithm we use
+%\begin{equation}
+%\label{eq:observation-importance-sampling}
+%h(\mathrm{p} | \mathrm{x'}; \kappa, r_k) = \frac{1}{\tilde{h}} e^{\frac{ -(\vert \mathrm{p} - \mathrm{p}_{\mathrm{x'}}  \vert - r_k)^2  }{2 (r_k/3)^2}} \frac{e^{\kappa (\mathrm{v}_{\mathrm{p}} \cdot \mathrm{v}_{\mathrm{x'}})}}{2 \pi I_0(\kappa)} \tau(\mathrm{p})
+%\end{equation}
+%as the importance sampling function to obtain the observations, where $\tilde{h}$ is a normalization factor such that the sum of $h$ over $\vert \mathrm{p} - \mathrm{p}_{\mathrm{x'}} \vert \leq 2r_k$ is unity, and $\mathrm{v}_{\mathrm{p}}=(\mathrm{p}-\mathrm{p}_{\mathrm{x'}})/\vert \mathrm{p}-\mathrm{p}_{\mathrm{x'}}\vert$. The first two factors have the same form as in (\ref{eq:persist-prediction}) but here $\kappa$ is typically lower to make the update step more restrictive than the prediction step. The third factor is the normalized tubularity measure $\tau$ \citep{Sato-1998} at location $\mathrm{p}$, which makes the observations correspond preferably to regions with high tubularity, which are indeed more likely to contain neuron structures.
+%
+%To obtain the observations at iteration $k$, for each object $i$ from the previous iteration a set of particles $\{\mathrm{p}_{i}^{n}\}_{n=1}^{\rho N_{k-1}}$ is drawn from $h$ using $\mathrm{x'}=\hat{\mathrm{x}}_{k-1,i}$ (the object state estimate), with particle weight proportional to the tubularity value at that location. All these particles together are subsequently clustered in an unsupervised manner using mean-shifting \citep{cheng1995mean}, resulting in a set of clusters $\lbrace \mathscr{C}_j \rbrace_{j=1}^{M_k}$, with each cluster $\mathscr{C}_j$ having a subset $\lbrace\mathrm{p}_{i,j}^n\rbrace_{n=1}^{|\mathscr{C}_j|}$ of the particles. For each cluster, a representative sample $\mathrm{p}_{i,j}^{\hat{n}}$ is calculated using least-squares optimization,
+%\begin{equation}
+%\label{eq:n-measure} % \setminus \lbrace n \rbrace
+%\hat{n} = \argmin_n \!\!\!\!\!\sum\limits_{m \in \left[ 1, |\mathscr{C}_j| \right]}\!\!\!\!\! \theta(\mathrm{p}_{i,j}^m, \mathrm{p}_{\hat{\mathrm{x}}_{k-1,i}}, \mathrm{p}_{i,j}^n)
+%\end{equation} % e^{-\frac{}{2\sigma_{\theta}^2}}
+%where $\theta(\mathrm{p}_0, \mathrm{p}_1, \mathrm{p}_2)$ denotes the squared Euclidean distance from point $\mathrm{p}_0$ to the line segment defined by $\mathrm{p}_1$ and $\mathrm{p}_2$, calculated as
+%\begin{multline}
+%\label{eq:theta}
+%\theta(\mathrm{p}_0, \mathrm{p}_1, \mathrm{p}_2) = \\
+%\begin{cases}
+%	\vert \mathrm{p}_0 - \mathrm{p}_1 \vert^2 & \textrm{if\ } (\mathrm{p}_0-\mathrm{p}_1) \cdot (\mathrm{p}_2-\mathrm{p}_1) \leq 0 \\
+%	\vert \mathrm{p}_0 - \mathrm{p}_2 \vert^2 & \textrm{if\ } (\mathrm{p}_0-\mathrm{p}_2) \cdot (\mathrm{p}_1-\mathrm{p}_2) \leq 0 \\
+%	\frac{\vert(\mathrm{p}_2-\mathrm{p}_1) \times (\mathrm{p}_1-\mathrm{p}_0)\vert^2}{\vert\mathrm{p}_2-\mathrm{p}_1\vert^2} & \textrm{otherwise}
+%\end{cases}
+%\end{multline}
+%so that the line segment that best fits the cluster elements determines the selected location. From this the observation is obtained as $\mathrm{z}_{k,j} = [\mathrm{p}_{i,j}^{\hat{n}}, \tau(\mathrm{p}_{i,j}^{\hat{n}})]$. The process is illustrated in supplementary Fig.~S2.
+%
+%For the single-object likelihood in (\ref{eq:phd-update}) we use a Gaussian function centered at the spatial location of the observation, $g_k(\mathrm{z}|\mathrm{x})=\exp(-\vert\mathrm{p}_{\mathrm{z}}-\mathrm{p}_{\mathrm{x}}\vert^2/2\sigma_{\mathrm{z}}^2)$, giving more importance to predictions closer to $\mathrm{z}$. The clutter intensity function is defined as an exponential dependency on the observation tubularity value, $C_k(\mathrm{z})=\exp(-K_{c}\tau_{\mathrm{z}})$, implying that the clutter increases as the tubularity value goes to zero. In practice, clutter plays a role in detecting terminal points, causing tracings with low particle weights (due to their proximity to regions with low tubularity values) to not be resampled and thus dropped after the update step.
+%\subsubsection{Implementation details}
+%\label{sssec:implementation-details}
+%Algorithms~1 and 2 in the supplementary information provide a step-by-step overview of our PHD-filtering based neuron tracing method. For testing purposes the method was implemented in Java as a plugin for ImageJ \citep{abramoff2004image}. The method has several parameters for which default parameters are given in Table~\ref{tab:params}. In our experience most of them do not require extensive tuning and for the experiments we used default values. An important aspect of any SMC-based algorithm is to use a sufficient number of particles in the approximations. In our experiments we found that values of 10-20 are sufficient for $\rho$ and $\eta$ since the objects of interest in our application (neurons) are approximately 1D structures in 3D space and therefore are easily covered. Higher values can lead to higher accuracy and precision but at proportionally higher computational cost. The most important parameters are the numbers of seeds $N_0$ and rounds (Fig.~\ref{fig:method}) and in the experiments (described next) we have tested the performance of our algorithm for different values of these parameters.
 
 \begin{table}[!t]
 \small\centering
@@ -245,9 +244,9 @@ We have presented a new method for tracing the branch centerlines of neurons bas
 
 The current version of the proposed method is initialized with seed points sampled from the local maxima (from highest to lowest) of the tubularity filter response. This is a rather rudimentary approach that may sometimes result in missed branches (false negatives). Ideally, seeds should be strategically distributed so that they cover as many branches of the neuron structure as possible while avoiding background artifacts, and this is an important topic for further research. In addition, the current mechanism responsible for trace termination, based on the clutter term of the PHD filter, relies strongly on the tubularity score and thus is sensitive to local interruptions in neuron staining. This could be remedied by using a better tubularity filter and/or refining the clutter model. Thus, in future work, we will study whether further improvements could be achieved using different transition and observations models. We also aim to extend the method to perform local branch radius estimation during tracing in order to obtain complete neuron reconstructions.
 
-\section*{Funding}
-This work was supported by the Netherlands Organization for Scientific Reseach (NWO) [grant number 612.001.018 awarded to EM].
-
-\bibliographystyle{natbib}
-\bibliography{lit}
-\end{document}
+%\section*{Funding}
+%This work was supported by the Netherlands Organization for Scientific Reseach (NWO) [grant number 612.001.018 awarded to EM].
+%
+%\bibliographystyle{natbib}
+%\bibliography{lit}
+%\end{document}
