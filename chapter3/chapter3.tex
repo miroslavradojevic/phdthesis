@@ -171,7 +171,7 @@ where $\theta(\mathrm{p}_0, \mathrm{p}_1, \mathrm{p}_2)$ denotes the squared Euc
 \end{cases}
 \end{multline}
 so that the line segment that best fits the cluster elements determines the selected location. From this the observation is obtained as $\mathrm{z}_{k,j} = [\mathrm{p}_{i,j}^{\hat{n}}, \tau(\mathrm{p}_{i,j}^{\hat{n}})]$. The process is illustrated in Fig.~\ref{fig4}.
-\begin{figure}%[!t]
+\begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{2em}}c}
 		\includegraphics[width=0.4\columnwidth]{fig4a} &
@@ -216,6 +216,47 @@ For the single-object likelihood in (\ref{eq:phd-update}) we use a Gaussian func
 \subsubsection{Implementation details}
 \label{sssec:implementation-details}
 Algorithms~\ref{alg:delin} and~\ref{alg:smc-phd} provide a step-by-step overview of the introduced PHD-filtering based neuron tracing method. For testing purposes the method was implemented in Java as a plugin for ImageJ \cite{abramoff2004image}. The method has several parameters for which default parameters are given in Table~\ref{tab:params}. In our experience most of them do not require extensive tuning and for the experiments we used default values. An important aspect of any SMC-based algorithm is to use a sufficient number of particles in the approximations. In our experiments we found that values of 10-20 are sufficient for $\rho$ and $\eta$ since the objects of interest in our application (neurons) are approximately 1D structures in 3D space and therefore are easily covered. Higher values can lead to higher accuracy and precision but at proportionally higher computational cost. The most important parameters are the numbers of seeds $N_0$ and rounds (Fig.~\ref{fig:method}) and in the experiments (described next) we have tested the performance of our algorithm for different values of these parameters.
+
+\begin{table}[!t]
+	\small\centering
+	\begin{tabular}{c@{\hspace{3em}}c@{\hspace{3em}}l}
+		\hline
+		Parameter & Default & Description \\
+		\hline
+		$K_c$ & 30 & Clutter intensity function decay \\
+		$N_0$ & 20 & Number of seed points per round \\
+		$p_D$ & 0.9 & Object detection probability \\
+		$p_S$ & 0.9 & Object survival probability \\
+		$r_k$ & 3 voxels & Radial estimation step size \\
+		$\rho$ & $\geq 10$ & Number of particles per object \\
+		$\eta$ & $\geq 10$ & Number of predictions per particle \\
+		$\kappa$ & 2 & Circular variance in (\ref{eq:persist-prediction}) \& (\ref{eq:spawn-prediction}) \\
+		& 0.5 & Circular variance in (\ref{eq:observation-importance-sampling}) \\
+		\hline
+	\end{tabular}
+	\vspace{0.5\baselineskip}
+	\caption{Parameters of the proposed method with their default values. In our implementation we used constants for the object detection probability $p_D=p_{D,k}$ and the object survival probability $p_S=p_{S,k|k-1}$.}
+	\label{tab:params}
+\end{table}
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Neuron data sets} 
+\label{subsec:neuron-datasets}
+For evaluating the performance of the proposed method for both 2D and 3D neuron tracing we used three data sets (Fig.~\ref{fig5}) of real neuron images acquired with fluorescence microscopy. Two data sets are 3D image stacks from the DIADEM challenge \cite{brown2011diadem}: neocortical layer-1 axons (NCL1A) with 16 image stacks and olfactory projection fibers (OPF) with 9 image stacks. The third data set (HCN) consists of 30 2D images of hippocampal neurons \cite{steiner2002overexpression}. Together the data sets show a good variety of image contrast and structural complexity. We refer to the cited papers for further details about the images.
+
+\begin{figure}%[!t]
+	\centering
+	\includegraphics[width=\linewidth]{fig5}
+%	\vspace{-1.5\baselineskip}
+	\caption{Example images with tracing results of the data sets used in the evaluation. Top row: NCL1A image stacks (volume rendered) showing a network of neocortical layer-1 axons. Middle row: OPF image stacks (volume rendered) showing olfactory projection fibers. Bottom row: HCN images showing hippocampal neurons. The tracings (overlaid in red) were obtained with our method using 20 seeds and at most 10 rounds (up to 40 for the top row to capture more detail). For illustration purposes the image intensities are inverted in these visualizations compared to the originals, and the tracings are offset with respect to the neuron structures for better visual comparison.}
+	\label{fig5}
+\end{figure}
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Availability and implementation} Software implementing the proposed neuron tracing method was written in the Java programming language as a plugin for the ImageJ platform. Source code is freely available for non-commercial use at \url{https://bitbucket.org/miroslavradojevic/phd}.

@@ -140,7 +140,8 @@
 \include{./contents}
 %\glsaddall
 %\printglossaries
-\printglossary[style=long]
+%\printglossary[style=long]
+\printglossary[style=long,type=\acronymtype,title={List of Abbreviations}]
 
 % ************************************************************************
 \pagenumbering{arabic}
@@ -155,19 +156,18 @@
 \graphicspath{{./chapter3/}}
 \include{./chapter3/chapter3}
 
-%\graphicspath{{./chapter4/}}
-%\include{./chapter4/chapter4}
+\graphicspath{{./chapter4/}}
+\include{./chapter4/chapter4}
 
-%\graphicspath{{./chapter5/}}
-%\include{./chapter5/chapter5}
-
+\graphicspath{{./chapter5/}}
+\include{./chapter5/chapter5}
 
 \include{./bibliography}
-%\include{./summary/summary}
-%\include{./summary/samenvatting}
-%\include{./portfolio/portfolio}
-%\include{./publications/publications}
-%\include{./curriculum/curriculum}
+\include{./summary/summary}
+\include{./summary/samenvatting}
+\include{./portfolio/portfolio}
+\include{./publications/publications}
+\include{./curriculum/curriculum}
 
 % ************************************************************************
 \end{document}
