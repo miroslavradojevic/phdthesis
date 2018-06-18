@@ -241,22 +241,58 @@ Algorithms~\ref{alg:delin} and~\ref{alg:smc-phd} provide a step-by-step overview
 
 \section{Results}
 \label{sec:results}
-
 \subsection{Neuron data sets} 
 \label{subsec:neuron-datasets}
 For evaluating the performance of the proposed method for both 2D and 3D neuron tracing we used three data sets (Fig.~\ref{fig5}) of real neuron images acquired with fluorescence microscopy. Two data sets are 3D image stacks from the DIADEM challenge \cite{brown2011diadem}: neocortical layer-1 axons (NCL1A) with 16 image stacks and olfactory projection fibers (OPF) with 9 image stacks. The third data set (HCN) consists of 30 2D images of hippocampal neurons \cite{steiner2002overexpression}. Together the data sets show a good variety of image contrast and structural complexity. We refer to the cited papers for further details about the images.
-
-\begin{figure}%[!t]
+\begin{figure}
 	\centering
 	\includegraphics[width=\linewidth]{fig5}
-%	\vspace{-1.5\baselineskip}
 	\caption{Example images with tracing results of the data sets used in the evaluation. Top row: NCL1A image stacks (volume rendered) showing a network of neocortical layer-1 axons. Middle row: OPF image stacks (volume rendered) showing olfactory projection fibers. Bottom row: HCN images showing hippocampal neurons. The tracings (overlaid in red) were obtained with our method using 20 seeds and at most 10 rounds (up to 40 for the top row to capture more detail). For illustration purposes the image intensities are inverted in these visualizations compared to the originals, and the tracings are offset with respect to the neuron structures for better visual comparison.}
 	\label{fig5}
 \end{figure}
 
+\subsection{Performance measures}
+\label{subsec:performance-measures}
+The accuracy of the tracings produced by our method was assessed by comparison with the gold-standard obtained by manual delineation of the neuron structures \cite{gillette2011diademchallenge, meijering2004design}. To this end, two categories of evaluation measures are used. The first consists of measures summarizing the spatial Euclidean distances between the nodes of two tracings to be compared: the average spatial distance (SD), the average substantial spatial distance (SSD), and the fraction of nodes whose distance is at least the substantial distance (\%SSD). Similar to previous studies using these measures \cite{peng2010v3d} we set the substantial distance to 2 (pixels in 2D and voxels in 3D). The second category of evaluation measures are based on the numbers of true-positive (TP), false-positive (FP), and false-negative (FN) nodes according to the substantial distance. From these we compute the recall, $\textrm{R}=\textrm{TP}/(\textrm{TP}+\textrm{FN})$, and precision, $\textrm{P}=\textrm{TP}/(\textrm{TP}+\textrm{FP})$, summarized using the F-score, $\textrm{F}=2\,\textrm{P}\,\textrm{R}/(\textrm{P}+\textrm{R})$. Prior to computing these measures the tracings (from the method and the gold-standard) were resampled with an equal step size of 1 pixel using Vaa3D \cite{peng2010v3d}.
 
+\subsection{Evaluation of method behavior} 
+\label{subsec:evaluation-of-method-behavior}
+First we evaluated the behavior of our method as a function of the number of seeds and rounds. For this experiment we measured P, R, and F for 1) a single round of filtering with different numbers of seeds and 2) multiple rounds of filtering using a fixed number of seeds. Since our algorithm operates probabilistically we averaged the results of five repetitions of the experiment. The results for the NCL1A data set are shown in Fig.~\ref{fig:tests-203} and for the other data sets in Fig.~\ref{fig6}. As expected, R and F generally increase, but P slightly decreases as the number of seeds and rounds increase, indicating an increase in the number of FP detections. The specific patterns may differ depending on the image content, but we observe that as a function of the number of seeds, the increase of R and F levels off beyond about 40, so we subsequently used this value. As a function of the number of rounds, R and F level off after about 4 rounds, indicating there is no need in practice to run the method exhaustively on all possible seed points. This can be explained from the fact that seed selection proceeds from highest to lowest tubularity value, so that later seeds correspond to less and less valuable image structures, and the resulting tracings will be dropped due to low particle weights. Examples of traced neurons for the different data sets are shown in Fig.~\ref{fig:viz}. As can be observed from the examples in the top row of the figure, images with more fuzzy and fragmented structures may require more rounds to capture more detail. Alternatively, a better tubularity filter may be needed.
 
-
+\begin{figure}
+	\centering
+	\begin{tabular}{c@{\hspace{1ex}}c@{\hspace{1ex}}c@{\hspace{3ex}}c@{\hspace{1ex}}c@{\hspace{1ex}}c}
+		a) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6a1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6a2} &
+		b) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6b1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6b2} \\
+		\vspace{-2ex} \\
+		c) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6c1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6c2} &
+		d) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6d1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6d2} \\
+		\vspace{-2ex} \\
+		e) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6e1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6e2} &
+		f) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6f1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6f2} \\
+		\vspace{-2ex} \\
+		g) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6g1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6g2} &
+		h) &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6h1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{fig6h2} \\
+	\end{tabular}
+	\caption{Performance as a function of numbers of seeds and rounds for four example cases from the OPF (a-d) and the HCN (e-h) data set. Similar trends were observed for all cases in the respective data sets. Left panel per case: Precision (P), recall (R), and F-score (F) after one round initialized with different numbers of seeds ($N_0$). Right panel per case: The scores after multiple rounds with a fixed number of seeds ($N_0=40$). Fifth-order polynomial curves were fit to the data to show approximate trends.}
+	\label{fig6}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Availability and implementation} Software implementing the proposed neuron tracing method was written in the Java programming language as a plugin for the ImageJ platform. Source code is freely available for non-commercial use at \url{https://bitbucket.org/miroslavradojevic/phd}.
