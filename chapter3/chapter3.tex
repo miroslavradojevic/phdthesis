@@ -307,7 +307,7 @@ First we evaluated the behavior of our method as a function of the number of see
 
 \subsection{Comparison with other methods}
 \label{subsec:comparison-with-other-methods}
-Next we compared the performance of our method (PHD) with several alterative methods, namely all-path pruning (APP2) \cite{xiao2013app2}, NeuroGPS-Tree (GPS) \cite{quan2015neurogps}, minimum spanning tree (MST) tracing as used in the BigNeuron project \cite{Peng-2015}, and Neural Circuit Tracer (NCT) \cite{chothani2011automated}. For each of these methods the scores were optimized by trying all possible parameter values on a grid. The results for the NCL1A data set are shown in Fig.~\ref{fig:compare-ncl1a} and for the other data sets in supplementary Figs.~S4 and S5. We observe that our method (results indicated in red) performs comparably or even better than the state-of-the-art methods. This suggests there may indeed be an advantage in using probabilistic approaches such as the one proposed in this paper. We note that NCT (results indicated in blue), while performing superiorly in most cases, required significant user interaction and manual correction to enable export of the tracings to the standard SWC file format used in our evaluations. Thus the results of this method include a high level of expert input and could serve as a reference. All other methods including our own were fully automatic after parameter selection.
+Next we compared the performance of our method (PHD) with several alterative methods, namely all-path pruning (APP2) \cite{xiao2013app2}, NeuroGPS-Tree (GPS) \cite{quan2015neurogps}, minimum spanning tree (MST) tracing as used in the BigNeuron project \cite{Peng-2015}, and Neural Circuit Tracer (NCT) \cite{chothani2011automated}. For each of these methods the scores were optimized by trying all possible parameter values on a grid. The results for the NCL1A data set are shown in Fig.~\ref{fig12} and for the other data sets in supplementary Figs.~S4 and S5. We observe that our method (results indicated in red) performs comparably or even better than the state-of-the-art methods. This suggests there may indeed be an advantage in using probabilistic approaches such as the one proposed in this paper. We note that NCT (results indicated in blue), while performing superiorly in most cases, required significant user interaction and manual correction to enable export of the tracings to the standard SWC file format used in our evaluations. Thus the results of this method include a high level of expert input and could serve as a reference. All other methods including our own were fully automatic after parameter selection.
 
 % add here S4 (fig8) and S5 (fig9)
 
@@ -322,14 +322,14 @@ In terms of computational efficiency it turned out difficult to directly compare
 	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
 		\includegraphics[width=0.31\columnwidth]{p_ncl1a} &
 		\includegraphics[width=0.31\columnwidth]{r_ncl1a} & 
-		\includegraphics[width=0.31\columnwidth]{f_ncl1a} \\[1ex]
+		\includegraphics[width=0.31\columnwidth]{f_ncl1a} \\%[1ex]
 		\includegraphics[width=0.31\columnwidth]{sd_ncl1a} &
 		\includegraphics[width=0.31\columnwidth]{ssd_ncl1a} &
 		\includegraphics[width=0.31\columnwidth]{pssd_ncl1a} \\
 	\end{tabular}
-	\vspace{-\baselineskip}
+%	\vspace{-\baselineskip}
 	\caption{Performance comparison of our method with several other methods on the NCL1A data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
-	\label{fig12}% fig:compare-ncl1a
+	\label{fig12}
 \end{figure}
 
 \section{Conclusions}
@@ -338,6 +338,4 @@ We have presented a new method for tracing the branch centerlines of neurons bas
 
 The current version of the proposed method is initialized with seed points sampled from the local maxima (from highest to lowest) of the tubularity filter response. This is a rather rudimentary approach that may sometimes result in missed branches (false negatives). Ideally, seeds should be strategically distributed so that they cover as many branches of the neuron structure as possible while avoiding background artifacts, and this is an important topic for further research. In addition, the current mechanism responsible for trace termination, based on the clutter term of the PHD filter, relies strongly on the tubularity score and thus is sensitive to local interruptions in neuron staining. This could be remedied by using a better tubularity filter and/or refining the clutter model. Thus, in future work, we will study whether further improvements could be achieved using different transition and observations models. We also aim to extend the method to perform local branch radius estimation during tracing in order to obtain complete neuron reconstructions.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{Availability and implementation} 
 Software implementing the proposed neuron tracing method was written in the Java programming language as a plugin for the ImageJ platform. Source code is freely available for non-commercial use at \url{https://bitbucket.org/miroslavradojevic/phd}.
