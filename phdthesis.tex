@@ -11,17 +11,10 @@
 \setcounter{secnumdepth}{3}
 
 \usepackage{./styfiles/mya4layout}
-\usepackage{./styfiles/myborder}
 \usepackage{./styfiles/myheadings}
-\usepackage{./styfiles/mycleardblpg}
-\usepackage{./styfiles/mybbb}
 \usepackage{./styfiles/myquote}
-\usepackage{./styfiles/mysquote}
 \usepackage{./styfiles/mycaption}
-\usepackage{./styfiles/myabbrevia}
 \usepackage{./styfiles/myabstract}
-\usepackage{./styfiles/myappendix}
-\usepackage{./styfiles/dropping}
 \usepackage{lettrine}
 \usepackage{afterpage}
 \usepackage{amssymb,amsfonts,amsmath}
@@ -37,11 +30,9 @@
 \usepackage[english]{babel}
 \usepackage[caption=false]{subfig}
 \usepackage[mathscr]{euscript}
-\usepackage{url}%hyperref
+\usepackage{url}
 \usepackage[toc]{glossaries}
-\usepackage{pagecolor}% for the coverpage bacground color
-%\usepackage{geometry}
-
+\usepackage{pagecolor}
 
 \bibliographystyle{./styfiles/mybibstyle}
 
@@ -95,16 +86,19 @@
 \rule{\textwidth}{0.4pt}
 }
 
-%\newenvironment{changemargin}[2]{%
-%	\begin{list}{}{%
-%			\setlength{\topsep}{0pt}%
-%			\setlength{\leftmargin}{#1}%
-%			\setlength{\rightmargin}{#2}%
-%			\setlength{\listparindent}{\parindent}%
-%			\setlength{\itemindent}{\parindent}%
-%			\setlength{\parsep}{\parskip}%
-%		}%
-%		\item[]}{\end{list}}
+\newenvironment{changemargin}[2]{%
+	\begin{list}{}{
+			\setlength{\topsep}{0cm}%
+			\setlength{\leftmargin}{#1}%
+			\setlength{\rightmargin}{#2}%
+			\setlength{\listparindent}{\parindent}%
+			\setlength{\itemindent}{\parindent}%
+			\setlength{\parsep}{\parskip}%
+%			\voffset 	0mm 
+%			\hoffset 	0.0mm
+%			\textheight 250.0mm
+		}%
+		\item[]}{\end{list}}
 
 %------------------------------------------------------------------
 \newcommand{\red}[1]{\textcolor{red}{#1}}
@@ -121,10 +115,8 @@
 %------------------------------------------------------------------
 \makeglossaries
 \loadglsentries{abbreviations}
-
 % ************************************************************************
 %\includeonly{}
-
 % ************************************************************************
 \begin{document}
 \selectlanguage{english}
