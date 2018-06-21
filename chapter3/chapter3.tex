@@ -309,7 +309,23 @@ First we evaluated the behavior of our method as a function of the number of see
 \label{subsec:comparison-with-other-methods}
 Next we compared the performance of our method (PHD) with several alterative methods, namely all-path pruning (APP2) \cite{xiao2013app2}, NeuroGPS-Tree (GPS) \cite{quan2015neurogps}, minimum spanning tree (MST) tracing as used in the BigNeuron project \cite{Peng-2015}, and Neural Circuit Tracer (NCT) \cite{chothani2011automated}. For each of these methods the scores were optimized by trying all possible parameter values on a grid. The results for the NCL1A data set are shown in Fig.~\ref{fig12} and for the other data sets in supplementary Figs.~S4 and S5. We observe that our method (results indicated in red) performs comparably or even better than the state-of-the-art methods. This suggests there may indeed be an advantage in using probabilistic approaches such as the one proposed in this paper. We note that NCT (results indicated in blue), while performing superiorly in most cases, required significant user interaction and manual correction to enable export of the tracings to the standard SWC file format used in our evaluations. Thus the results of this method include a high level of expert input and could serve as a reference. All other methods including our own were fully automatic after parameter selection.
 
-% add here S4 (fig8) and S5 (fig9)
+% add here S4 (fig8) 
+\begin{figure}
+	\centering
+	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
+		\includegraphics[width=0.31\columnwidth]{fig8a} &
+		\includegraphics[width=0.31\columnwidth]{./fig/r_opf} &% ./fig/compare/opf/r
+		\includegraphics[width=0.31\columnwidth]{./fig/f_opf} \\%[1ex]% ./fig/compare/opf/f
+		\includegraphics[width=0.31\columnwidth]{./fig/sd_opf} &% ./fig/compare/opf/sd
+		\includegraphics[width=0.31\columnwidth]{./fig/ssd_opf} &% ./fig/compare/opf/ssd
+		\includegraphics[width=0.31\columnwidth]{./fig/pssd_opf} \\% ./fig/compare/opf/pssd
+	\end{tabular}
+	\caption{Performance comparison of our method with several other methods on the OPF data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
+	\label{fig8}% S4 fig:compare-opf
+\end{figure}
+
+% S5 (fig9)
+
 
 To further demonstrate the advantage of our method over the others in challenging situations we also studied the case when neuron fibers meet, run closely parallel to each other for some distance, and then diverge again. In order to analyze the behavior of the different methods in a controlled manner, with increasing distance between the fibers, we synthesized images with two fibers of similar intensity and scale. The results, shown in supplementary Fig.~S6, demonstrate that our PHD method, similar to GPS, yields more faithful tracings than APP2 and MST. NCT was not included in these experiments for reasons mentioned above. Not surprisingly, all methods break down when the fibers overlap completely. We also created an even more challenging case, with three fibers of different intensity and scale. The results, shown in supplementary Fig.~S7, illustrate that our method outperforms even the best alternatives.
 
@@ -320,15 +336,14 @@ In terms of computational efficiency it turned out difficult to directly compare
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
-		\includegraphics[width=0.31\columnwidth]{p_ncl1a} &
-		\includegraphics[width=0.31\columnwidth]{r_ncl1a} & 
-		\includegraphics[width=0.31\columnwidth]{f_ncl1a} \\%[1ex]
-		\includegraphics[width=0.31\columnwidth]{sd_ncl1a} &
-		\includegraphics[width=0.31\columnwidth]{ssd_ncl1a} &
-		\includegraphics[width=0.31\columnwidth]{pssd_ncl1a} \\
+		\includegraphics[width=0.31\columnwidth]{fig12a} &
+		\includegraphics[width=0.31\columnwidth]{fig12b} & 
+		\includegraphics[width=0.31\columnwidth]{fig12c} \\
+		\includegraphics[width=0.31\columnwidth]{fig12d} &
+		\includegraphics[width=0.31\columnwidth]{fig12e} &
+		\includegraphics[width=0.31\columnwidth]{fig12f} \\
 	\end{tabular}
-%	\vspace{-\baselineskip}
-	\caption{Performance comparison of our method with several other methods on the NCL1A data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
+	\caption{Performance comparison of the method with several other methods on the NCL1A data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
 	\label{fig12}
 \end{figure}
 
