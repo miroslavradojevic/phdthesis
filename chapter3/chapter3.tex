@@ -309,27 +309,96 @@ First we evaluated the behavior of our method as a function of the number of see
 \label{subsec:comparison-with-other-methods}
 Next we compared the performance of our method (PHD) with several alterative methods, namely all-path pruning (APP2) \cite{xiao2013app2}, NeuroGPS-Tree (GPS) \cite{quan2015neurogps}, minimum spanning tree (MST) tracing as used in the BigNeuron project \cite{Peng-2015}, and Neural Circuit Tracer (NCT) \cite{chothani2011automated}. For each of these methods the scores were optimized by trying all possible parameter values on a grid. The results for the NCL1A data set are shown in Fig.~\ref{fig12} and for the other data sets in supplementary Figs.~S4 and S5. We observe that our method (results indicated in red) performs comparably or even better than the state-of-the-art methods. This suggests there may indeed be an advantage in using probabilistic approaches such as the one proposed in this paper. We note that NCT (results indicated in blue), while performing superiorly in most cases, required significant user interaction and manual correction to enable export of the tracings to the standard SWC file format used in our evaluations. Thus the results of this method include a high level of expert input and could serve as a reference. All other methods including our own were fully automatic after parameter selection.
 
-% add here S4 (fig8) 
+% S4 (fig8) 
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
 		\includegraphics[width=0.31\columnwidth]{fig8a} &
-		\includegraphics[width=0.31\columnwidth]{r_opf} &% compare/opf/r
-		\includegraphics[width=0.31\columnwidth]{f_opf} \\%[1ex]% compare/opf/f
-		\includegraphics[width=0.31\columnwidth]{sd_opf} &% compare/opf/sd
-		\includegraphics[width=0.31\columnwidth]{ssd_opf} &% compare/opf/ssd
-		\includegraphics[width=0.31\columnwidth]{pssd_opf} \\% compare/opf/pssd
+		\includegraphics[width=0.31\columnwidth]{fig8b} &
+		\includegraphics[width=0.31\columnwidth]{fig8c} \\
+		\includegraphics[width=0.31\columnwidth]{fig8d} &
+		\includegraphics[width=0.31\columnwidth]{fig8e} &
+		\includegraphics[width=0.31\columnwidth]{fig8f} \\
 	\end{tabular}
 	\caption{Performance comparison of our method with several other methods on the OPF data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
 	\label{fig8}% S4 fig:compare-opf
 \end{figure}
 
 % S5 (fig9)
-
+\begin{figure}
+	\centering
+	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
+		\includegraphics[width=0.31\columnwidth]{fig9a} &% ./fig/compare/saria/p
+		\includegraphics[width=0.31\columnwidth]{r_saria} &% ./fig/compare/saria/r
+		\includegraphics[width=0.31\columnwidth]{f_saria} \\%[1ex]% ./fig/compare/saria/f
+		\includegraphics[width=0.31\columnwidth]{sd_saria} &% ./fig/compare/saria/sd
+		\includegraphics[width=0.31\columnwidth]{ssd_saria} &% ./fig/compare/saria/ssd
+		\includegraphics[width=0.31\columnwidth]{pssd_saria} \\% ./fig/compare/saria/pssd
+	\end{tabular}
+	\caption{Performance comparison of our method with several other methods on the HCN data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
+	\label{fig9}% S5 fig:compare-saria
+\end{figure}
 
 To further demonstrate the advantage of our method over the others in challenging situations we also studied the case when neuron fibers meet, run closely parallel to each other for some distance, and then diverge again. In order to analyze the behavior of the different methods in a controlled manner, with increasing distance between the fibers, we synthesized images with two fibers of similar intensity and scale. The results, shown in supplementary Fig.~S6, demonstrate that our PHD method, similar to GPS, yields more faithful tracings than APP2 and MST. NCT was not included in these experiments for reasons mentioned above. Not surprisingly, all methods break down when the fibers overlap completely. We also created an even more challenging case, with three fibers of different intensity and scale. The results, shown in supplementary Fig.~S7, illustrate that our method outperforms even the best alternatives.
 
-% add here S6 (fig10) and S7 (fig11)
+% S6 (fig10) 
+\begin{figure}
+	\centering
+	\begin{tabular}{r@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
+		Case: &
+		\includegraphics[align=c,width=0.15\columnwidth]{./fig/c2.compare/i1_inv} &
+		\includegraphics[align=c,width=0.15\columnwidth]{./fig/c2.compare/i2_inv} &
+		\includegraphics[align=c,width=0.15\columnwidth]{./fig/c2.compare/i3_inv}\\
+		PHD: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/phd,i1,c0,s0} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/phd,i2,c0,s0} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/phd,i3,c0,s0} \\
+		GPS: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/gps,i1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/gps,i2} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/gps,i3} \\
+		APP2: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/app2,i1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/app2,i2} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/app2,i3} \\
+		MST: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/mst,i1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/mst,i2} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c2.compare/mst,i3} \\
+	\end{tabular}
+	\caption{Ability of the tested methods to separate two fibers of similar intensity and scale running closely in parallel. The examples show cases with gradually increasing distance between the fibers: overlap (left column), just separated (middle column), and clearly separated (right column). The tracing results of PHD, GPS, APP2, MST are overlaid (with slight offset) in red color.}
+	\label{fig:phd-advantage-2} % S6
+\end{figure}
+
+% S7 (fig11)
+\begin{figure}[!t]
+	\centering
+	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
+		%\multicolumn{4}{c}{\includegraphics[align=c,width=0.2\columnwidth]{./fig/test2d.compare/i}}\\
+		Case: &
+		\includegraphics[align=c,width=0.15\columnwidth]{./fig/c3.compare/i1_inv} &
+		\includegraphics[align=c,width=0.15\columnwidth]{./fig/c3.compare/i2_inv} &
+		\includegraphics[align=c,width=0.15\columnwidth]{./fig/c3.compare/i3_inv}\\
+		PHD: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/phd,i1,c0,s0} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/phd,i2,c0,s0} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/phd,i3,c0,s0} \\
+		GPS: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/gps,i1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/gps,i2} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/gps,i3} \\
+		APP2: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/app2,i1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/app2,i2} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/app2,i3} \\
+		MST: &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/mst,i1} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/mst,i2} &
+		\includegraphics[align=c,width=0.2\columnwidth]{./fig/c3.compare/mst,i3} \\
+	\end{tabular}
+	\caption{Ability of the tested methods to separate three fibers with different intensity and scale running closely in parallel. The examples show cases with gradually increasing distance between the fibers: overlap (left column), just separated (middle column), and clearly separated (right column). The tracing results of PHD, GPS, APP2, MST are overlaid (with slight offset) in red color.}
+	\label{fig:phd-advantage-3} % S7
+\end{figure}
 
 In terms of computational efficiency it turned out difficult to directly compare the methods. This was mainly due to the use of different programming languages (Java versus C++) and the varying efficiencies of underlying software libraries used on the different operating systems we considered (Linux Ubuntu and Mac OS). Moreover we observed that the absolute as well as the relative execution times of the different methods varied widely depending on the image content. Generally we found APP2 to be the fastest method (on the order of seconds per image), and PHD up to about one order of magnitude slower, while GPS and MST were either slower or faster than PHD depending on the configuration. NCT is ignored here for mentioned reasons. From these observations we conclude that the efficiency of our method is comparable to the state of the art.
 
