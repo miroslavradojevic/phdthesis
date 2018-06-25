@@ -1,46 +1,46 @@
-\documentclass[twocolumn,natbib]{svjour3}
-\usepackage{amssymb,amsmath,upgreek,txfonts,array,color,mathtools,algorithm,algpseudocode,grffile,adjustbox,graphbox,url}
-\usepackage[english]{babel}
-\usepackage[caption=false]{subfig}
-\usepackage[mathscr]{euscript}
-
-\newcommand{\red}[1]{\textcolor{red}{#1}}
-\newcommand{\blue}[1]{\textcolor{blue}{#1}}
-\newcommand{\Rho}{\mathrm{P}}
-
-\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
-\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
-
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\argmax}{arg\,max}
-
-\bibliographystyle{ninf}
-\journalname{Neuroinformatics}
-
-\begin{document}
-
-\title{Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images using Sequential Monte Carlo Estimation}
-
-\author{Miroslav Radojevi\'{c} \and Erik Meijering}
-
-\institute{M. Radojevi\'{c} \and E. Meijering\\
-              Biomedical Imaging Group Rotterdam\\
-              Erasmus University Medical Center, Rotterdam, the Netherlands\\
-              Departments of Medical Informatics and Radiology\\
-              \email{meijering@imagescience.org}      
-}
-
-\date{}
-\maketitle
-
-\begin{abstract}
-Microscopic images of neuronal cells provide essential structural information about the key constituents of the brain and form the basis of many neuroscientific studies. Computational analyses of the morphological properties of the captured neurons require first converting the structural information into digital tree-like reconstructions. Many dedicated computational methods and corresponding software tools have been and are continuously being developed with the aim to automate this step while achieving human-comparable reconstruction accuracy. This pursuit is hampered by the immense diversity and intricacy of neuronal morphologies as well as the often low quality and ambiguity of the images. Here we present a novel method we developed in an effort to improve the robustness of digital reconstruction against these complicating factors. The method is based on probabilistic filtering by sequential Monte Carlo estimation and uses prediction and update models designed specifically for tracing neuronal branches in microscopic image stacks. Moreover, it uses multiple probabilistic traces to arrive at a more robust, ensemble reconstruction. The proposed method was evaluated on fluorescence microscopy image stacks of single neurons and dense neuronal networks with expert manual annotations serving as the gold standard, as well as on synthetic images with known ground truth. The results indicate that our method performs well under varying experimental conditions and compares favorably to state-of-the-art alternative methods.
-\keywords{Neuron reconstruction \and Bayesian filtering \and Sequential Monte Carlo estimation \and Particle filtering \and Fluorescence microscopy}
-\end{abstract}
-
-\section{Introduction} 
-\label{sec:intro}
-The brain is regarded as one of the most complex and enigmatic biological structures. Composed of an intricate network of tree-shaped neuronal cells \citep{ascoli2015trees}, together forming a powerful information processing unit, it performs a myriad of functions that are essential to living organisms \citep{kandel2000principles}. Obtaining a blue print of the architecture of this network, including the morphologies and interconnectivities of the neurons in various subunits, helps to understand how the brain works \citep{ascoli2002computational, donohue2008comparative, cuntz2010one}, including how  neurodegenerative disease processes alter its function. A key instrument in this endeavor is microscopic imaging, as it allows detailed visualization of neuronal cells in isolation and in tissue, thus providing the means to study their structural properties quantitatively \citep{senft2011brief}.
+%\documentclass[twocolumn,natbib]{svjour3}
+%\usepackage{amssymb,amsmath,upgreek,txfonts,array,color,mathtools,algorithm,algpseudocode,grffile,adjustbox,graphbox,url}
+%\usepackage[english]{babel}
+%\usepackage[caption=false]{subfig}
+%\usepackage[mathscr]{euscript}
+%
+%\newcommand{\red}[1]{\textcolor{red}{#1}}
+%\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+%\newcommand{\Rho}{\mathrm{P}}
+%
+%\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+%\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+%
+%\DeclareMathOperator*{\argmin}{arg\,min}
+%\DeclareMathOperator*{\argmax}{arg\,max}
+%
+%\bibliographystyle{ninf}
+%\journalname{Neuroinformatics}
+%
+%\begin{document}
+%
+%\title{Automated Neuron Reconstruction from 3D Fluorescence Microscopy Images using Sequential Monte Carlo Estimation}
+%
+%\author{Miroslav Radojevi\'{c} \and Erik Meijering}
+%
+%\institute{M. Radojevi\'{c} \and E. Meijering\\
+%              Biomedical Imaging Group Rotterdam\\
+%              Erasmus University Medical Center, Rotterdam, the Netherlands\\
+%              Departments of Medical Informatics and Radiology\\
+%              \email{meijering@imagescience.org}      
+%}
+%
+%\date{}
+%\maketitle
+%
+%\begin{abstract}
+%Microscopic images of neuronal cells provide essential structural information about the key constituents of the brain and form the basis of many neuroscientific studies. Computational analyses of the morphological properties of the captured neurons require first converting the structural information into digital tree-like reconstructions. Many dedicated computational methods and corresponding software tools have been and are continuously being developed with the aim to automate this step while achieving human-comparable reconstruction accuracy. This pursuit is hampered by the immense diversity and intricacy of neuronal morphologies as well as the often low quality and ambiguity of the images. Here we present a novel method we developed in an effort to improve the robustness of digital reconstruction against these complicating factors. The method is based on probabilistic filtering by sequential Monte Carlo estimation and uses prediction and update models designed specifically for tracing neuronal branches in microscopic image stacks. Moreover, it uses multiple probabilistic traces to arrive at a more robust, ensemble reconstruction. The proposed method was evaluated on fluorescence microscopy image stacks of single neurons and dense neuronal networks with expert manual annotations serving as the gold standard, as well as on synthetic images with known ground truth. The results indicate that our method performs well under varying experimental conditions and compares favorably to state-of-the-art alternative methods.
+%\keywords{Neuron reconstruction \and Bayesian filtering \and Sequential Monte Carlo estimation \and Particle filtering \and Fluorescence microscopy}
+%\end{abstract}
+%
+%\section{Introduction} 
+%\label{sec:intro}
+%The brain is regarded as one of the most complex and enigmatic biological structures. Composed of an intricate network of tree-shaped neuronal cells \citep{ascoli2015trees}, together forming a powerful information processing unit, it performs a myriad of functions that are essential to living organisms \citep{kandel2000principles}. Obtaining a blue print of the architecture of this network, including the morphologies and interconnectivities of the neurons in various subunits, helps to understand how the brain works \citep{ascoli2002computational, donohue2008comparative, cuntz2010one}, including how  neurodegenerative disease processes alter its function. A key instrument in this endeavor is microscopic imaging, as it allows detailed visualization of neuronal cells in isolation and in tissue, thus providing the means to study their structural properties quantitatively \citep{senft2011brief}.
 
 Quantitative measurement and statistical analysis of neuronal cell and network properties from microscopic data rely on the ability to obtain accurate digital reconstructions of the branching structures \citep{halavi2012digital} in the form of a directional tree of connected nodes \citep{ascoli2007neuromorpho}. The ever increasing amount of available image data calls for automated computational methods and software tools for this purpose, as manual delineation of neurons is extremely cumbersome even in single image stacks, and is downright infeasible in processing large numbers of images \citep{svoboda2011past, senft2011brief}. Automating neuron reconstruction requires solving fundamental computer vision problems such as detecting and segmenting tree-like image structures \citep{meijering2010neuron, donohue2011automated, acciai2016automated}. This is complicated by the large diversity of neuron types, imperfections in cell staining, optical distortions, inevitable image noise, and other causes of ambiguity in the image data. Consequently, with the current state-of-the-art, manual proof-editing of automatically obtained digital reconstructions is often necessary \citep{peng2011proof}. Recent international initiatives such as the DIADEM challenge \citep{gillette2011diademchallenge} and the BigNeuron project \citep{peng2015bigneuron, peng2015diadem2bigneuron} have catalyzed research in automated neuron reconstruction but have also clearly revealed that further improvement is still very much needed before computers can fully replace manual labor in performing this task.
 
