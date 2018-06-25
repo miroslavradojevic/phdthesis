@@ -1,0 +1,911 @@
+\documentclass[twocolumn,natbib]{svjour3}
+
+\usepackage{xcolor}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{txfonts}
+\usepackage{url}
+\usepackage{array}
+
+\newcolumntype{C}[0]{>{\centering\arraybackslash}m{5ex}}
+\renewcommand{\arraystretch}{1.2}
+
+\bibliographystyle{ninf}
+
+\journalname{Neuroinformatics}
+
+\begin{document}
+
+\title{Automated neuron detection in high-content fluorescence microscopy images using machine learning}
+
+\author{Gadea Mata$^{*}$ \and Miroslav Radojevi\'{c}$^{*}$ \and Carlos Fernandez-Lozano$^{*}$ \and Ihor Smal \and Miguel Morales \and Erik Meijering \and Julio Rubio}
+
+\authorrunning{Mata et al.}
+
+\institute{
+G. Mata \and J. Rubio \at
+Department of Mathematics and Computer Science,\\
+University of La Rioja, Logro\~no, Spain\\
+\email{gadea.mata@unirioja.es}
+\and
+M. Radojevi\'{c} \and I. Smal \and E. Meijering \at
+Biomedical Imaging Group Rotterdam,\\
+Departments of Medical Informatics and Radiology,\\
+Erasmus University Medical Center, Rotterdam, Netherlands
+\and
+C. Fernandez-Lozano \at
+Department of Computation, Faculty of Computer Science,\\
+University of A Coru\~na, A Coru\~na, Spain, and\\
+Instituto de Investigaci\'on Biom\'edica de A Coru\~na,\\
+Complexo Hospitalario Universitario de A Coru\~na, A Coru\~na, Spain
+\and
+M. Morales \at
+Molecular Cognition Laboratory,\\
+Biophysics Institute, CSIC-UPV/EHU,\\
+Campus Universidad del Pa{\'i}s Vasco, Leioa, Spain
+\and
+$^{*}$These authors contributed equally to this work.
+}
+
+\date{}
+
+\maketitle
+
+\begin{abstract}
+The study of neuronal morphology in relation to function, and the development of effective medicines to positively impact this relationship in patients suffering from neurodegenerative diseases, increasingly involves image-based high-content screening and analysis. The first critical step toward fully automated high-content image analyses in such studies is to detect all neuronal cells and distinguish them from possible non-neuronal cells or artifacts in the images. Here we investigate the performance of well-established machine learning techniques for this purpose. These include support vector machines, random forests, k-nearest neighbors, and generalized linear model classifiers, operating on an extensive set of image features extracted using the compound hierarchy of algorithms representing morphology, and the scale-invariant feature transform. We present experiments on a dataset of rat hippocampal neurons from our own studies to find the most suitable classifier(s) and subset(s) of features in the common practical setting where there is very limited annotated data for training. {\color{red}The results indicate that a random forests classifier using the right feature subset ranks best for the considered task, although its performance is not statistically significantly better than some support vector machine based classification models.}
+\keywords{Neuron detection \and High-content analysis \and Fluorescence microscopy \and Machine learning}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Neurons are special cells in the sense that they codify and transmit information in the form of action potentials. Networks consisting of many billions of neurons, such as in the brains of higher organisms, are extraordinarily complex and perform many different functions. Since the pioneering work of \cite{Cajal2007} it is well known that the morphology of neurons vary widely in different parts of the brain and that neuronal morphology and function are intricately linked. Moreover, in healthy conditions, neuronal (sub)networks within the brain are dynamic and continuously readjust their connections during the lifetime of an organism in response to external stimuli, in order to refine existing functions or learn new ones \citep{Ascoli-2015}. Conversely, in pathological conditions, disease processes destructively alter neuronal morphology and cause progressive loss of function, such as in Alzheimer's and Parkinson's disease, but also in aging \citep{Pelt-2001}. Thus the study of neuronal cell morphology in relation to function, in health and disease, is of high importance for developing suitable drugs and therapies \citep{Meijering-2010}.
+
+A convenient tool to visualize large numbers of cultured cells for phenotypic profiling and analysis in drug discovery is high-content fluorescence microscopy imaging \citep{Xia-2012, Antony-2013, Singh-2014, Bougen-Zhukov-2017}. By automated acquisition it produces very large amounts of image data, which cannot be analyzed manually but require automated high-content analysis (HCA) in order to take full advantage of all captured information. HCA is also used increasingly in neuroscience research \citep{D08, ARB09, Jain-2012} and various image processing pipelines have been developed for quantitative analysis of neuronal cells in high-content images \citep{Vallotton-2007, Zhang-2007, Wu-2010, Dehmelt-2011, RN12, Charoenkwan-2013, Smafield-2015}. However, especially in screening applications, where the image quality is often relatively low and may vary widely between experiments, the challenge remains to develop more accurate and more robust image analysis methods \citep{Sommer-2013, Kraus-2016, Meijering-2016}.
+
+The first critical step in any HCA pipeline is the detection of the objects of interest in the images. It is well recognized now in many areas of microscopic image analysis that machine learning based classification methods are an excellent choice for this task and typically outperform non-learning methods based on manually defined rules \citep{Horvath-2011, Sommer-2013, Kraus-2016, Arganda-Carreras-2017}. However, which classifiers work best, and on which sets of image features, may depend on the specific image data and detection task, and needs to be determined experimentally before using HCA on a routine basis in a given application.
+
+In this paper we investigate the performance of machine learning methods for the specific task of detecting neuronal cells in high-content fluorescence microscopy images as a first step toward fully automated HCA in our neuroscientific studies. We recently presented an early version of our work at a conference \citep{Mata-2016} and report here on a significant extension of that work including more classifiers, more extensive experiments and results, and a much deeper and more solid (statistical) analysis and discussion of the findings. {\color{red}We explore classifiers based on precalculated image features in order to determine which combinations of classifiers and features work best in a practical setting where there is very limited annotated data for training. Specifically, we consider various state-of-the-art classifiers based on support vector machines (SVM), random forests (RF), k-nearest neighbors (KNN), and generalized linear models (in particular GLMNET)}, operating on more than a thousand image features extracted using the compound hierarchy of algorithms representing morphology (CHARM) and the scale-invariant feature transform (SIFT).
+
+\section{Materials and Methods}
+\label{sec:matmet}
+
+To facilitate reproducibility of our study we made use of published image data and employed publicly available software tools. Here we successively describe the image dataset, the used methods for extracting image features, and the considered machine learning methods. {\color{red}All materials and methods are available as part of this publication from http://www. unirioja.es/cu/jurubio/ANDHCFMIUML/.}
+
+\subsection{Image Dataset}
+\label{sec:data}
+
+The high-content image data used in this study is from our ongoing research into effective treatments for neurological disorders \citep{Cuesto-2011, Enriquez-Barreto-2014, Enriquez-Barreto-2016}. We describe the acquisition of the images, their annotation, and the strategy we used to obtain a well-balanced dataset for training of the machine learning algorithms.
+
+\subsubsection{Image Acquisition}
+\label{sec:acquisition}
+
+\begin{figure*}[!t]
+\centering
+\begin{tabular}{@{}c@{\hspace{0.05\textwidth}}c@{}}
+	\begin{tabular}{@{}c@{}}
+		\includegraphics[width=0.5\textwidth]{fig01a} \\[1ex]
+		(a) Example high-content image. Scale bar: 500$\mu$m. \\
+	\end{tabular} &
+	\begin{tabular}{@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}}
+		\includegraphics[width=0.085\textwidth]{fig01b01} &
+		\includegraphics[width=0.085\textwidth]{fig01b02} &
+		\includegraphics[width=0.085\textwidth]{fig01b03} &
+		\includegraphics[width=0.085\textwidth]{fig01b04} &
+		\includegraphics[width=0.085\textwidth]{fig01b05} \\
+		\includegraphics[width=0.085\textwidth]{fig01b06} &
+		\includegraphics[width=0.085\textwidth]{fig01b07} &
+		\includegraphics[width=0.085\textwidth]{fig01b08} &
+		\includegraphics[width=0.085\textwidth]{fig01b09} &
+		\includegraphics[width=0.085\textwidth]{fig01b10} \\
+		\includegraphics[width=0.085\textwidth]{fig01b11} &
+		\includegraphics[width=0.085\textwidth]{fig01b12} &
+		\includegraphics[width=0.085\textwidth]{fig01b13} &
+		\includegraphics[width=0.085\textwidth]{fig01b14} &
+		\includegraphics[width=0.085\textwidth]{fig01b15} \\[1ex]
+		\multicolumn{5}{c}{(b) Example patches considered as positives (blue squares).} \\[4ex]
+		\includegraphics[width=0.085\textwidth]{fig01c01} &
+		\includegraphics[width=0.085\textwidth]{fig01c02} &
+		\includegraphics[width=0.085\textwidth]{fig01c03} &
+		\includegraphics[width=0.085\textwidth]{fig01c04} &
+		\includegraphics[width=0.085\textwidth]{fig01c05} \\
+		\includegraphics[width=0.085\textwidth]{fig01c06} &
+		\includegraphics[width=0.085\textwidth]{fig01c07} &
+		\includegraphics[width=0.085\textwidth]{fig01c08} &
+		\includegraphics[width=0.085\textwidth]{fig01c09} &
+		\includegraphics[width=0.085\textwidth]{fig01c10} \\
+		\includegraphics[width=0.085\textwidth]{fig01c11} &
+		\includegraphics[width=0.085\textwidth]{fig01c12} &
+		\includegraphics[width=0.085\textwidth]{fig01c13} &
+		\includegraphics[width=0.085\textwidth]{fig01c14} &
+		\includegraphics[width=0.085\textwidth]{fig01c15} \\[1ex]
+		\multicolumn{5}{c}{(c) Example patches considered as negatives (magenta squares).} \\
+	\end{tabular} \\
+\end{tabular}
+\caption{Part of a high-content fluorescence microscopy image (a) where the blue squares highlight some example patches containing neuronal structure and the magenta squares depict some example patches containing background. These squares are enlarged in (b) and (c) for a better visualization. The intensities of the shown images are inverted compared to their originals for displaying purposes.}
+\label{fig:example}
+\end{figure*}
+
+Rat hippocampal neurons were cultured and transfected with green fluorescent protein (GFP) and imaged with a Leica SP5 automated confocal fluorescence microscope using its Matrix modules and a 20$\times$ lens. The imaged neurons, coming from a part of the brain (the hippocampus) that is well known to be involved in higher functions such as learning and memory \citep{S92}, typically have a pyramidal soma with a complex dendritric tree \citep{GAB98}, and their in-vivo morphological features are well conserved in culture conditions. We acquired eight two-dimensional (2D) high-content images (total size $>$1 GB), each with a size of about 10,000\,$\times$\,12,000 pixels, covering approximately 70\,mm${}^2$ of culture dish {\color{red}. Each image is a mosaic made up of tiles of size 1024\,$\times$\,1024 pixels, automatically acquired and stitched using the Leica Matrix module. Prior to imaging, the user has to select the desired culture area within the field of view, and the module calculates the tiles to be imaged in order to cover the chosen area, considering 10\% overlap between neighboring tiles. Each mosaic contains} on the order of 40 transfected neurons (Fig.\ \ref{fig:example}). Our specimens usually have about 100 neurons, but more than half of them are not or only partly imaged, as they are in different optical planes or close to the borders of the dish, making the automated detection of relevant image structures (complete neurons) as opposed to irrelevant image structures (incomplete neurons, astrocytes, and artifacts) quite challenging.
+
+\subsubsection{Image Annotation}
+\label{sec:annotation}
+
+To obtain a reference dataset for training and testing of the machine learning methods, an expert neurobiologist manually marked all the regions of interest (ROIs) containing neurons in these images, about 400 in total. We established that relevant neurons typically cover an area of around 500 $\times$ 500 pixels in our images and therefore we fixed the ROI size to these dimensions. Using the same window size, we automatically sampled additional patches from the remaining parts of the images, containing all different types of irrelevant image structures. More specifically, to ensure evenly distributed sampling of background patches across the images, we defined a regular grid and included every patch from the grid having less than 50\% overlap with any of the neuron ROIs marked by the expert, resulting in approximately 4,500 non-neuron patches. In the sequel we refer to the neuron ROIs as `positives' and the non-neuron image patches as `negatives' (Fig.\ \ref{fig:example}).
+
+\subsubsection{Dataset Balancing}
+\label{sec:balanced}
+
+Due to the sparseness of our image data, the patches of the negative class far outnumbered those of the positive class, with a ratio of approximately 10:1, resulting in an imbalanced dataset. It is well known that the performance of classification algorithms may be negatively impacted by the data being imbalanced \citep{Chawla:2004:ESI:1007730.1007733, Daskalaki06evaluationof, Forman:2010:ACS:1882471.1882479, Branco:2016:SPM:2966278.2907070}, as the algorithms may overfit the majority class and underfit the minority class, and favor the former, yielding biased results \citep{Garcia2014, Li20181}. Approaches to deal with class imbalance can roughly be divided into two categories \citep{5128907, Krawczyk-2016, Haixiang-2017}: data-level approaches, which modify the collection of data samples to balance the class distributions, and algorithm-level approaches, which modify the learning algorithms to alleviate their bias, for example by introducing costs to balance the importance of the different classes. Since in our case the class imbalance was substantial, and we used mostly existing algorithms and aimed to evaluate their performance without tweaking them for our application, we opted to oversample the minority class in order to obtain approximately the same number of samples in each class. {\color{red}To this end we employed the popular synthetic minority oversampling technique (SMOTE) \citep{Chawla:2002:SSM:1622407.1622416} of which several variants exist \citep{Saez2015, Krawczyk-2016, Gosain2017}.} Specifically, for each neuron ROI marked by the expert, we also considered as potential positive samples all patches having at least 50\% overlap with that ROI (Fig.~\ref{fig:neuronROI}). However, the higher the overlap percentage of a patch, the higher the relevance of that patch, as it contains more neuron structure. Therefore, we assigned a weight to each potential patch corresponding to the overlap percentage, and taking this into account we randomly sampled from the pool of all potential patches in order to avoid bias (Fig.~\ref{fig:oversampling}). This resulted in a positive class and a negative class each consisting of approximately 4,500 samples in total.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig02}
+\caption{Two example neurons with their expert-marked ROIs (black squares) and their potential alternative positive patch locations (gray regions). The latter comprise all possible top-left corner positions of patches with the same size as the given ROI and having 50\% or more area overlap with that ROI.}
+\label{fig:neuronROI}
+\end{figure}
+
+\subsection{Images Features}
+\label{subsec:imageFeaturesExtraction}
+
+To train the machine learning algorithms we used a large number of predefined features extracted from the positive and negative image patches. In this study two very comprehensive feature extraction approaches were employed: the compound hierarchy of algorithms representing morphology (CHARM) and the scale-invariant feature transform (SIFT). Here we briefly describe each of them. {\color{red} In the training stage of the machine learning algorithms, feature values were normalized to zero mean and unit variance per feature over the whole data set, and constant features were pruned.}
+
+\subsubsection{CHARM Features}
+\label{subsubsec:wnd-chrm}
+
+For the extraction of the CHARM features we used the open-source software library WND-CHARM \citep{Shamir2008, Orlov2008}, which has been successful for many pattern recognition applications in biology \citep{Shamir-2010, Uhlmann-2016} as well as in astronomy \citep{Shamir-2012, Kuminski-2014} and in art \citep{Shamir-2012b}. It can extract a large number of generic image descriptors and also includes a classifier based on the weighted neighbor distance (WND) between feature vectors. However, since the performance of this classifier was rather limited in our initial results \citep{Mata-2016}, we decided to explore alternative machine learning algorithms for our classification task, but using the image features calculated by this sofware library. In total we calculated 1,059 CHARM features for each positive and negative patch (recent versions of WND-CHARM can extract even more features but at an increased computational cost).
+
+The calculated image features can be divided into four categories: polynomial decompositions, high-contrast features, pixel statistics, and texture descriptors. The first category includes features based on the Zernike polynomials and Chebyshev polynomials \citep{Gradshtein1994} as well as Chebyshev-Fourier statistics. Features from the second category include various statistics calculated from the Prewitt edges \citep{Prewitt1970}, Gabor wavelets \citep{Gabor1946}, and object masks obtained by Otsu thresholding \citep{Otsu1979}. The third category consists of image features calculated from the multiscale intensity histogram \citep{Hadjidementriou2001} and various statistics based on the image moments. The last category includes the Haralick \citep{Haralick-1975} and Tamura \citep{Tamura1978} texture features. In addition, the software calculates various image transforms, including the Radon, Fourier, wavelet, Chebyshev, and edge transforms, as well as transforms of image transforms. For more technical descriptions of all features and transforms we refer to \cite{Orlov2008}.
+
+\subsubsection{SIFT Features}
+\label{subsubsec:sift-and-bow}
+
+The SIFT algorithm \citep{lowe2004distinctive} is another popular tool to extract meaningful features from images for pattern recognition tasks. It has been used for a very wide range of applications in thousands of studies, including in biomedical image analysis \citep{DBLP:journals/cmig/NiCQYQWHH09, Jiang-2010, Mualla-2013, DBLP:journals/cmmm/ZhangZLYX13, 10.1371/journal.pone.0153043, 7182310}. The extraction of SIFT features from a patch consists of four main steps. First, a Gaussian scale space is calculated, and potentially interesting points are identified by searching over all scales and locations for extrema in the difference-of-Gaussian function. Next, key points are selected from this list of candidates based on their measures of stability, and their precise location and scale are determined by model fitting. Then, based on the local gradient directions, each key point is assigned to one or more orientations (binned angles). And lastly, orientation histograms are constructed from the local gradients in a region around each key point, relative to the key point's assigned orientation, and the histogram entries constitute the elements of a (typically 128-dimensional) feature vector. By normalizing the feature vector we obtain a key point descriptor that is relatively invariant to spatial distortions and changes in illumination. All key point descriptors of a patch taken together form the SIFT features of that patch.
+
+A problem in comparing image patches based on their SIFT features is that the number of key points, and thus the number of descriptors, may be different for each patch. The comparison is facilitated by applying a transform that represents each patch by a feature vector of fixed length {\color{red}\citep{Yang}}. A very effective and popular approach to achieve this is to use the bag-of-words (BoW) model {\color{red}\citep{FeiFei}}. Here, all descriptors of all available patches are divided into a fixed number of clusters by $k$-means clustering \citep{macqueen1967}, and the mean of each cluster represents a visual `word', a vector of the same dimensionality as the descriptors. Subsequently, for any given patch, each of its descriptors is assigned to the {\color{red}single} cluster to which it is closest according to the Mahalanobis distance. {\color{red}Such mapping yields a histogram} vector of fixed length $k$, with each vector element being the number of patch descriptors assigned to the corresponding cluster.
+
+To obtain the SIFT-BoW feature vector for each positive and negative patch, we used the VLFeat software library \citep{vedaldi08vlfeat} in conjunction with MATLAB \citep{MATLAB2016}. The vector length is a user parameter, and we evaluated the classification performance of the different machine learning algorithms for lengths of 20, 40, 60, 80, 100, 150, 200, and 230.
+
+\subsection{Machine Learning}
+\label{subsec:machineLearning}
+
+Four different machine learning algorithms were considered for the classification task in this study. We summarize the algorithms and their hyperparameters, and explain the resampling strategies we used in the training and testing of the algorithms, and the feature selection approach.
+
+\subsubsection{Classification Algorithms}
+\label{subsubsec:classifiers}
+
+{\bf Support Vector Machines} (SVM) are one of the best known and most successful machine learning algorithms for both classification and regression problems \citep{Boser92atraining, zbMATH01332320, Vapnik99thenature, Bishop-2006}. In classification problems, the principal aim of SVM is to find the hyperplane in the feature space that best separates the given samples (in our case neuron and non-neuron patches), by maximizing the distance between the samples and the hyperplane \citep{Burges1998}. If the problem requires more complex (nonlinear) separation functions, SVM can still be used, by employing so-called kernel functions that transform the high-dimensional feature space such that a hyperplane (linear) can still be used as the separation function. Generally speaking one could interpret a kernel as a similarity measure \citep{2549}. Different types of kernels have been proposed, the Gaussian radial basis function (RBF) being one of the most popular \citep{Cristianini:1999:ISV:345662}. Two hyperparameters need to be optimized for best performance, one related to the SVM algorithm itself, the other related to the Gaussian RBF kernel. The first (`cost') is the trade-off between the misclassification of the samples and the simplicity of the decision surface. The second (`gamma') is the free parameter of the Gaussian function. In the grid search in our experiments we considered values $2^k$ for integer $k=-12,\dots,12$ for both parameters.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig03}
+\caption{Example of positive patch oversampling. The background shows a high-content fluorescence microscopy image (with intensities inverted), and the graphical overlay shows the neuron ROIs marked by the expert (yellow squares), the top-left corners of the patches randomly sampled from all possible patches considered as alternative positives (red dots), and the intersection points (blue dots) of the regular grid used for negative patch sampling (Section~\ref{sec:annotation}).}
+\label{fig:oversampling}
+\end{figure}
+
+\bigskip
+
+{\bf Random Forest} (RF) is another well-known and successful machine learning algorithm \citep{Breiman2001} for classification and regression. As a classifier it operates by randomly taking multiple bootstrapped subsets of the data, fitting a decision tree to each one of them, and outputting the mode of the class outputs of the individual trees. This approach reduces the possibility of overfitting the training dataset and generally produces more accurate results than a single decision tree. The RF has two main hyperparameters. The first (`node size') is the minimum size of the terminal nodes of the decision trees. In our experiments we considered integer values of 1\dots5 for this parameter. The second (`mtry') is the number of features randomly sampled as possible candidates at each split. For this parameter we considered integer values of 5\dots36.
+
+\bigskip
+
+{\bf k-Nearest Neighbor} (KNN) classification operates by comparing an unclassified patch to patches with known class labels (the reference set), then selecting the k most similar of these patches (the nearest neighbors) according to some distance metric in the feature space, and outputting the most frequently occurring class label of these patches \citep{1053964}. In this study we used a weighted KNN algorithm \citep{Hechenbichler06weightedk-nearest-neighbor, citeulike:13121917} which employs the Minkowski distance and classifies patches using the maximum of summed kernel densities. This algorithm uses kernel functions to weigh the neighbors according to their distances. The KNN algorithm requires optimization of only one hyperparameter (`k'), for which we considered integer values of 3\dots9.
+
+\bigskip
+
+{\color{red}{\bf Generalized Linear Model} (GLMNET) via penalized maximum likelihood \citep{glmnet}} is a regularization method based on the least absolute shrinkage and selection operator (LASSO) \citep{Tibshirani96regressionshrinkage}. Similar to the LASSO, this method simultaneously performs automatic feature selection and continuous shrinkage (regularization), and is able to select groups of correlated features. Specifically, {\color{red} GLMNET combines $l_1$ and $l_2$ penalties for regularization, and has two hyperparameters.} The first (`alpha') is in the range $[0,1]$ and linearly weighs the contributions of the different types of penalities, with value 0 corresponding to $l_2$ regularization, and 1 to $l_1$ regularization. In our experiments we used values 0, 0.15, 0.25, 0.35, 0.5, 0.65, 0.75, 0.85, and 1. The second parameter (`lambda') determines the degree of regularization, for which we considered values of 0.0001, 0.001, 0.01, 0.1, and 1.
+
+\bigskip
+
+For our experiments we used the statistical computing software tool R \citep{Rpackage2016} and the R packages mlr \citep{mlrpackage2016}, e1071 \citep{e1071}, random-Forest \citep{randomForest}, kknn \citep{kknn}, and GLMnet \citep{glmnet}, to evaluate all the machine learning algorithms. Most of the result plots presented in this paper were generated using the R package ggplot2 \citep{Wickham-2009}.
+
+\subsubsection{Resampling Strategies}
+\label{subsubsec:resampling}
+
+The mentioned hyperparameters of the machine learning algorithms need to be optimized for best performance. To accomplish this, and at the same time make an honest comparison of the algorithms under equal conditions, we used a nested resampling approach \citep{Simon2007, Bischl:2012:RMM:2261317.2261322} involving an inner loop and an outer loop. In this approach, the actual performance assessment of the algorithms takes place in the outer loop, which we implemented as three independent runs of a 10-fold cross-validation experiment, with stratification (to ensure having the same proportion of positive and negative samples in all partitions of the cross-validation), where the final performance scores are obtained by aggregation. In each iteration of the outer loop, the corresponding training set is used in an inner loop, to find the optimal values of the hyperparameters of the algorithms. The inner loop was implemented using a holdout approach, where the given training set from the outer loop is redivided into a training subset (2/3rd of the set) and a validation subset (1/3rd of the set), and a grid search is run on the hyperparameters. The hyperparameter values that give the best performance are subsequently used to retrain the algorithms on the given training set from the outer loop. This nested resampling strategy is statistically sound but computationally expensive. To make the experiments computationally feasible, we discretized the search space using the hyperparameter values listed in the previous section.
+
+\subsubsection{Feature Selection}
+\label{subsubsec:featureSelection}
+
+Although a priori it is appropriate to consider as many features as possible, and increasing  computational power allows us to construct larger and larger feature sets, in the end many features may be irrelevant or may even negatively impact the performance of the machine learning algorithms. Thus we also aimed to investigate which of all considered features positively contribute most to the performance of the algorithms in our application. Knowledge of the best features allows one to build potentially better and computationally more efficient classifiers. Moreover, it may shed light on which image information is most relevant to the classification task, which in turn may provide useful hints to improve the imaging process. There exist various approaches for feature selection using machine learning algorithms in supervised classification problems, including filter, wrapper, and embedded approaches \citep{doi:10.1093/bioinformatics/btm344}. In this study we used the filter approach, as it is independent of the classifier, fast, scalable, and needs to be applied only once, after which the different algorithms can be evaluated.
+
+\section{Experimental Results}
+\label{sec:experimental-results}
+
+All experiments in this study were carried out using the BioCAI HPC cluster facility at the University of A Coru\~{n}a. To quantitatively assess and compare the performances of the machine learning algorithms we used the area under the receiver operating curve (AUROC) measure as it captures both Type I and Type II errors \citep{Fawcett:2006:IRA:1159473.1159475}. We first performed an initial exploratory experiment on various combinations of CHARM and SIFT feature sets to find out which of these deserved closer investigation. Using the most promising feature sets we conducted an in-depth performance evaluation of all the algorithms. Subsequently we investigated which specific features of the complete set contributed most to the performance. And finally we performed an analysis to see whether the differences in performance of the algorithms were statistically significant or not.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig04}
+\caption{Results of the initial exploratory experiment. Each of the considered classifiers (SVM, RF, KNN, GLMNET) was evaluated for each of the {\color{red}described} 17 feature sets according to the performance measure (AUROC) using the described simplified resampling strategy.}
+\label{fig:initialResults}
+\end{figure}
+
+\begin{figure}[!b]
+\centering
+\includegraphics[width=\columnwidth]{fig05}
+\caption{Results of the cross-validation experiment. Each of the considered classifiers (SVM, RF, KNN, GLMNET) was evaluated for each of the selected feature sets (CHARM, SIFT230, CHARM+SIFT230) using the performance measure (AUROC). The results are shown as violin plots, where the horizontal bar indicates the median value, the vertical extent is the interquartile range, and the width indicates the estimated probability density.}
+\label{fig:fullCVresults}
+\end{figure}
+
+\subsection{Initial Exploratory Results}
+\label{subsec:initialExploratoryExperiments}
+
+For the initial experiment we constructed 17 different feature sets from (combinations of) the CHARM features and the SIFT features{\color{red}: CHARM features only (one set), SIFT features only (eight sets, one for each of the eight BoW vector lengths), and the union of CHARM and SIFT features (eight sets).} To avoid prohibitive computation times in the cross-validation experiment (described next), we first explored which of these feature sets would likely yield the best classification results with the considered machine learning algorithms. The feature sets were preprocessed by normalizing each feature to zero mean and unit standard deviation over all patches, and removing constant features (if present), to reduce the effect of possible outliers. To make this exploratory experiment more computationally feasible, we used a simpler resampling strategy than described, namely a single 10-fold cross-validation in the outer loop, and a holdout approach in the inner loop. In the latter, the optimal hyperparameters of the classification algorithms were obtained using a grid search on 2/3rd of the training set of the outer loop, and validated on the remaining 1/3rd.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig06}
+\caption{\color{red}Performance (AUROC) of the considered classifiers (SVM, RF, KNN, GLMNET) for different feature subsets (the top 25, 100, 200, and 600 features from the CHARM+SIFT230 set). The results are shown as violin plots, where the horizontal bar indicates the median value, the vertical extent is the interquartile range, and the width indicates the estimated probability density.}
+\label{fig:subsetResults}
+\end{figure*}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig07}
+\caption{\color{red}Cumulative percentages of the different types of features contained in the four subsets (the top 25, 100, 200, and 600 features selected from the CHARM+SIFT230 set).}
+\label{fig:subsetFS}
+\end{figure}
+
+From the results (Fig.~\ref{fig:initialResults}) we observe that both the absolute and the relative performance of the classifiers was quite different for the different feature sets. Specifically, for SVM and KNN, the best results were obtained with the SIFT features alone (for sufficiently large BoW vector lengths), while the CHARM features alone produced inferior results, and with the combination of CHARM and SIFT features these classifiers performed somewhere in between. For RF and GLMNET, on the other hand, the SIFT features alone yielded inferior results, and with the CHARM features alone these classifiers did not fare much better, but the combination of CHARM and SIFT features (for all BoW vector lengths) produced the best results.
+
+Thus we concluded that the cross-validation experiment should include both the CHARM and SIFT feature sets alone, as well as their combination, and the only way to reduce the computational cost of that experiment was to select a specific SIFT-BoW vector length. Overall, the results seemed to indicate that in most cases it is better to use larger vector lengths, and simply taking the maximum considered length (230) is a good choice.
+
+\subsection{Cross-Validation Results}
+\label{subsec:baselineResults}
+
+Based on the results of the initial exploratory experiment we selected {\color{red}three feature sets, corresponding to CHARM features only, SIFT230 features only, and CHARM+SIFT230 features,} to evaluate the four machine learning classifiers using a cross-validation experiment, involving an outer loop (3 $\times$ 10-fold) for performance assessment and an inner loop (holdout) for hyperparameter optimization as described. The results (Fig.~\ref{fig:fullCVresults}) show that virtually all classifiers achieved AUROC values of $>$95\% and, generally, SVM and RF outperformed KNN and GLMNET. Considering the different feature sets, we observe that all classifiers except RF achieved better performance with the SIFT230 feature set than with the CHARM feature set. This is interesting since the latter is much more extensive (1,059 features of many different types) than the former (230 BoW clusters). Apparently the SIFT230 features are more descriptive of the image content in our application. This is confirmed by the results with the CHARM+SIFT230 feature set, which are consistently better than with the CHARM feature set alone. However, whereas RF and GLMNET performed best using the more extensive CHARM+SIFT230 set, SVM and KNN performed best using the SIFT230 set alone. Overall, the best results were obtained with the SVM classifier using the SIFT230 feature set, although SVM and RF using the combined CHARM+ SIFT230 features performed comparably (we discuss statistical significance in Section~\ref{subsec:experimentalAnalysis}).
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig08}
+\caption{\color{red}The 50 most important features from the CHARM+SIFT230: 600 feature subset used by the best performing classifier. Importance was calculated according to the Gini index of the RF classifier. The importance value for each feature was averaged over all runs and folds of the cross-validation experiment.}
+\label{fig:importanceFeatures}
+\end{figure}
+
+\begin{figure}[!b]
+\centering
+\includegraphics[width=\columnwidth]{fig09}
+\caption{\color{red}Quantile-quantile (Q-Q) plot of the theoretical normal distribution and our data samples. Clearly, the computed values (small circles) deviate substantially from a straight line (the solid line is the least squares fit) and reveal a nonlinear relationship, leading to the conclusion that our data is not normally distributed.}
+\label{fig:normalityPlot}
+\end{figure}
+
+\subsection{Feature Selection Results}
+\label{subsec:featureSelectionResults}
+
+Next we subjected the complete CHARM+SIFT230 feature set to a feature selection experiment. Specifically, we wanted to find out which features contributed most to the performance of the different classifiers, and whether these features alone could yield similar or even better classification performance than using the complete set, as that would make the classification task computationally cheaper.
+
+To this end we ranked all 1,289 features using a {\color{red}CForest test \citep{CForest}} and considered four subsets, consisting of the top 25, 100, 200, and 600 features. The results (Fig.~\ref{fig:subsetResults}) agree with those of the previous experiment in that SVM and RF consistently outperformed KNN and GLMNET for all feature subsets. We also observe that the larger the number of top features, the better the performance of all four classifiers, but for most of them there was little improvement beyond the top 200 features. In fact, the scores of the best performing classifiers, SVM and RF, were very similar for the CHARM+SIFT230:200 subset and the full CHARM+SIFT230 set, and with smaller standard deviations (we discuss statistical significance in Section~\ref{subsec:experimentalAnalysis}). This indicates that the non-selected features provided noise rather than useful information to the classifiers.
+
+{\color{red}Analyzing the types of features contained in the four subsets (Fig.~\ref{fig:subsetFS}), we note that the top 25 subset is dominated by the SIFT features and the Zernike coefficients from CHARM, whereas the top 100, 200, and 600 subsets include many other types of features (about twice as many), in roughly similar proportions. These additional features contribute important information to the classification process, as follows from the fact that the performance of the larger subsets is considerably better than that of the top 25 subset. However, the reasons why these specific types of features are dominant, elude us. According to the feature selection results (Fig.~\ref{fig:subsetResults}), the best performing classification model is the RF using the CHARM+SIFT230:600 feature subset (AUROC = 0.9784), followed very closely by the SVM using the CHARM+SIFT230:200 feature subset (AUROC = 0.9783). Studying the importance of the features in the former model according to the Gini index \citep{Breiman2001}, we observe (Fig.~\ref{fig:importanceFeatures}) that the most important features are indeed from the SIFT set together with the Zernike coefficients from the CHARM set. Other important top features from the CHARM set in decreasing order include the Tamura and Haralick textures, multiscale histograms, combined moments, and others (Fig.~\ref{fig:subsetFS}).}
+
+\subsection{Statistical Analysis Results}
+\label{subsec:experimentalAnalysis}
+
+Finally we analyzed the statistical significance of the results (AUROC values) of the considered classification algorithms on the selected feature (sub)sets, to see if any particular model (combination of features and classifier with corresponding optimal hyperparameters) is to be preferred for our application. There exist mainly two types of statistical test to do this: parametric and non-parametric. Although parametric tests can be more powerful, they require normality, independence, and heteroscedasticity of the data \citep{10.7717/peerj.2721}. To check the first condition, we used the Shapiro-Wilk test \citep{Shapiro-Wilk-1965} with the null hypothesis that our data follows a normal distribution, and we rejected the null hypothesis with very significant values of {\color{red}$W = 0.97324$ and $p < 2.723 \cdot 10^{-11}$} (see also the Q-Q plot in Fig.~\ref{fig:normalityPlot}). Since this already disqualifies parametric testing, there was no need to check the other conditions.
+
+Thus we used a non-parametric test, the Friedman test \citep{Friedman-1940}, which is known to yield conservative results in the case of relatively small numbers of algorithms and datasets \citep{Garcia-2010}. We used the null hypothesis that all models yield the same performance on our data, and we rejected it with very significant values of {\color{red}$\chi^2 = 657$ and $p < 2.25 \cdot 10^{-10}$}. Since this means that at least some models are statistically significantly better or worse than others, we subsequently tested for significant differences between all pairs of models using the post-hoc {\color{red}Finner test \citep{Finner1993}, with the control model being the RF classifier using the CHARM+SIFT230:600 feature set, as it performed best in the feature selection experiment (Fig.~\ref{fig:subsetResults})}.
+
+The results (Fig.~\ref{fig:statisticalSignificance}) show that several other models performed statistically similar to the control model. {\color{red}These include the SVM classifier using the SIFT230 feature set or the top 100, 200, or 600 features of the CHARM+SIFT230 set. Other statistically similar models include the RF classifier using the CHARM+SIFT230 feature set, or just the top 100 or 200 features of the latter. None of the models based on the KNN and GLMNET classifiers performed statistically similar to the control model.}
+
+\section{Discussion and Conclusions}
+\label{sec:discussion}
+
+Our goal with the presented study was to find out which machine learning based classification algorithms and which commonly used feature extraction algorithms would be most suited for the task of detecting neurons in high-content fluorescence microscopy image data typically acquired in screening experiments. To this end, we considered four popular classifiers (SVM, RF, KNN, GLMNET) and two popular feature extraction tools (CHARM and SIFT), and performed various experiments and statistical analyses to narrow down and compare the many possible models (combinations of classifiers and (sub)sets of features).
+
+From the results we conclude that of all considered classifiers, SVM and RF generally work best, provided they are fed with the right sets of features. {\color{red}We observed statistically similar performance with the following models: SVM using SIFT (230 features), SVM using CHARM+SIFT (the top 100, 200, or 600 features), and RF using CHARM+SIFT (the full 1,289 features or only the top 100, 200, or 600 features). In the course of our study we have also explored the potential of several alternative features, such as the histogram of oriented gradients (HOG) \citep{Dalal} and spatial pyramid matching (SPM) \citep{Lazebnik} based on sparse coding (ScSPM) \citep{Yang}, but the results were not as good.}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig10}
+\caption{\color{red}Results of the Friedman-Finner test showing the statistical significance of the differences in performance of the considered models (classifiers SVM, RF, KNN, and GLMNET, using any of the selected feature (sub)sets CHARM, SIFT230, CHARM+SIFT230, and the top 25, 100, 200, and 600 features of the latter) with respect to the control model (RF using CHARM+SIFT230:600). Performance values (AUROC) of each model from all runs and folds of the cross-validation experiment are summarized using the ggplot2 box plot. Significance with respect to the control model is indicated for $p > 0.05$ (+), and $0.01 < p < 0.05$ (*), and $p < 0.01$ (**).}
+\label{fig:statisticalSignificance}
+\end{figure}
+
+\begin{figure*}[!t]
+\centering
+\begin{tabular}{@{}c@{\hspace{0.02\textwidth}}c@{}}
+\includegraphics[height=0.50\textwidth]{fig11a} &
+\includegraphics[height=0.50\textwidth]{fig11b}
+\end{tabular}
+\caption{\color{red}Example of neuron detection in high-content fluorescence microscopy images. The images are shown with inverted intensities (dark grayscale parts) compared to the original. Left: One of the eight images used in the cross-validation experiment. Right: A new image acquired in a later experiment and not used in the cross-validation experiment. Here we used the SVM classifier with the SIFT230 feature set to classify square patches from a superimposed grid as neuron (bright grayscale) versus non-neuron (dark grayscale). The detected neuron regions correspond very well with the expert human annotations (blue squares). Scale bars: 500 $\mu$m.}
+\label{fig:detectionImage}
+\end{figure*}
+
+In the spirit of Occam's razor principle \citep{Iacca201217, Hong2013210, Ebrahimpour2017214}, which considers the simplest explanation of natural phenomena to be the closest to the truth, we have sought the smallest possible classification model capable of determining with high accuracy whether or not a new unseen image patch contains neuron structures. Generally speaking, in order to achieve good generalization in a classification task, it is required to have a sufficient number of samples and to minimize model complexity \citep{Gupta20171}. Since currently our data is rather limited, we started out by considering state-of-the-art classification algorithms requiring explicit calculation of features, and using state-of-the-art algorithms for extracting a very wide variety and large number of features. In the future, when more annotated data becomes available in our studies, we aim to compare the presented results with those of artificial neural networks (ANNs), in particular convolutional neural networks (CNNs), which are nowadays increasingly used in many applications \citep{LeCun-2015} but require large amounts of annotated data, as well as computational power for training, and careful engineering to avoid overfitting \citep{6697897, Greenspan-2016, Tajbakhsh-2016, Shaikhina201751, Litjens-2017, Shen-2017}. {\color{red}Another direction for future research would be to reformulate the problem as a} {\color{red}multiclass detection challenge, distinguishing not only between neurons and background, but also incomplete or out-of-focus neurons, astrocytes, and artifacts.}
+
+Achieving AUROC values between {\color{red}0.97 and 0.98, the best models considered in the present study are already very suitable for detecting neurons in high-content fluorescence microscopy images. As an example we applied the model using the SVM classifier and the SIFT230 feature set to one of our images (Fig.~\ref{fig:detectionImage}). In addition, to investigate generalizability, we also applied it to a new, ``unseen'' image from a new experiment. In that experiment, to introduce some variability, we used a transfection method with higher efficiency \citep{Bredenbeek1993}, resulting in higher intensities and larger numbers of neurons in the field of view. In both images, to detect the neurons,} a very simple and low-cost detection approach was used, where square patches (same patch size as used throughout this study) from a superimposed grid were classified individually as neuron versus non-neuron. If needed, more sophisticated (but more computationally costly) detection schemes with higher localization precision could be easily made, by using finer grids with overlapping patches (keeping the same patch size) and segmenting the positive responses. In our work, detection is the first step in a much more comprehensive pipeline we are developing for fully automated neuron screening, where the actual analysis will take place in much higher-resolution images taken at the detected locations in the low-resolution high-content images. From the results presented in this study we conclude that machine learning approaches are very suitable for the initial detection task.
+
+\begin{acknowledgments}
+This work was partially supported by the Spanish Ministry of Economy, Industry and Competitiveness (project numbers MTM2014-54151-P, UNLC08-1E-002, UNLC13-13-3503), the University of La Rioja (project number FPI-UR-13), the European Regional Development Fund (FEDER) of the European Union, the Netherlands Organization for Scientific Reseach (project number 612.001.018), and the Erasmus University Medical Center Fellowship Program. Carlos Fernandez-Lozano was supported by a Juan de la Cierva postdoctoral fellowship grant (Spanish Ministry of Economy, Industry and Competitiveness, FJCI-2015-26071).
+\end{acknowledgments}
+
+%\bibliography{lit}
+
+\begin{thebibliography}{110}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{DOI~\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{DOI~\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Anderl et~al.(2009)Anderl, Redpath, and Ball}]{ARB09}
+Anderl JL, Redpath S, Ball AJ (2009). A neuronal and astrocyte co-culture assay
+  for high content analysis of neurotoxicity. \emph{Journal of Visualized
+  Experiments} 5(27):1173.
+
+\bibitem[{Antony et~al.(2013)Antony, Trefois, Stojanovic, Baumuratov, and
+  Kozak}]{Antony-2013}
+Antony PMA, Trefois C, Stojanovic A, Baumuratov AS, Kozak K (2013). Light
+  microscopy applications in systems biology: opportunities and challenges.
+  \emph{Cell Communication and Signaling} 11(24):1--19.
+
+\bibitem[{Arganda-Carreras et~al.(2017)Arganda-Carreras, Kaynig, Rueden,
+  Eliceiri, Schindelin, Cardona, and Seung}]{Arganda-Carreras-2017}
+Arganda-Carreras I, Kaynig V, Rueden C, Eliceiri KW, Schindelin J, Cardona A,
+  Seung HS (2017). {Trainable Weka Segmentation}: a machine learning tool for
+  microscopy pixel classification. \emph{Bioinformatics} 33(15):2424--2426.
+
+\bibitem[{Ascoli(2015)}]{Ascoli-2015}
+Ascoli GA (2015). \emph{Trees of the Brain, Roots of the Mind}. MIT Press,
+  Cambridge, MA.
+
+\bibitem[{Bianchini and Scarselli(2014)}]{6697897}
+Bianchini M, Scarselli F (2014). On the complexity of neural network
+  classifiers: a comparison between shallow and deep architectures. \emph{IEEE
+  Transactions on Neural Networks and Learning Systems} 25(8):1553--1565.
+
+\bibitem[{Bischl et~al.(2012)Bischl, Mersmann, Trautmann, and
+  Weihs}]{Bischl:2012:RMM:2261317.2261322}
+Bischl B, Mersmann O, Trautmann H, Weihs C (2012). Resampling methods for
+  meta-model validation with recommendations for evolutionary computation.
+  \emph{Evolutionary Computation} 20(2):249--275.
+
+\bibitem[{Bischl et~al.(2016)Bischl, Lang, Kotthoff, Schiffner, Richter, Jones,
+  and Casalicchio}]{mlrpackage2016}
+Bischl B, Lang M, Kotthoff L, Schiffner J, Richter J, Jones Z, Casalicchio G
+  (2016).
+\newblock \emph{mlr: Machine Learning in R}.
+  \urlprefix\url{https://CRAN.R-project.org/package=mlr}.
+
+\bibitem[{Bishop(2006)}]{Bishop-2006}
+Bishop CM (2006). \emph{Pattern Recognition and Machine Learning}. Springer,
+  New York, NY.
+
+\bibitem[{Boser et~al.(1992)Boser, Guyon, and Vapnik}]{Boser92atraining}
+Boser BE, Guyon IM, Vapnik VN (1992). A training algorithm for optimal margin
+  classifiers. In \emph{Proceedings of the 5th Annual ACM Workshop on
+  Computational Learning Theory}, pp. 144--152.
+
+\bibitem[{Bougen-Zhukov et~al.(2017)Bougen-Zhukov, Loh, Lee, and
+  Loo}]{Bougen-Zhukov-2017}
+Bougen-Zhukov N, Loh SY, Lee HK, Loo LH (2017). Large-scale image-based
+  screening and profiling of cellular phenotypes. \emph{Cytometry Part A}
+  91(2):115--125.
+
+\bibitem[{Branco et~al.(2016)Branco, Torgo, and
+  Ribeiro}]{Branco:2016:SPM:2966278.2907070}
+Branco P, Torgo L, Ribeiro RP (2016). A survey of predictive modeling on
+  imbalanced domains. \emph{ACM Computing Surveys} 49(2):31:1--31:50.
+
+\bibitem[{Bredenbeek et~al.(1993)Bredenbeek, Frolov, Rice, and
+  Schlesinger}]{Bredenbeek1993}
+{\color{red}Bredenbeek PJ, Frolov I, Rice CM, Schlesinger S (1993). Sindbis virus
+  expression vectors: packaging of {RNA} replicons by using defective helper
+  {RNAs}. \emph{Journal of Virology} 67(11):6439--6446.}
+
+\bibitem[{Breiman(2001)}]{Breiman2001}
+Breiman L (2001). Random forests. \emph{Machine Learning} 45(1):5--32.
+
+\bibitem[{Burges(1998)}]{Burges1998}
+Burges CJC (1998). A tutorial on support vector machines for pattern
+  recognition. \emph{Data Mining and Knowledge Discovery} 2(2):121--167.
+
+\bibitem[{Charoenkwan et~al.(2013)Charoenkwan, Hwang, Cutler, Lee, Ko, Huang,
+  and Ho}]{Charoenkwan-2013}
+Charoenkwan P, Hwang E, Cutler RW, Lee HC, Ko LW, Huang HL, Ho SY (2013).
+  {HCS-Neurons}: identifying phenotypic changes in multi-neuron images upon
+  drug treatments of high-content screening. \emph{BMC Bioinformatics}
+  14(S16):S12.
+
+\bibitem[{Chawla et~al.(2002)Chawla, Bowyer, Hall, and
+  Kegelmeyer}]{Chawla:2002:SSM:1622407.1622416}
+Chawla NV, Bowyer KW, Hall LO, Kegelmeyer WP (2002). {SMOTE}: Synthetic
+  minority over-sampling technique. \emph{Journal of Artificial Intelligence
+  Research} 16(1):321--357.
+
+\bibitem[{Chawla et~al.(2004)Chawla, Japkowicz, and
+  Kotcz}]{Chawla:2004:ESI:1007730.1007733}
+Chawla NV, Japkowicz N, Kotcz A (2004). Editorial: Special issue on learning
+  from imbalanced data sets. \emph{ACM SIGKDD Explorations Newsletter}
+  6(1):1--6.
+
+\bibitem[{Cover and Hart(1967)}]{1053964}
+Cover T, Hart P (1967). Nearest neighbor pattern classification. \emph{IEEE
+  Transactions on Information Theory} 13(1):21--27.
+
+\bibitem[{Cristianini and Shawe-Taylor(2000)}]{Cristianini:1999:ISV:345662}
+Cristianini N, Shawe-Taylor J (2000). \emph{An Introduction to Support Vector
+  Machines and Other Kernel-Based Learning Methods}. Cambridge University
+  Press, New York, NY.
+
+\bibitem[{Cuesto et~al.(2011)Cuesto, Enriquez-Barreto, Caram{\'e}s, Cantarero,
+  Gasull, Sandi, Ferr{\'u}s, Acebes, and Morales}]{Cuesto-2011}
+Cuesto G, Enriquez-Barreto L, Caram{\'e}s C, Cantarero M, Gasull X, Sandi C,
+  Ferr{\'u}s A, Acebes {\'A}, Morales M (2011). Phosphoinositide-3-kinase
+  activation controls synaptogenesis and spinogenesis in hippocampal neurons.
+  \emph{Journal of Neuroscience} 31(8):2721--2733.
+
+\bibitem[{Dalal and Triggs(2005)}]{Dalal}
+{\color{red}Dalal N, Triggs B (2005). Histograms of oriented gradients for human detection.
+  In \emph{Proceedings of the IEEE Computer Society Conference on Computer
+  Vision and Pattern Recognition}, pp. 886--893.}
+
+\bibitem[{Daskalaki et~al.(2006)Daskalaki, Kopanas, and
+  Avouris}]{Daskalaki06evaluationof}
+Daskalaki S, Kopanas I, Avouris N (2006). Evaluation of classifiers for an
+  uneven class distribution problem. \emph{Applied Artificial Intelligence}
+  20(5):381--417.
+
+\bibitem[{Dehmelt et~al.(2011)Dehmelt, Poplawski, Hwang, and
+  Halpain}]{Dehmelt-2011}
+Dehmelt L, Poplawski G, Hwang E, Halpain S (2011). {NeuriteQuant}: an open
+  source toolkit for high content screens of neuronal morphogenesis. \emph{BMC
+  Neuroscience} 12(100):1--13.
+
+\bibitem[{Dragunow(2008)}]{D08}
+Dragunow M (2008). High-content analysis in neuroscience. \emph{Nature Reviews
+  Neuroscience} 9(10):779--788.
+
+\bibitem[{Ebrahimpour et~al.(2017)Ebrahimpour, Zare, Eftekhari, and
+  Aghamolaei}]{Ebrahimpour2017214}
+Ebrahimpour MK, Zare M, Eftekhari M, Aghamolaei G (2017). Occam's razor in
+  dimension reduction: using reduced row {Echelon} form for finding linear
+  independent features in high dimensional microarray datasets.
+  \emph{Engineering Applications of Artificial Intelligence} 62:214--221.
+
+\bibitem[{Enriquez-Barreto and Morales(2016)}]{Enriquez-Barreto-2016}
+Enriquez-Barreto L, Morales M (2016). The {PI3K} signaling pathway as a
+  pharmacological target in autism related disorders and schizophrenia.
+  \emph{Molecular and Cellular Therapies} 4:2.
+
+\bibitem[{Enriquez-Barreto et~al.(2014)Enriquez-Barreto, Cuesto,
+  Dominguez-Iturza, Gavil{\'a}n, Ruano, Sandi, Fern{\'a}ndez-Ruiz,
+  Mart{\'i}n-V{\'a}zquez, Herreras, and Morales}]{Enriquez-Barreto-2014}
+Enriquez-Barreto L, Cuesto G, Dominguez-Iturza N, Gavil{\'a}n E, Ruano D, Sandi
+  C, Fern{\'a}ndez-Ruiz A, Mart{\'i}n-V{\'a}zquez G, Herreras O, Morales M
+  (2014). Learning improvement after {PI3K} activation correlates with de novo
+  formation of functional small spines. \emph{Frontiers in Molecular
+  Neuroscience} 6:54.
+
+\bibitem[{Fawcett(2006)}]{Fawcett:2006:IRA:1159473.1159475}
+Fawcett T (2006). An introduction to {ROC} analysis. \emph{Pattern Recognition
+  Letters} 27(8):861--874.
+
+\bibitem[{Fei-Fei and Perona(2005)}]{FeiFei}
+{\color{red}Fei-Fei L, Perona P (2005). A {B}ayesian hierarchical model for learning
+  natural scene categories. In \emph{Proceedings of the IEEE Conference on
+  Computer Vision and Pattern Recognition}, vol~2, pp. 524--531.}
+
+\bibitem[{Fernandez-Lozano et~al.(2016)Fernandez-Lozano, Gestal, Munteanu,
+  Dorado, and Pazos}]{10.7717/peerj.2721}
+Fernandez-Lozano C, Gestal M, Munteanu CR, Dorado J, Pazos A (2016). A
+  methodology for the design of experiments in computational intelligence with
+  multiple regression models. \emph{PeerJ} 4:e2721.
+
+\bibitem[{Finner(1993)}]{Finner1993}
+{\color{red}Finner H (1993). On a monotonicity problem in step-down multiple test
+  procedures. \emph{Journal of the American Statistical Association}
+  88(423):920--923.}
+
+\bibitem[{Forman and Scholz(2010)}]{Forman:2010:ACS:1882471.1882479}
+Forman G, Scholz M (2010). Apples-to-apples in cross-validation studies:
+  pitfalls in classifier performance measurement. \emph{ACM SIGKDD Explorations
+  Newsletter} 12(1):49--57.
+
+\bibitem[{Friedman et~al.(2010)Friedman, Hastie, and Tibshirani}]{glmnet}
+Friedman J, Hastie T, Tibshirani R (2010). Regularization paths for generalized
+  linear models via coordinate descent. \emph{Journal of Statistical Software}
+  33(1):1--22.
+
+\bibitem[{Friedman(1940)}]{Friedman-1940}
+Friedman M (1940). A comparison of alternative tests of significance for the
+  problem of $m$ rankings. \emph{Annals of Mathematical Statistics}
+  11(1):86--92.
+
+\bibitem[{Gabor(1946)}]{Gabor1946}
+Gabor D (1946). Theory of communication. \emph{Journal of the Institution of
+  Electrical Engineers --- Part III: Radio and Communication Engineering}
+  93(26):429--457.
+
+\bibitem[{Garc{\'i}a et~al.(2010)Garc{\'i}a, Fern{\'a}ndez, Luengo, and
+  Herrera}]{Garcia-2010}
+Garc{\'i}a S, Fern{\'a}ndez A, Luengo J, Herrera F (2010). Advanced
+  nonparametric tests for multiple comparisons in the design of experiments in
+  computational intelligence and data mining: experimental analysis of power.
+  \emph{Information Sciences} 180(10):2044--2064.
+
+\bibitem[{Garc{\'i}a et~al.(2014)Garc{\'i}a, Mollineda, and
+  S{\'{a}}nchez}]{Garcia2014}
+Garc{\'i}a V, Mollineda RA, S{\'{a}}nchez JS (2014). A bias correction function
+  for classification performance assessment in two-class imbalanced problems.
+  \emph{Knowledge-Based Systems} 59:66--74.
+
+\bibitem[{Gosain and Sardana(2017)}]{Gosain2017}
+{\color{red}Gosain A, Sardana S (2017). Handling class imbalance problem using oversampling
+  techniques: a review. In \emph{Proceedings of the International Conference on
+  Advances in Computing, Communications and Informatics}, pp. 79--85.}
+
+\bibitem[{Goslin et~al.(1998)Goslin, Asumussen, and Banker}]{GAB98}
+Goslin K, Asumussen H, Banker G (1998). Rat hippocampal neurons in low-density
+  culture. In \emph{Culturing Nerve Cells}, The MIT Press, Cambridge, MA, pp.
+  339--370.
+
+\bibitem[{Gradshteyn and Ryzhik(1994)}]{Gradshtein1994}
+Gradshteyn IS, Ryzhik IM (1994). \emph{Table of Integrals, Series and
+  Products}. Academic Press, New York, NY.
+
+\bibitem[{Greenspan et~al.(2016)Greenspan, van Ginneken, and
+  Summers}]{Greenspan-2016}
+Greenspan H, van Ginneken B, Summers RM (2016). Deep learning in medical
+  imaging: overview and future promise of an exciting new technique. \emph{IEEE
+  Transactions on Medical Imaging} 35(5):1153--1159.
+
+\bibitem[{Gupta et~al.(2017)Gupta, Batra, and Jayadeva}]{Gupta20171}
+Gupta P, Batra SS, Jayadeva (2017). Sparse short-term time series forecasting
+  models via minimum model complexity. \emph{Neurocomputing} 243:1--11.
+
+\bibitem[{Hadjidementriou et~al.(2001)Hadjidementriou, Grossberg, and
+  Nayar}]{Hadjidementriou2001}
+Hadjidementriou E, Grossberg M, Nayar S (2001). Spatial information in
+  multiresolution histograms. In \emph{Proceedings of the IEEE Conference on
+  Computer Vision and Pattern Recognition}, pp. I.702--I.709.
+
+\bibitem[{Haixiang et~al.(2017)Haixiang, Yijing, Shang, Mingyun, Yuanyue, and
+  Bing}]{Haixiang-2017}
+Haixiang G, Yijing L, Shang J, Mingyun G, Yuanyue H, Bing G (2017). Learning
+  from class-imbalanced data: review of methods and applications. \emph{Expert
+  Systems with Applications} 73:220--239.
+
+\bibitem[{Haralick et~al.(1973)Haralick, Shanmugam, and
+  Dinstein}]{Haralick-1975}
+Haralick RM, Shanmugam K, Dinstein I (1973). Textural features for image
+  classification. \emph{IEEE Transactions on Systems, Man, and Cybernetics}
+  3(6):610--621.
+
+\bibitem[{He and Garcia(2009)}]{5128907}
+He H, Garcia EA (2009). Learning from imbalanced data. \emph{IEEE Transactions
+  on Knowledge and Data Engineering} 21(9):1263--1284.
+
+\bibitem[{Hechenbichler and
+  Schliep(2004)}]{Hechenbichler06weightedk-nearest-neighbor}
+Hechenbichler K, Schliep K (2004). Weighted k-nearest-neighbor techniques and
+  ordinal classification. \emph{Sonderforschungsbereich} 386(399):1--16.
+
+\bibitem[{Hong et~al.(2013)Hong, Gao, Chen, and Harris}]{Hong2013210}
+Hong X, Gao J, Chen S, Harris CJ (2013). Particle swarm optimisation assisted
+  classification using elastic net prefiltering. \emph{Neurocomputing}
+  122:210--220.
+
+\bibitem[{Horvath et~al.(2011)Horvath, Wild, Kutay, and Csucs}]{Horvath-2011}
+Horvath P, Wild T, Kutay U, Csucs G (2011). Machine learning improves the
+  precision and robustness of high-content screens: using nonlinear
+  multiparametric methods to analyze screening results. \emph{Journal of
+  Biomolecular Screening} 16(9):1059--1067.
+
+\bibitem[{Iacca et~al.(2012)Iacca, Neri, Mininno, Ong, and Lim}]{Iacca201217}
+Iacca G, Neri F, Mininno E, Ong YS, Lim MH (2012). Ockham's razor in memetic
+  computing: three stage optimal memetic exploration. \emph{Information
+  Sciences} 188:17--43.
+
+\bibitem[{Jain et~al.(2012)Jain, van Kesteren, and Heutink}]{Jain-2012}
+Jain S, van Kesteren RE, Heutink P (2012). High content screening in
+  neurodegenerative diseases. \emph{Journal of Visualized Experiments}
+  59:e3452.
+
+\bibitem[{Jiang et~al.(2010)Jiang, Crookes, Luo, and Davidson}]{Jiang-2010}
+Jiang RM, Crookes D, Luo N, Davidson MW (2010). Live-cell tracking using {SIFT}
+  features in {DIC} microscopic videos. \emph{IEEE Transactions on Biomedical
+  Engineering} 57(9):2219--2228.
+
+\bibitem[{Kraus and Frey(2016)}]{Kraus-2016}
+Kraus OZ, Frey BJ (2016). Computer vision for high content screening.
+  \emph{Critical Reviews in Biochemistry and Molecular Biology} 51(2):102--109.
+
+\bibitem[{Krawczyk(2016)}]{Krawczyk-2016}
+Krawczyk B (2016). Learning from imbalanced data: open challenges and future
+  directions. \emph{Progress in Artificial Intelligence} 5(4):221--232.
+
+\bibitem[{Kuminski et~al.(2014)Kuminski, George, Wallin, and
+  Shamir}]{Kuminski-2014}
+Kuminski E, George J, Wallin J, Shamir L (2014). Combining human and machine
+  learning for morphological analysis of galaxy images. \emph{Publications of
+  the Astronomical Society of the Pacific} 126(944):959--967.
+
+\bibitem[{Lazebnik et~al.(2006)Lazebnik, Schmid, and Ponce}]{Lazebnik}
+{\color{red}Lazebnik S, Schmid C, Ponce J (2006). Beyond bags of features: spatial pyramid
+  matching for recognizing natural scene categories. In \emph{Proceedings of
+  the IEEE Conference on Computer Vision and Pattern Recognition}, vol~2, pp.
+  2169--2178.}
+
+\bibitem[{LeCun et~al.(2015)LeCun, Bengio, and Hinton}]{LeCun-2015}
+LeCun Y, Bengio Y, Hinton G (2015). Deep learning. \emph{Nature}
+  521(7553):436--444.
+
+\bibitem[{Lee et~al.(2016)Lee, Lee, and Han}]{10.1371/journal.pone.0153043}
+Lee DH, Lee DW, Han BS (2016). Possibility study of scale invariant feature
+  transform {(SIFT)} algorithm application to spine magnetic resonance imaging.
+  \emph{PLOS ONE} 11(4):1--9.
+
+\bibitem[{Li et~al.(2018)Li, Fong, Wong, and Chu}]{Li20181}
+Li J, Fong S, Wong RK, Chu VW (2018). Adaptive multi-objective swarm fusion for
+  imbalanced data classification. \emph{Information Fusion} 39:1--24.
+
+\bibitem[{Liaw and Wiener(2002)}]{randomForest}
+Liaw A, Wiener M (2002). Classification and regression by {randomForest}.
+  \emph{R News} 2(3):18--22.
+
+\bibitem[{Litjens et~al.(2017)Litjens, Kooi, Bejnordi, Setio, Ciompi,
+  Ghafoorian, van~der Laak, van Ginneken, and S{\'a}nchez}]{Litjens-2017}
+Litjens G, Kooi T, Bejnordi BE, Setio AAA, Ciompi F, Ghafoorian M, van~der Laak
+  JAWM, van Ginneken B, S{\'a}nchez CI (2017). A survey on deep learning in
+  medical image analysis. \emph{Medical Image Analysis} 42:60--88.
+
+\bibitem[{Lowe(2004)}]{lowe2004distinctive}
+Lowe DG (2004). Distinctive image features from scale-invariant keypoints.
+  \emph{International Journal of Computer Vision} 60(2):91--110.
+
+\bibitem[{MacQueen(1967)}]{macqueen1967}
+MacQueen J (1967). Some methods for classification and analysis of multivariate
+  observations. In \emph{Proceedings of the 5th Berkeley Symposium on
+  Mathematical Statistics and Probability --- Volume 1: Statistics}, University
+  of California Press, Berkeley, CA, pp. 281--297.
+
+\bibitem[{Mata et~al.(2016)Mata, Radojevi\'c, Smal, Morales, Meijering, and
+  Rubio}]{Mata-2016}
+Mata G, Radojevi\'c M, Smal I, Morales M, Meijering E, Rubio J (2016).
+  Automatic detection of neurons in high-content microscope images using
+  machine learning approaches. In \emph{Proceedings of the IEEE International
+  Symposium on Biomedical Imaging: From Nano to Macro}, pp. 330--333.
+
+\bibitem[{MathWorks(2016)}]{MATLAB2016}
+MathWorks (2016). \emph{Version 9.0.0.341360 (R2016a)}. The MathWorks Inc.,
+  Natick, MA.
+
+\bibitem[{Meijering(2010)}]{Meijering-2010}
+Meijering E (2010). Neuron tracing in perspective. \emph{Cytometry Part A}
+  77(7):693--704.
+
+\bibitem[{Meijering et~al.(2016)Meijering, Carpenter, Peng, Hamprecht, and
+  Olivo-Marin}]{Meijering-2016}
+Meijering E, Carpenter AE, Peng H, Hamprecht FA, Olivo-Marin JC (2016).
+  Imagining the future of bioimage analysis. \emph{Nature Biotechnology}
+  34(12):1250--1255.
+
+\bibitem[{Meyer et~al.(2017)Meyer, Dimitriadou, Hornik, Weingessel, and
+  Leisch}]{e1071}
+Meyer D, Dimitriadou E, Hornik K, Weingessel A, Leisch F (2017).
+\newblock \emph{e1071: Misc Functions of the Department of Statistics,
+  Probability Theory Group (Formerly: E1071), TU Wien}.
+  \urlprefix\url{https://CRAN.R-project.org/package=e1071}.
+
+\bibitem[{Mualla et~al.(2013)Mualla, Scholl, Sommerfeldt, Maier, and
+  Hornegger}]{Mualla-2013}
+Mualla F, Scholl S, Sommerfeldt B, Maier A, Hornegger J (2013). Automatic cell
+  detection in bright-field microscope images using {SIFT}, random forests, and
+  hierarchical clustering. \emph{IEEE Transactions on Medical Imaging}
+  32(12):2274--2286.
+
+\bibitem[{Ni et~al.(2009)Ni, Chui, Qu, Yang, Qin, Wong, Ho, and
+  Heng}]{DBLP:journals/cmig/NiCQYQWHH09}
+Ni D, Chui YP, Qu Y, Yang XS, Qin J, Wong TT, Ho SSH, Heng PA (2009).
+  Reconstruction of volumetric ultrasound panorama based on improved {3D}
+  {SIFT}. \emph{Computerized Medical Imaging and Graphics} 33(7):559--566.
+
+\bibitem[{Orlov et~al.(2008)Orlov, Shamir, Macura, Johnston, Eckley, and
+  Goldberg}]{Orlov2008}
+Orlov N, Shamir L, Macura T, Johnston J, Eckley DM, Goldberg IG (2008).
+  {WND-CHARM}: Multi-purpose image classification using compound image
+  transforms. \emph{Pattern Recognition Letters} 29(11):1684--1693.
+
+\bibitem[{Otsu(1979)}]{Otsu1979}
+Otsu N (1979). A threshold selection method from gray-level histograms.
+  \emph{IEEE Transactions on Systems, Man, and Cybernetics} 9(1):62--66.
+
+\bibitem[{van Pelt et~al.(2001)van Pelt, van Ooyen, and Uylings}]{Pelt-2001}
+van Pelt J, van Ooyen A, Uylings H (2001). The need for integrating neuronal
+  morphology databases and computational environments in exploring neuronal
+  structure and function. \emph{Anatomy and Embryology} 204(4):255--265.
+
+\bibitem[{Prewitt(1970)}]{Prewitt1970}
+Prewitt JMS (1970).
+\newblock Object enhancement and extraction. In \emph{Picture Processing and
+  Psychopictorics}, Academic Press, New York, NY, pp. 75--149.
+
+\bibitem[{{R Core Team}(2016)}]{Rpackage2016}
+{R Core Team} (2016).
+\newblock \emph{R: A Language and Environment for Statistical Computing}. R
+  Foundation for Statistical Computing, Vienna, Austria,
+  \urlprefix\url{https://www.R-project.org/}.
+
+\bibitem[{Radio(2012)}]{RN12}
+Radio N (2012). Neurite outgrowth assessment using high content analysis
+  methodology. \emph{Methods in Molecular Biology} 846:247--260.
+
+\bibitem[{{Ram\'on y Cajal}(1899)}]{Cajal2007}
+{Ram\'on y Cajal} S (1899). \emph{Histolog\'ia del sistema nervioso del hombre
+  y de los vertebrados}. CSIC, Madrid, reprinted in 2007.
+
+\bibitem[{Saeys et~al.(2007)Saeys, Inza, and
+  Larra\~naga}]{doi:10.1093/bioinformatics/btm344}
+Saeys Y, Inza I, Larra\~naga P (2007). A review of feature selection techniques
+  in bioinformatics. \emph{Bioinformatics} 23(19):2507--2517.
+
+\bibitem[{S{\'a}ez et~al.(2015)S{\'a}ez, Luengo, Stefanowski, and
+  Herrera}]{Saez2015}
+{\color{red}S{\'a}ez JA, Luengo J, Stefanowski J, Herrera F (2015). {SMOTE-IPF}: Addressing
+  the noisy and borderline examples problem in imbalanced classification by a
+  re-sampling method with filtering. \emph{Information Sciences} 291:184--203.}
+
+\bibitem[{Samworth(2012)}]{citeulike:13121917}
+Samworth RJ (2012). {Optimal weighted nearest neighbour classifiers}. \emph{The
+  Annals of Statistics} 40(5):2733--2763.
+
+\bibitem[{Schliep and Hechenbichler(2016)}]{kknn}
+Schliep K, Hechenbichler K (2016).
+\newblock \emph{kknn: Weighted k-Nearest Neighbors}.
+  \urlprefix\url{https://CRAN.R-project.org/package=kknn}.
+
+\bibitem[{Shaikhina and Khovanova(2017)}]{Shaikhina201751}
+Shaikhina T, Khovanova NA (2017). Handling limited datasets with neural
+  networks in medical applications: a small-data approach. \emph{Artificial
+  Intelligence in Medicine} 75:51--63.
+
+\bibitem[{Shamir(2012)}]{Shamir-2012}
+Shamir L (2012). Automatic detection of peculiar galaxies in large datasets of
+  galaxy images. \emph{Journal of Computational Science} 3(3):181--189.
+
+\bibitem[{Shamir and Tarakhovsky(2012)}]{Shamir-2012b}
+Shamir L, Tarakhovsky JA (2012). Computer analysis of art. \emph{Journal on
+  Computing and Cultural Heritage} 5(2):7.
+
+\bibitem[{Shamir et~al.(2008)Shamir, Orlov, Eckley, Macura, Johnston, and
+  Goldberg}]{Shamir2008}
+Shamir L, Orlov N, Eckley DM, Macura T, Johnston J, Goldberg IG (2008). Wndchrm
+  -- an open source utility for biological image analysis. \emph{Source Code
+  for Biology and Medicine} 3(1):1--13.
+
+\bibitem[{Shamir et~al.(2010)Shamir, Delaney, Orlov, Eckley, and
+  Goldberg}]{Shamir-2010}
+Shamir L, Delaney JD, Orlov N, Eckley DM, Goldberg IG (2010). Pattern
+  recognition software and techniques for biological image analysis. \emph{PLOS
+  Computational Biology} 6(11):e1000974.
+
+\bibitem[{Shapiro and Wilk(1965)}]{Shapiro-Wilk-1965}
+Shapiro SS, Wilk MB (1965). An analysis of variance test for normality
+  (complete samples). \emph{Biometrika} 52(3-4):591--611.
+
+\bibitem[{Shen et~al.(2017)Shen, Wu, and Suk}]{Shen-2017}
+Shen D, Wu G, Suk HI (2017). Deep learning in medical image analysis.
+  \emph{Annual Review of Biomedical Engineering} 19:221--248.
+
+\bibitem[{Simon(2007)}]{Simon2007}
+Simon R (2007).
+\newblock Resampling strategies for model assessment and selection. In
+  \emph{Fundamentals of Data Mining in Genomics and Proteomics}, Springer,
+  Boston, MA, pp. 173--186.
+
+\bibitem[{Singh et~al.(2014)Singh, Carpenter, and Genovesio}]{Singh-2014}
+Singh S, Carpenter AE, Genovesio A (2014). Increasing the content of
+  high-content screening: an overview. \emph{Journal of Biomolecular Screening}
+  19(5):640--650.
+
+\bibitem[{Smafield et~al.(2015)Smafield, Pasupuleti, Sharma, Huganir, Ye, and
+  Zhou}]{Smafield-2015}
+Smafield T, Pasupuleti V, Sharma K, Huganir RL, Ye B, Zhou J (2015). Automatic
+  dendritic length quantification for high throughput screening of mature
+  neurons. \emph{Neuroinformatics} 13(4):443--458.
+
+\bibitem[{Sommer and Gerlich(2013)}]{Sommer-2013}
+Sommer C, Gerlich DW (2013). Machine learning in cell biology -- teaching
+  computers to recognize phenotypes. \emph{Journal of Cell Science}
+  126(24):5529--5539.
+
+\bibitem[{Squire(1992)}]{S92}
+Squire LR (1992). Memory and the hippocampus: a synthesis from findings with
+  rats, monkeys, and humans. \emph{Psychological Review} 99(2):195--231.
+
+\bibitem[{Strobl et~al.(2009)Strobl, Hothorn, and Zeileis}]{CForest}
+Strobl C, Hothorn T, Zeileis A (2009). A new, conditional variable importance
+  measure for random forests available in the party package. \emph{The R
+  Journal} 1(2):14--17.
+
+\bibitem[{Tajbakhsh et~al.(2016)Tajbakhsh, Shin, Gurudu, Hurst, Kendall,
+  Gotway, and Liang}]{Tajbakhsh-2016}
+Tajbakhsh N, Shin JY, Gurudu SR, Hurst RT, Kendall CB, Gotway MB, Liang J
+  (2016). Convolutional neural networks for medical image analysis: full
+  training or fine tuning? \emph{IEEE Transactions on Medical Imaging}
+  35(5):1299--1312.
+
+\bibitem[{Tamura et~al.(1978)Tamura, Mori, and Yamawaki}]{Tamura1978}
+Tamura H, Mori S, Yamawaki T (1978). Textural features corresponding to visual
+  perception. \emph{IEEE Transactions on Systems, Man, and Cybernetics}
+  8(6):460--473.
+
+\bibitem[{Tibshirani(1996)}]{Tibshirani96regressionshrinkage}
+Tibshirani R (1996). Regression shrinkage and selection via the lasso.
+  \emph{Journal of the Royal Statistical Society: Series B (Statistical
+  Methodology)} 58(1):267--288.
+
+\bibitem[{Uhlmann et~al.(2016)Uhlmann, Singh, and Carpenter}]{Uhlmann-2016}
+Uhlmann V, Singh S, Carpenter AE (2016). {CP-CHARM}: segmentation-free image
+  classification made accessible. \emph{BMC Bioinformatics} 17(1):51.
+
+\bibitem[{Vallotton et~al.(2007)Vallotton, Lagerstrom, Sun, Buckley, Wang,
+  Silva, Tan, and Gunnersen}]{Vallotton-2007}
+Vallotton P, Lagerstrom R, Sun C, Buckley M, Wang D, Silva MD, Tan SS,
+  Gunnersen JM (2007). Automated analysis of neurite branching in cultured
+  cortical neurons using {HCA-Vision}. \emph{Cytometry Part A} 71(10):889--895.
+
+\bibitem[{Vapnik(1998)}]{zbMATH01332320}
+Vapnik VN (1998). \emph{Statistical Learning Theory}. John Wiley \& Sons, New
+  York, NY.
+
+\bibitem[{Vapnik(1999)}]{Vapnik99thenature}
+Vapnik VN (1999). \emph{The Nature of Statistical Learning Theory}.
+  Springer-Verlag, New York, NY.
+
+\bibitem[{Vedaldi and Fulkerson(2008)}]{vedaldi08vlfeat}
+Vedaldi A, Fulkerson B (2008).
+\newblock \emph{{VLFeat}: An Open and Portable Library of Computer Vision
+  Algorithms}. \urlprefix\url{http://www.vlfeat.org/}.
+
+\bibitem[{Vert et~al.(2004)Vert, Tsuda, and Sch{\"o}lkopf}]{2549}
+Vert JP, Tsuda K, Sch{\"o}lkopf B (2004).
+\newblock A primer on kernel methods. In \emph{Kernel Methods in Computational
+  Biology}, MIT Press, Cambridge, MA, USA, pp. 35--70.
+
+\bibitem[{Wickham(2009)}]{Wickham-2009}
+Wickham H (2009). \emph{ggplot2: Elegant Graphics for Data Analysis}. Springer,
+  New York, NY.
+
+\bibitem[{Wu et~al.(2010)Wu, Schulte, Sepp, Littleton, and Hong}]{Wu-2010}
+Wu C, Schulte J, Sepp KJ, Littleton JT, Hong P (2010). Automatic robust neurite
+  detection and morphological analysis of neuronal cell cultures in
+  high-content screening. \emph{Neuroinformatics} 8(2):83--100.
+
+\bibitem[{Xia and Wong(2012)}]{Xia-2012}
+Xia X, Wong STC (2012). Concise review: a high-content screening approach to
+  stem cell research and drug discovery. \emph{Stem Cells} 30(9):1800--1807.
+
+\bibitem[{Yang et~al.(2009)Yang, Yu, Gong, and Huang}]{Yang}
+Yang J, Yu K, Gong Y, Huang T (2009). Linear spatial pyramid matching using
+  sparse coding for image classification. In \emph{Proceedings of the IEEE
+  Conference on Computer Vision and Pattern Recognition}, pp. 1794--1801.
+
+\bibitem[{Yu et~al.(2016)Yu, Yang, Yang, Leng, Cao, Wang, and Tian}]{7182310}
+Yu D, Yang F, Yang C, Leng C, Cao J, Wang Y, Tian J (2016). Fast rotation-free
+  feature-based image registration using improved {N-SIFT} and {GMM}-based
+  parallel optimization. \emph{IEEE Transactions on Biomedical Engineering}
+  63(8):1653--1664.
+
+\bibitem[{Zhang et~al.(2013)Zhang, Zhou, Li, Yu, and
+  Xie}]{DBLP:journals/cmmm/ZhangZLYX13}
+Zhang R, Zhou W, Li Y, Yu S, Xie Y (2013). Nonrigid registration of lung {CT}
+  images based on tissue features. \emph{Computational and Mathematical Methods
+  in Medicine} 2013:834192.
+
+\bibitem[{Zhang et~al.(2007)Zhang, Zhou, Degterev, Lipinski, Adjeroh, Yuan, and
+  Wong}]{Zhang-2007}
+Zhang Y, Zhou X, Degterev A, Lipinski M, Adjeroh D, Yuan J, Wong STC (2007). A
+  novel tracing algorithm for high throughput imaging: screening of
+  neuron-based assays. \emph{Journal of Neuroscience Methods} 160(1):149--162.
+
+\end{thebibliography}
+
+\end{document}
