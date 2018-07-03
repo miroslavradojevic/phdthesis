@@ -58,312 +58,299 @@
 %\caption{Schematic overview of the six main steps of the proposed method: (A) soma extraction, (B) seed extraction, (C) branch tracing, (D) trace refinement, (E) node grouping, (F) tree construction.}
 %\label{fig:method}
 %\end{figure*}
-
 %\section{Related Work}
 %\label{sec:related-work}
 %Early methods and tools for digital neuron reconstruction were semi-automatic and required extensive manual intervention for their initialization and operation or the curation of faulty results \citep{glaser1965semi, capowski1981, glaser1990, masseroli1993}. With the increasing capabilities of computers it became possible to store and process 3D images of neurons \citep{cohen1994, belichenko1995}. More recently, the state-of-the-art in the field has moved towards full automation of neuron reconstruction, and various freely available software tools are now available for this purpose \citep{peng2010v3d, longair2011simple, peng2014extensible, peng2014virtual}, though the need for flexible editing tools has remained unabated \citep{luisi2011farsight, dercksen2014filament}.
-
 %Neuron reconstruction methods typically have a modular design where each module or stage of the processing pipeline deals with different structural objects. Depending on the subproblems being solved, modules can operate independently, or work together for example to combine local and global processing, possibly requiring multiple iterations. Several subproblems that can be identified in the literature include image prefiltering and segmentation \citep{zhou2015adaptive, turetken2011automated, sironi2016multiscale, mukherjee2013vector}, soma (cell body) detection and segmentation \citep{quan2013neurogps}, landmark points extraction \citep{al2008improved, wang2011broadly, choromanska2012automatic, su2012junction, radojevic2016fuzzy}, neuron arbor tracing \citep{zhao2011automated, liu2016rivulet, leandro2009automatic, radojevic2017automated, xiao2013app2}, and assembling the final tree-like graph structure \citep{zhou2016tremap, turetken2011automated, yuan2009mdl}. In the remainder of this section we briefly review techniques for solving each of these subproblems. Since our primary goal in this paper is to present a new method, the review is not meant to be exhaustive, but to put our method into context.
-
 %The pool of neuron reconstruction methods is very diverse \citep{meijering2010neuron, donohue2011automated, acciai2016automated, peng2015bigneuron} but there are also many commonalities. For example, image prefiltering to enhance tubular structures is typically carried out using Hessian or Jacobian based processing \citep{xiong2006, al2008improved, yuan2009mdl, wang2011broadly}. And to cope with uneven staining, adaptive thresholding \citep{zhou2015adaptive}, perceptual grouping \citep{narayanaswamy20113}, and vector field convolution \citep{mukherjee2015tubularity} have been used. For image segmentation (separating foreground from background), a wide variety of methods has been proposed, including the use of feature-based classifiers \citep{turetken2011automated, chen2015smarttracing, jimenez2015improved}, tubularity based supervised regression \citep{sironi2016multiscale}, and even deep learning \citep{li2017deep}. The general difficulty of supervised methods, however, is their need for extensive manual annotation for training to arrive at usable segmentation models. In our proposed method we have chosen to avoid this by using carefully designed explicit models.
+%For the detection and segmentation of the neuronal somas, which typically have a much larger diameter than the dendritic and axonal branches, a simple and efficient solution is to apply morphological closing and adaptive thresholding \citep{yan2013automated}. An alternative is to use shape fitting approaches \citep{quan2013neurogps}. Next, to initialize and/or guide the segmentation of the arbor, landmark points are often extracted using image filters that specifically enhance tubular structures \citep{wang2011broadly, turetken2011automated, choromanska2012automatic, su2012junction, radojevic2016fuzzy}, a popular one being the so-called ``vesselness filter'' \citep{frangi1998multiscale}. In our proposed method we have adopted classical approaches for soma and seed point detection as detailed in the next section.
+%Segmentation or tracing of all branches of the dendritic and axonal trees is the main challenge of the reconstruction problem. A widely used approach to overcome the difficulties caused by imperfect staining and image noise is to use techniques that find globally optimal paths between seed points by minimizing a predefined cost function \citep{meijering2004design, peng2011automatic, longair2011simple, quan2016neurogps}. But many other concepts have been proposed as well, including model fitting \citep{schmitt2004new,zhao2011automated}, contour extraction \citep{leandro2009automatic}, active contour segmentation \citep{wang2011broadly, luo2015neuron}, level-set or fast-marching approaches \citep{xiao2013app2, basu2014reconstructing}, path-pruning from oversegmentation \citep{peng2011automatic}, distance field tracing \citep{yang2013distance}, marching rayburst sampling \citep{ming2013rapid}, marked point processing \citep{basu2016neurite}, iterative back-tracking \citep{liu2016rivulet}, and learning based approaches \citep{chen2015smarttracing, gala2014active, santamaria2015automatic}. In recent works we have shown the great potential of probabilistic approaches to neuron tracing \citep{radojevic2015automated, radojevic2017automated, radojevic2017neuron} which formed the basis for the new fully automated neuron reconstruction method presented and evaluated in the next sections.
+%The final aspect of neuron reconstruction is the assembling of the complete neuronal tree structure from possibly many partial or overlapping traces and putting it into a format that is both representative and suitable for further automated analysis. This is typically solved by graph optimization strategies such as the minimum spanning tree (MST), the alternative K-MST \citep{turetken2011automated, gonzalez2010delineating}, or integer programming \citep{turetken2013reconstructing}. To deal with very large data sets it has also been proposed to assemble the 3D graph representation through tracing in 2D projections and applying reverse mapping \citep{zhou2016tremap}. However, with the advent of sophisticated assemblers such as UltraTracer \citep{peng2016automatic}, it is possible to extend any base tracing algorithm to deal with arbitrarily large volumes of neuronal image data \citep{peng2016automatic}. Therefore, in our proposed method, we do not use projections but perform the tracing in the original image (sub)volumes. And to obtain the graph representation we propose a new approach to refining and grouping the individual traces.
+%\section{Proposed Method}
+%\label{sec:method}
+%The pipeline of our proposed method consists of six steps (Fig.~\ref{fig:method}) described in detail in the following subsections. We assume that image stacks contain a single neuron (one soma) or just an arbor (no soma) as in the DIADEM \citep{brown2011diadem} and BigNeuron data \citep{peng2015bigneuron}. In short, we first extract the soma and a set of seeds, which serve to initialize our probabilistic branch tracing scheme. The resulting traces are iteratively refined and their corresponding nodes spatially grouped into a representative node set that is traversed to form the final reconstruction.
+%\subsection{Soma Extraction}
+%\label{subsec:soma-extraction}
+%The soma typically has a considerably larger diameter than the individual branches of the neuronal arbor (Fig.~\ref{fig:method}A). Thus it can be easily extracted using morphological filtering operations \citep{yan2013automated}. Specifically, in our method, we apply grayscale erosion to remove all branches and leave only the (eroded) soma. To this end, the radius $r_s$ of the structuring element needs to be larger than the largest expected branch radius in a given data set, and smaller than the expected soma radius. The resulting image is then smoothed using a Gaussian filter with standard deviation equal to $r_s$ and segmented using max-entropy thresholding \citep{radojevic2016fuzzy} to obtain a blob corresponding to the soma. For computational efficiency both the erosion and the Gaussian smoothing operation are carried out by separable filtering. In this paper we model the soma in the final graph representation of the neuron as a single spherical node with position equal to the centroid of the segmented blob and radius equal to the average distance of the blob voxels to the centroid. Alternatively, we could model the soma with a set of nodes that together represent the blob as accurately as we like, but in our applications this is not needed.
+%\begin{figure}[b!]
+%\begin{tabular}{@{}c@{\ }c@{}}
+%\includegraphics[width=0.49\columnwidth]{./fig/pi} &
+%\includegraphics[width=0.49\columnwidth]{./fig/lhood} \\
+%\hspace{2em} (a) $\mathrm{x}_{i}^k \sim p(\mathrm{x}_i | \mathrm{x}_{i-1}^k)$ &
+%\hspace{2em} (b) $p(\mathrm{z} | \mathrm{x})=\textrm{e}^{Kc_{\mathrm{x}}}$ \\
+%\end{tabular}
+%\caption{Functions used in the prediction and update steps of the SMC filtering: (a) the prediction importance sampling distribution (for ease of visualization a 2D example is given) and (b) the measurement likelihood function for different values of $K$. Reprinted with permission from \cite{radojevic2017neuron}.}
+%\label{fig:pred-lhood}
+%\end{figure}
+%\subsection{Seed Extraction}
+%\label{subsec:seed-extraction}
+%To initialize the branch tracing we extract a set of seed points (Fig.~\ref{fig:method}B). These seeds are points with very high likelihood of being centered on a branch. In our method we estimate this likelihood using a Hessian-based multiscale tubularity filter \citep{frangi1998multiscale}. For each voxel location $\mathrm{p} = [x,y,z]$ this filter yields not only an estimate of the tubularity of the local image structure, but also an estimate of the structure's orientation $\mathrm{v} = [ v_x, v_y, v_z ]$ as derived from the Hessian eigenvector corresponding to the smallest absolute eigenvalue, and an estimate of its spatial scale as derived from the Gaussian $\sigma$ at which the filter yields the highest tubularity value. From the resulting tubularity map, seeds $\mathrm{s}_i = [ \mathrm{p}_i, \mathrm{v}_i, \sigma_i ]$ are selected whose tubularity value is the highest in a cylindrical neighborhood with radius $3\sigma_i$, centered at $\mathrm{p}_i$, and oriented along $\mathrm{v}_i$. Here we use a find-maxima function ported from ImageJ, which applies a noise tolerance $\tau$ to prune insignificant local maxima \citep{imagejguide}.
+%\subsection{Branch Tracing}
+%\label{subsec:branch-tracing}
+%For each seed $\mathrm{s}_i$, our method traces the local image structure in two directions, $+\mathrm{v}_i$ and $-\mathrm{v}_i$, producing a pair of local traces (Fig.~\ref{fig:method}C). A trace is considered to consist of a sequence of hidden states, $\mathrm{x}_{0:L} = (\mathrm{x}_0,\dots,\mathrm{x}_L)$, where $\mathrm{x}_0$ is the initial state extrapolated from the seed $s_i$, and $\mathrm{x}_L$ is the last state of the trace. Similar to the seeds, the states $\mathrm{x}_i = \left[ \mathrm{p}_i, \mathrm{v}_i, \sigma_i \right]$ contain estimates of the position $\mathrm{p}_i = \left[ x_i, y_i, z_i  \right]$, the direction $\mathrm{v}_i = \left[ v_{x_i}, v_{y_i}, v_{z_i} \right]$, and the scale $\sigma_i$ of the underlying neuron branch. The states are estimated sequentially in a probabilistic fashion using Bayes' rule:
+%\begin{equation}
+%p(\mathrm{x}_i | \mathrm{z}_{0:i}) \propto  p(\mathrm{z}_i | \mathrm{x}_i) \!\!\int\!\! p(\mathrm{x}_i | \mathrm{x}_{i-1}) p(\mathrm{x}_{i-1} | \mathrm{z}_{0:i-1}) \mathrm{dx}_{i-1}
+%\label{eq:posterior}
+%\end{equation}
+%where $p(\mathrm{x}_i | \mathrm{z}_{0:i})$ is the posterior probability distribution of the state $\mathrm{x}_i$ given measurements $\mathrm{z}_{0:i}$ from the first to the current iteration, $p(\mathrm{x}_i | \mathrm{x}_{i-1})$ is the state transition prior, and $p(\mathrm{z}_i | \mathrm{x}_i)$ is the likelihood of measuring $\mathrm{z}_i$ given state $\mathrm{x}_i$. It is assumed that the state transition is a Markovian process and the measurements are independent. To allow for nonlinearities in the process, we solve the estimation problem (\ref{eq:posterior}) using sequential Monte Carlo (SMC) filtering \citep{doucet2001introduction}, also known as particle filtering \citep{arulampalam2002tutorial}. Here the posterior is approximated using a set of $N$ samples $\mathrm{x}_{i}^k$ with corresponding weights $w_i^k$ as:
+%\begin{equation}
+%p(\mathrm{x}_i | \mathrm{z}_{0:i}) \approx \sum_{k=1}^{N} w_i^k \delta(\mathrm{x}_i - \mathrm{x}_i^k)
+%\label{eq:approx}
+%\end{equation}
+%where the weights are normalized so that $\sum_k w_i^k = 1$.
+%Each iteration in SMC filtering consists of a prediction step and an update step. In the prediction step, given the samples $\mathrm{x}_{i-1}^k$ from the previous iteration, $N$ new samples $\mathrm{x}_i^k$ are drawn using the state transition prior. The importance sampling distribution that we use for this is (Fig.~\ref{fig:pred-lhood}a):
+%\begin{equation}
+%p(\mathrm{x}_i  | \mathrm{x}_{i-1}^k) =
+%\begin{cases}
+%\displaystyle\frac{\exp\left(\kappa\,\mathrm{v}_i \cdot \mathrm{v}_{i-1}^k -\ \frac{(d_i-d)^2}{2 (d/3)^2} -\ \frac{(\sigma_i-\sigma_{i-1}^k)^2}{2\zeta^2} \right)}{2 \pi I_0(\kappa)\eta} \\[2ex]
+%\begin{aligned}
+%  & \qquad\text{for $d_i \leq 2d \land \sigma_i \leq 3\zeta$} \\
+%0 & \qquad\text{otherwise}
+%\end{aligned}
+%\end{cases}
+%\label{eq:pred}
+%\end{equation}
+%where $I_0$ denotes the zero-order Bessel function of the first kind, $\kappa$ is the circular variance parameter, $\eta$ is a normalization factor that makes the prediction over all $N$ samples integrate to unity, $d_i= || \mathrm{p}_i - \mathrm{p}_{i-1}^k ||$ is the Euclidean distance between the predicted position and the sample position in the previous iteration, $d$ is the tracing step size, and $\zeta$ the scale variance parameter. Each predicted state is assigned a unit direction $\mathrm{v}_i = (\mathrm{p}_i - \mathrm{p}_{i-1}^k) / || \mathrm{p}_i - \mathrm{p}_{i-1}^k ||$ defined by two consecutive positions. And $\sigma_i-\sigma_{i-1}^k$ represents the difference in scales, which contributes to the importance sampling function by a Gaussian component, giving a higher value to state samples that retain the scale.
 
-For the detection and segmentation of the neuronal somas, which typically have a much larger diameter than the dendritic and axonal branches, a simple and efficient solution is to apply morphological closing and adaptive thresholding \citep{yan2013automated}. An alternative is to use shape fitting approaches \citep{quan2013neurogps}. Next, to initialize and/or guide the segmentation of the arbor, landmark points are often extracted using image filters that specifically enhance tubular structures \citep{wang2011broadly, turetken2011automated, choromanska2012automatic, su2012junction, radojevic2016fuzzy}, a popular one being the so-called ``vesselness filter'' \citep{frangi1998multiscale}. In our proposed method we have adopted classical approaches for soma and seed point detection as detailed in the next section.
+%In the update step, the newly drawn samples are updated using the following likelihood function (Fig.~\ref{fig:pred-lhood}b):
+%\begin{equation}
+%p(\mathrm{z} | \mathrm{x}) = e^{K c_{\mathrm{x}}}
+%\end{equation}
+%where $K$ determines the sensitivity to the normalized cross-correlation $c_{\mathrm{x}}\in[-1,1]$, which quantifies the similarity of the underlying image structure for $\mathrm{x}=\left[ \mathrm{p}, \mathrm{v}, \sigma \right]$ to a cylindrical template model with Gaussian profile (Fig.~\ref{fig:model}):
+%\begin{equation}
+%\label{eq:corr}
+%c_\mathrm{x} = 
+%\frac{
+%\sum_{k,l,m}
+%\left(I(\mathrm{p}')-\bar{I}\,\right) \left(G_{\sigma}-\bar{G}\,\right)
+%}{
+%\!\!\sqrt{
+%\sum_{k,l,m}\left(I(\mathrm{p}')-\bar{I}\,\right)^2
+%\sum_{k,l,m}\left(G_{\sigma}-\bar{G}\,\right)^2}
+%}
+%\end{equation}
+%\begin{equation}
+%\label{eq:pp}
+%\mathrm{p}' = \mathrm{p}'(k,l,m) =  \mathrm{p} + k \mathrm{u} + l \mathrm{w} + m \mathrm{v}
+%\end{equation}
+%\begin{equation}
+%\label{eq:template}
+%G_{\sigma} = G_{\sigma}(k,l,m)=G_{\sigma}(k,l)=\exp\left(-\big(k^2+l^2\big)/2\sigma^2\right)
+%\end{equation} 
+%where $(k,l,m)$ are the template coordinates, which transform to $\mathrm{p}'$ in image coordinates since the template is centered at $\mathrm{p}$ and is oriented in the direction $\mathrm{v}$ and has  scale $\sigma$ of $\mathrm{x}$, and by definition $\mathrm{u} \! \perp \! \mathrm{v}$, $\mathrm{w} \! \perp \! \mathrm{v}$, and $\mathrm{u} \! \perp \! \mathrm{w}$. The summation is limited to $\floor*{-3\sigma} \leq k, l \leq \ceil*{3\sigma}$ and $\floor*{\sigma} \leq m \leq \ceil*{\sigma}$ which corresponds to the spatial extent of the template. $\bar{I}$ and $\bar{G}$ denote the mean of the image intensities and of the template intensities, respectively, within the mentioned limits. The value of $c_\mathrm{x}$ is independent of intensity scalings and offsets and thus provides us with a robust measure of structural resemblance, which may range from $-1$ (inverse correlation), to $0$ (no correlation), to $+1$ (full correlation). The weights of the samples are updated accordingly as:
+%\begin{equation} 
+%\label{eq:w-update}
+%w_i^k \propto w_{i-1}^k
+%p(\mathrm{x}_{i}^k | \mathrm{x}_{i-1}^k)
+%\,\textrm{e}^{K c_{\mathrm{x}_i^k}}
+%\end{equation}
+%and renormalized so that $\sum_k w_i^k = 1$. To avoid weight deterioration, systematic resampling \citep{kitagawa1996monte} is performed each time the effective sample size $N_{\text{eff}}$ \citep{kong1994sequential} falls below 80\% of $N$. The final state estimate after each iteration $i$, which constitutes a node of the trace, is computed from the weighted samples as the centroid:
+%\begin{equation} 
+%\hat{\mathrm{x}}_i = \sum_k w_i^k \mathrm{x}_i^k
+%\end{equation} 
 
-Segmentation or tracing of all branches of the dendritic and axonal trees is the main challenge of the reconstruction problem. A widely used approach to overcome the difficulties caused by imperfect staining and image noise is to use techniques that find globally optimal paths between seed points by minimizing a predefined cost function \citep{meijering2004design, peng2011automatic, longair2011simple, quan2016neurogps}. But many other concepts have been proposed as well, including model fitting \citep{schmitt2004new,zhao2011automated}, contour extraction \citep{leandro2009automatic}, active contour segmentation \citep{wang2011broadly, luo2015neuron}, level-set or fast-marching approaches \citep{xiao2013app2, basu2014reconstructing}, path-pruning from oversegmentation \citep{peng2011automatic}, distance field tracing \citep{yang2013distance}, marching rayburst sampling \citep{ming2013rapid}, marked point processing \citep{basu2016neurite}, iterative back-tracking \citep{liu2016rivulet}, and learning based approaches \citep{chen2015smarttracing, gala2014active, santamaria2015automatic}. In recent works we have shown the great potential of probabilistic approaches to neuron tracing \citep{radojevic2015automated, radojevic2017automated, radojevic2017neuron} which formed the basis for the new fully automated neuron reconstruction method presented and evaluated in the next sections.
+%\begin{figure}
+%\begin{tabular}{@{}c@{\ }c@{}}
+%\includegraphics[width=0.49\columnwidth]{./fig/model/kernel3d} &
+%\includegraphics[width=0.49\columnwidth]{./fig/model/kernel2d} \\
+%(a) 3D  & (b)  2D
+%\end{tabular}
+%\caption{Cylindrical template intensity model $G_{\sigma}$. The model has a Gaussian profile in coordinates $k$ and $l$ and is constant in coordinate $m$. Both the 3D (a) and the 2D (b) version is shown.}
+%\label{fig:model}
+%\end{figure}
 
-The final aspect of neuron reconstruction is the assembling of the complete neuronal tree structure from possibly many partial or overlapping traces and putting it into a format that is both representative and suitable for further automated analysis. This is typically solved by graph optimization strategies such as the minimum spanning tree (MST), the alternative K-MST \citep{turetken2011automated, gonzalez2010delineating}, or integer programming \citep{turetken2013reconstructing}. To deal with very large data sets it has also been proposed to assemble the 3D graph representation through tracing in 2D projections and applying reverse mapping \citep{zhou2016tremap}. However, with the advent of sophisticated assemblers such as UltraTracer \citep{peng2016automatic}, it is possible to extend any base tracing algorithm to deal with arbitrarily large volumes of neuronal image data \citep{peng2016automatic}. Therefore, in our proposed method, we do not use projections but perform the tracing in the original image (sub)volumes. And to obtain the graph representation we propose a new approach to refining and grouping the individual traces.
+%Filtering is terminated if the average correlation value $\sum_{k} c_{\mathrm{x}_i^k}/N$ drops below the threshold $c_{\text{min}}$, indicating the end of the underlying neuron branch in the image, or if the iteration limit $L$ is reached. Since the filtering is done for each seed, and in both (opposite) directions, the same neuron branch may be traced many times over, but in a probabilistically independent way, providing accumulating evidence about the presence and location of the branches. However, to avoid excessive over-tracing and to reduce the computation time, we also monitor the node density $D_n$ per image volume unit $n \times n \times n$ and terminate the tracing if the density in the current position exceeds the limit $\delta_n$.
 
-\section{Proposed Method}
-\label{sec:method}
+%\begin{figure}[b!]
+%\includegraphics[width=\columnwidth]{./fig/grouping/overview}
+%\caption{Trace merging: (A) accumulated traces, (B) trace refinement, (C) node grouping, (D) tree traversal.}
+%\label{fig:merging}
+%\end{figure}
 
-The pipeline of our proposed method consists of six steps (Fig.~\ref{fig:method}) described in detail in the following subsections. We assume that image stacks contain a single neuron (one soma) or just an arbor (no soma) as in the DIADEM \citep{brown2011diadem} and BigNeuron data \citep{peng2015bigneuron}. In short, we first extract the soma and a set of seeds, which serve to initialize our probabilistic branch tracing scheme. The resulting traces are iteratively refined and their corresponding nodes spatially grouped into a representative node set that is traversed to form the final reconstruction.
+%\subsection{Trace Refinement}
+%\label{subsec:trace-refinement}
+%After the tracing step, each neuron branch may have multiple corresponding traces, and each trace node has bidirectional links to neighboring nodes (Figs.~\ref{fig:method}D and \ref{fig:merging}A) to allow trace traversal in any of the possible directions in the final tree construction step. Denoting the total number of traces by $T$, and the nodes of any given trace $t$ by $n_i^t$, $i=1,\dots,M^t$, we may write the complete set of nodes as:
+%\begin{equation}
+%\label{eq:N}
+%\mathcal{N} = \bigg\{
+%\Big\{ n_1^1,\dots,n_{M^1}^1\Big\},
+%\dots,
+%\Big\{ n_1^T,\dots,n_{M^T}^T\Big\}
+%\bigg\}
+%\end{equation}
+%but in the sequel we write the elements of $\mathcal{N}$ more generally as $n_k$, $k=1,\dots,M$, where $M=\sum_{t=1}^{T}M^t$. Each node $n_k$ contains an estimate of the center position $\left(x,y,z\right)$ and the cross-sectional radius $\left(r\right)$ of the underlying branch structure, as well as the cross-correlation $\left(c\right)$ with the cylindrical Gaussian template model, and a set $\left( \mathcal{I} \right)$ containing the indices in $\mathcal{N}$ of the neighboring nodes:
+%\begin{equation}
+%\label{eq:n_k}
+%n_k = \lbrace x_k, y_k, z_k, r_k, c_k, \mathcal{I}_k \rbrace
+%\end{equation}
+%where $\mathcal{I}_k$ has either two elements (in the case of a body node) or just one (in the case of a terminal node).
 
-\subsection{Soma Extraction}
-\label{subsec:soma-extraction}
-The soma typically has a considerably larger diameter than the individual branches of the neuronal arbor (Fig.~\ref{fig:method}A). Thus it can be easily extracted using morphological filtering operations \citep{yan2013automated}. Specifically, in our method, we apply grayscale erosion to remove all branches and leave only the (eroded) soma. To this end, the radius $r_s$ of the structuring element needs to be larger than the largest expected branch radius in a given data set, and smaller than the expected soma radius. The resulting image is then smoothed using a Gaussian filter with standard deviation equal to $r_s$ and segmented using max-entropy thresholding \citep{radojevic2016fuzzy} to obtain a blob corresponding to the soma. For computational efficiency both the erosion and the Gaussian smoothing operation are carried out by separable filtering. In this paper we model the soma in the final graph representation of the neuron as a single spherical node with position equal to the centroid of the segmented blob and radius equal to the average distance of the blob voxels to the centroid. Alternatively, we could model the soma with a set of nodes that together represent the blob as accurately as we like, but in our applications this is not needed.
+%The goal of the trace refinement step is to exploit the cumulative evidence provided by the over-tracing in the previous step to improve the individual node estimates. Specifically, we update each node $n_k$ to:
+%\begin{equation}
+%\label{eq:bar_n_k}
+%\bar{n}_k = \lbrace \bar{x}_k, \bar{y}_k, \bar{z}_k, \bar{r}_k, \bar{c}_k, \bar{\mathcal{I}}_k \rbrace
+%\end{equation}
+%by applying mean-shifting \citep{cheng1995mean}, resulting in an updated node set $\bar{\mathcal{N}}$. Mean-shifting iteratively moves each node element to the local mean of the nodes in its vicinity. This reduces the variance of the estimates but preserves the linking of the nodes: $\bar{\mathcal{I}}=\mathcal{I}$. In practice, five iterations are sufficient to reach satisfactory radial trace alignment (Fig.~\ref{fig:merging}B). The kernel size used in the mean-shifting process is taken to be the initial radius of each node. In our implementation, prior to mean-shifting, we resample all traces with a step size of one voxel to get a more fine-grained result.
 
-\begin{figure}[b!]
-\begin{tabular}{@{}c@{\ }c@{}}
-\includegraphics[width=0.49\columnwidth]{./fig/pi} &
-\includegraphics[width=0.49\columnwidth]{./fig/lhood} \\
-\hspace{2em} (a) $\mathrm{x}_{i}^k \sim p(\mathrm{x}_i | \mathrm{x}_{i-1}^k)$ &
-\hspace{2em} (b) $p(\mathrm{z} | \mathrm{x})=\textrm{e}^{Kc_{\mathrm{x}}}$ \\
-\end{tabular}
-\caption{Functions used in the prediction and update steps of the SMC filtering: (a) the prediction importance sampling distribution (for ease of visualization a 2D example is given) and (b) the measurement likelihood function for different values of $K$. Reprinted with permission from \cite{radojevic2017neuron}.}
-\label{fig:pred-lhood}
-\end{figure}
-
-\subsection{Seed Extraction}
-\label{subsec:seed-extraction}
-To initialize the branch tracing we extract a set of seed points (Fig.~\ref{fig:method}B). These seeds are points with very high likelihood of being centered on a branch. In our method we estimate this likelihood using a Hessian-based multiscale tubularity filter \citep{frangi1998multiscale}. For each voxel location $\mathrm{p} = [x,y,z]$ this filter yields not only an estimate of the tubularity of the local image structure, but also an estimate of the structure's orientation $\mathrm{v} = [ v_x, v_y, v_z ]$ as derived from the Hessian eigenvector corresponding to the smallest absolute eigenvalue, and an estimate of its spatial scale as derived from the Gaussian $\sigma$ at which the filter yields the highest tubularity value. From the resulting tubularity map, seeds $\mathrm{s}_i = [ \mathrm{p}_i, \mathrm{v}_i, \sigma_i ]$ are selected whose tubularity value is the highest in a cylindrical neighborhood with radius $3\sigma_i$, centered at $\mathrm{p}_i$, and oriented along $\mathrm{v}_i$. Here we use a find-maxima function ported from ImageJ, which applies a noise tolerance $\tau$ to prune insignificant local maxima \citep{imagejguide}.
-
-\subsection{Branch Tracing}
-\label{subsec:branch-tracing}
-For each seed $\mathrm{s}_i$, our method traces the local image structure in two directions, $+\mathrm{v}_i$ and $-\mathrm{v}_i$, producing a pair of local traces (Fig.~\ref{fig:method}C). A trace is considered to consist of a sequence of hidden states, $\mathrm{x}_{0:L} = (\mathrm{x}_0,\dots,\mathrm{x}_L)$, where $\mathrm{x}_0$ is the initial state extrapolated from the seed $s_i$, and $\mathrm{x}_L$ is the last state of the trace. Similar to the seeds, the states $\mathrm{x}_i = \left[ \mathrm{p}_i, \mathrm{v}_i, \sigma_i \right]$ contain estimates of the position $\mathrm{p}_i = \left[ x_i, y_i, z_i  \right]$, the direction $\mathrm{v}_i = \left[ v_{x_i}, v_{y_i}, v_{z_i} \right]$, and the scale $\sigma_i$ of the underlying neuron branch. The states are estimated sequentially in a probabilistic fashion using Bayes' rule:
-\begin{equation}
-p(\mathrm{x}_i | \mathrm{z}_{0:i}) \propto  p(\mathrm{z}_i | \mathrm{x}_i) \!\!\int\!\! p(\mathrm{x}_i | \mathrm{x}_{i-1}) p(\mathrm{x}_{i-1} | \mathrm{z}_{0:i-1}) \mathrm{dx}_{i-1}
-\label{eq:posterior}
-\end{equation}
-where $p(\mathrm{x}_i | \mathrm{z}_{0:i})$ is the posterior probability distribution of the state $\mathrm{x}_i$ given measurements $\mathrm{z}_{0:i}$ from the first to the current iteration, $p(\mathrm{x}_i | \mathrm{x}_{i-1})$ is the state transition prior, and $p(\mathrm{z}_i | \mathrm{x}_i)$ is the likelihood of measuring $\mathrm{z}_i$ given state $\mathrm{x}_i$. It is assumed that the state transition is a Markovian process and the measurements are independent. To allow for nonlinearities in the process, we solve the estimation problem (\ref{eq:posterior}) using sequential Monte Carlo (SMC) filtering \citep{doucet2001introduction}, also known as particle filtering \citep{arulampalam2002tutorial}. Here the posterior is approximated using a set of $N$ samples $\mathrm{x}_{i}^k$ with corresponding weights $w_i^k$ as:
-\begin{equation}
-p(\mathrm{x}_i | \mathrm{z}_{0:i}) \approx \sum_{k=1}^{N} w_i^k \delta(\mathrm{x}_i - \mathrm{x}_i^k)
-\label{eq:approx}
-\end{equation}
-where the weights are normalized so that $\sum_k w_i^k = 1$.
-
-Each iteration in SMC filtering consists of a prediction step and an update step. In the prediction step, given the samples $\mathrm{x}_{i-1}^k$ from the previous iteration, $N$ new samples $\mathrm{x}_i^k$ are drawn using the state transition prior. The importance sampling distribution that we use for this is (Fig.~\ref{fig:pred-lhood}a):
-\begin{equation}
-p(\mathrm{x}_i  | \mathrm{x}_{i-1}^k) =
-\begin{cases}
-\displaystyle\frac{\exp\left(\kappa\,\mathrm{v}_i \cdot \mathrm{v}_{i-1}^k -\ \frac{(d_i-d)^2}{2 (d/3)^2} -\ \frac{(\sigma_i-\sigma_{i-1}^k)^2}{2\zeta^2} \right)}{2 \pi I_0(\kappa)\eta} \\[2ex]
-\begin{aligned}
-  & \qquad\text{for $d_i \leq 2d \land \sigma_i \leq 3\zeta$} \\
-0 & \qquad\text{otherwise}
-\end{aligned}
-\end{cases}
-\label{eq:pred}
-\end{equation}
-where $I_0$ denotes the zero-order Bessel function of the first kind, $\kappa$ is the circular variance parameter, $\eta$ is a normalization factor that makes the prediction over all $N$ samples integrate to unity, $d_i= || \mathrm{p}_i - \mathrm{p}_{i-1}^k ||$ is the Euclidean distance between the predicted position and the sample position in the previous iteration, $d$ is the tracing step size, and $\zeta$ the scale variance parameter. Each predicted state is assigned a unit direction $\mathrm{v}_i = (\mathrm{p}_i - \mathrm{p}_{i-1}^k) / || \mathrm{p}_i - \mathrm{p}_{i-1}^k ||$ defined by two consecutive positions. And $\sigma_i-\sigma_{i-1}^k$ represents the difference in scales, which contributes to the importance sampling function by a Gaussian component, giving a higher value to state samples that retain the scale.
-
-In the update step, the newly drawn samples are updated using the following likelihood function (Fig.~\ref{fig:pred-lhood}b):
-\begin{equation}
-p(\mathrm{z} | \mathrm{x}) = e^{K c_{\mathrm{x}}}
-\end{equation}
-where $K$ determines the sensitivity to the normalized cross-correlation $c_{\mathrm{x}}\in[-1,1]$, which quantifies the similarity of the underlying image structure for $\mathrm{x}=\left[ \mathrm{p}, \mathrm{v}, \sigma \right]$ to a cylindrical template model with Gaussian profile (Fig.~\ref{fig:model}):
-\begin{equation}
-\label{eq:corr}
-c_\mathrm{x} = 
-\frac{
-\sum_{k,l,m}
-\left(I(\mathrm{p}')-\bar{I}\,\right) \left(G_{\sigma}-\bar{G}\,\right)
-}{
-\!\!\sqrt{
-\sum_{k,l,m}\left(I(\mathrm{p}')-\bar{I}\,\right)^2
-\sum_{k,l,m}\left(G_{\sigma}-\bar{G}\,\right)^2}
-}
-\end{equation}
-\begin{equation}
-\label{eq:pp}
-\mathrm{p}' = \mathrm{p}'(k,l,m) =  \mathrm{p} + k \mathrm{u} + l \mathrm{w} + m \mathrm{v}
-\end{equation}
-\begin{equation}
-\label{eq:template}
-G_{\sigma} = G_{\sigma}(k,l,m)=G_{\sigma}(k,l)=\exp\left(-\big(k^2+l^2\big)/2\sigma^2\right)
-\end{equation} 
-where $(k,l,m)$ are the template coordinates, which transform to $\mathrm{p}'$ in image coordinates since the template is centered at $\mathrm{p}$ and is oriented in the direction $\mathrm{v}$ and has  scale $\sigma$ of $\mathrm{x}$, and by definition $\mathrm{u} \! \perp \! \mathrm{v}$, $\mathrm{w} \! \perp \! \mathrm{v}$, and $\mathrm{u} \! \perp \! \mathrm{w}$. The summation is limited to $\floor*{-3\sigma} \leq k, l \leq \ceil*{3\sigma}$ and $\floor*{\sigma} \leq m \leq \ceil*{\sigma}$ which corresponds to the spatial extent of the template. $\bar{I}$ and $\bar{G}$ denote the mean of the image intensities and of the template intensities, respectively, within the mentioned limits. The value of $c_\mathrm{x}$ is independent of intensity scalings and offsets and thus provides us with a robust measure of structural resemblance, which may range from $-1$ (inverse correlation), to $0$ (no correlation), to $+1$ (full correlation). The weights of the samples are updated accordingly as:
-\begin{equation} 
-\label{eq:w-update}
-w_i^k \propto w_{i-1}^k
-p(\mathrm{x}_{i}^k | \mathrm{x}_{i-1}^k)
-\,\textrm{e}^{K c_{\mathrm{x}_i^k}}
-\end{equation}
-and renormalized so that $\sum_k w_i^k = 1$. To avoid weight deterioration, systematic resampling \citep{kitagawa1996monte} is performed each time the effective sample size $N_{\text{eff}}$ \citep{kong1994sequential} falls below 80\% of $N$. The final state estimate after each iteration $i$, which constitutes a node of the trace, is computed from the weighted samples as the centroid:
-\begin{equation} 
-\hat{\mathrm{x}}_i = \sum_k w_i^k \mathrm{x}_i^k
-\end{equation} 
-
-\begin{figure}
-\begin{tabular}{@{}c@{\ }c@{}}
-\includegraphics[width=0.49\columnwidth]{./fig/model/kernel3d} &
-\includegraphics[width=0.49\columnwidth]{./fig/model/kernel2d} \\
-(a) 3D  & (b)  2D
-\end{tabular}
-\caption{Cylindrical template intensity model $G_{\sigma}$. The model has a Gaussian profile in coordinates $k$ and $l$ and is constant in coordinate $m$. Both the 3D (a) and the 2D (b) version is shown.}
-\label{fig:model}
-\end{figure}
-
-Filtering is terminated if the average correlation value $\sum_{k} c_{\mathrm{x}_i^k}/N$ drops below the threshold $c_{\text{min}}$, indicating the end of the underlying neuron branch in the image, or if the iteration limit $L$ is reached. Since the filtering is done for each seed, and in both (opposite) directions, the same neuron branch may be traced many times over, but in a probabilistically independent way, providing accumulating evidence about the presence and location of the branches. However, to avoid excessive over-tracing and to reduce the computation time, we also monitor the node density $D_n$ per image volume unit $n \times n \times n$ and terminate the tracing if the density in the current position exceeds the limit $\delta_n$.
-
-\begin{figure}[b!]
-\includegraphics[width=\columnwidth]{./fig/grouping/overview}
-\caption{Trace merging: (A) accumulated traces, (B) trace refinement, (C) node grouping, (D) tree traversal.}
-\label{fig:merging}
-\end{figure}
-
-\subsection{Trace Refinement}
-\label{subsec:trace-refinement}
-After the tracing step, each neuron branch may have multiple corresponding traces, and each trace node has bidirectional links to neighboring nodes (Figs.~\ref{fig:method}D and \ref{fig:merging}A) to allow trace traversal in any of the possible directions in the final tree construction step. Denoting the total number of traces by $T$, and the nodes of any given trace $t$ by $n_i^t$, $i=1,\dots,M^t$, we may write the complete set of nodes as:
-\begin{equation}
-\label{eq:N}
-\mathcal{N} = \bigg\{
-\Big\{ n_1^1,\dots,n_{M^1}^1\Big\},
-\dots,
-\Big\{ n_1^T,\dots,n_{M^T}^T\Big\}
-\bigg\}
-\end{equation}
-but in the sequel we write the elements of $\mathcal{N}$ more generally as $n_k$, $k=1,\dots,M$, where $M=\sum_{t=1}^{T}M^t$. Each node $n_k$ contains an estimate of the center position $\left(x,y,z\right)$ and the cross-sectional radius $\left(r\right)$ of the underlying branch structure, as well as the cross-correlation $\left(c\right)$ with the cylindrical Gaussian template model, and a set $\left( \mathcal{I} \right)$ containing the indices in $\mathcal{N}$ of the neighboring nodes:
-\begin{equation}
-\label{eq:n_k}
-n_k = \lbrace x_k, y_k, z_k, r_k, c_k, \mathcal{I}_k \rbrace
-\end{equation}
-where $\mathcal{I}_k$ has either two elements (in the case of a body node) or just one (in the case of a terminal node).
-
-The goal of the trace refinement step is to exploit the cumulative evidence provided by the over-tracing in the previous step to improve the individual node estimates. Specifically, we update each node $n_k$ to:
-\begin{equation}
-\label{eq:bar_n_k}
-\bar{n}_k = \lbrace \bar{x}_k, \bar{y}_k, \bar{z}_k, \bar{r}_k, \bar{c}_k, \bar{\mathcal{I}}_k \rbrace
-\end{equation}
-by applying mean-shifting \citep{cheng1995mean}, resulting in an updated node set $\bar{\mathcal{N}}$. Mean-shifting iteratively moves each node element to the local mean of the nodes in its vicinity. This reduces the variance of the estimates but preserves the linking of the nodes: $\bar{\mathcal{I}}=\mathcal{I}$. In practice, five iterations are sufficient to reach satisfactory radial trace alignment (Fig.~\ref{fig:merging}B). The kernel size used in the mean-shifting process is taken to be the initial radius of each node. In our implementation, prior to mean-shifting, we resample all traces with a step size of one voxel to get a more fine-grained result.
-
-\begin{algorithm}[b!]
-	\caption{Node grouping.}
-	\label{alg:grouping}
-	\begin{algorithmic}[1]
-		\Require $\bar{\mathcal{N}}$, $r_g$ \Comment{refined node list and grouping radius}
-		\State $G = \left[ 0, \dots, 0 \right]$ \Comment{initialize node group mapping list $| G | = | \bar{\mathcal{N}} | = M$}
-		\State $\hat{\mathcal{N}} = \lbrace \rbrace $ \Comment{initialize group node set $| \hat{\mathcal{N}} | = 0$}
-		\For{$k = \argmax_k \bar{c}_k, \dots, \argmin_k \bar{c}_k $} \Comment{descending correlation}
-		\If {$G[k] = 0$} \label{alg:grouping:gFalse}\Comment{initialize new group if yet ungrouped}
-		\State $m = | \hat{\mathcal{N}} | + 1$ \Comment{next node group index}
-		\State $G[k] = m$ \Comment{fill node group mapping}
-		\State $t = 1$ \Comment{index group elements}
-		\State $\left(x'_t, y'_t, z'_t, r'_t, c'_t \right) = \left(\bar{x}_k, \bar{y}_k, \bar{z}_k, \bar{r}_k, \bar{c}_k \right) $  \Comment{initialize centroid}
-		\State $ \mathcal{I}'_t = \bar{\mathcal{I}}_k $ \Comment{initialize link}
-		\For{$l = 1,\dots,k-1, k+1,\dots,M$} \Comment{all other nodes}
-		\If {$ (\bar{x}_{l} - \bar{x}_{k})^2 + (\bar{y}_{l} - \bar{y}_{k})^2 +  (\bar{z}_{l} - \bar{z}_{k})^2  \leq r_g^2$} \label{alg:grouping:sphere}
-		\State $t = t + 1$	
-		\State $x'_t = \frac{t-1}{t} x'_{t-1} + \frac{1}{t} \bar{x}_l$ \Comment{iterative mean}
-		\State $y'_t = \frac{t-1}{t} y'_{t-1} + \frac{1}{t} \bar{y}_l$
-		\State $z'_t = \frac{t-1}{t} z'_{t-1} + \frac{1}{t} \bar{z}_l$ 
-		\State $r'_t = \frac{t-1}{t} r'_{t-1} + \frac{1}{t} \bar{r}_l$
-		\State $c'_t = \frac{t-1}{t} c'_{t-1} + \frac{1}{t} \bar{c}_l$
-		\State $\mathcal{I}'_t = \mathcal{I}'_{t-1}\cup\bar{\mathcal{I}}_l$	\Comment{accumulate node linkage}			
-		\State $G[l] = m$ \Comment{fill node group mapping}
-		\EndIf
-		\EndFor	
-		\State $\hat{n}_m = \left(x'_t,y'_t,z'_t,r'_t,c'_t,\mathcal{I}'_t\right)$ \Comment{assign group values}
-		\State $\hat{\mathcal{N}}=\hat{\mathcal{N}}\cup\lbrace\hat{n}_m\rbrace$ \Comment{add node group}
-		\EndIf
-		\EndFor
-		\For{$k = 1, \dots, P $} \Comment{$P = | \hat{\mathcal{N}} |$} 
-		\State $ \hat{\mathcal{I}}_k = \text{group}(\hat{\mathcal{I}}_k, G)$ \label{alg:grouping:gMapping} \Comment{turn node to group node indices}
-		\State $ \hat{\mathcal{I}}_k = \text{unique}(\hat{\mathcal{I}}_k) $ \Comment{remove repeating indexes}
-		\State $ \hat{\mathcal{I}}_k = \hat{\mathcal{I}}_k \setminus \{k\} $ \Comment{remove self-links}
-		\EndFor
-	\end{algorithmic}
-\end{algorithm}
+%\begin{algorithm}[b!]
+%	\caption{Node grouping.}
+%	\label{alg:grouping}
+%	\begin{algorithmic}[1]
+%		\Require $\bar{\mathcal{N}}$, $r_g$ \Comment{refined node list and grouping radius}
+%		\State $G = \left[ 0, \dots, 0 \right]$ \Comment{initialize node group mapping list $| G | = | \bar{\mathcal{N}} | = M$}
+%		\State $\hat{\mathcal{N}} = \lbrace \rbrace $ \Comment{initialize group node set $| \hat{\mathcal{N}} | = 0$}
+%		\For{$k = \argmax_k \bar{c}_k, \dots, \argmin_k \bar{c}_k $} \Comment{descending correlation}
+%		\If {$G[k] = 0$} \label{alg:grouping:gFalse}\Comment{initialize new group if yet ungrouped}
+%		\State $m = | \hat{\mathcal{N}} | + 1$ \Comment{next node group index}
+%		\State $G[k] = m$ \Comment{fill node group mapping}
+%		\State $t = 1$ \Comment{index group elements}
+%		\State $\left(x'_t, y'_t, z'_t, r'_t, c'_t \right) = \left(\bar{x}_k, \bar{y}_k, \bar{z}_k, \bar{r}_k, \bar{c}_k \right) $  \Comment{initialize centroid}
+%		\State $ \mathcal{I}'_t = \bar{\mathcal{I}}_k $ \Comment{initialize link}
+%		\For{$l = 1,\dots,k-1, k+1,\dots,M$} \Comment{all other nodes}
+%		\If {$ (\bar{x}_{l} - \bar{x}_{k})^2 + (\bar{y}_{l} - \bar{y}_{k})^2 +  (\bar{z}_{l} - \bar{z}_{k})^2  \leq r_g^2$} \label{alg:grouping:sphere}
+%		\State $t = t + 1$	
+%		\State $x'_t = \frac{t-1}{t} x'_{t-1} + \frac{1}{t} \bar{x}_l$ \Comment{iterative mean}
+%		\State $y'_t = \frac{t-1}{t} y'_{t-1} + \frac{1}{t} \bar{y}_l$
+%		\State $z'_t = \frac{t-1}{t} z'_{t-1} + \frac{1}{t} \bar{z}_l$ 
+%		\State $r'_t = \frac{t-1}{t} r'_{t-1} + \frac{1}{t} \bar{r}_l$
+%		\State $c'_t = \frac{t-1}{t} c'_{t-1} + \frac{1}{t} \bar{c}_l$
+%		\State $\mathcal{I}'_t = \mathcal{I}'_{t-1}\cup\bar{\mathcal{I}}_l$	\Comment{accumulate node linkage}			
+%		\State $G[l] = m$ \Comment{fill node group mapping}
+%		\EndIf
+%		\EndFor	
+%		\State $\hat{n}_m = \left(x'_t,y'_t,z'_t,r'_t,c'_t,\mathcal{I}'_t\right)$ \Comment{assign group values}
+%		\State $\hat{\mathcal{N}}=\hat{\mathcal{N}}\cup\lbrace\hat{n}_m\rbrace$ \Comment{add node group}
+%		\EndIf
+%		\EndFor
+%		\For{$k = 1, \dots, P $} \Comment{$P = | \hat{\mathcal{N}} |$} 
+%		\State $ \hat{\mathcal{I}}_k = \text{group}(\hat{\mathcal{I}}_k, G)$ \label{alg:grouping:gMapping} \Comment{turn node to group node indices}
+%		\State $ \hat{\mathcal{I}}_k = \text{unique}(\hat{\mathcal{I}}_k) $ \Comment{remove repeating indexes}
+%		\State $ \hat{\mathcal{I}}_k = \hat{\mathcal{I}}_k \setminus \{k\} $ \Comment{remove self-links}
+%		\EndFor
+%	\end{algorithmic}
+%\end{algorithm}
 
 
-\subsection{Node Grouping}
-\label{subsec:node-grouping}
-Although the previous step results in refined node estimates, it keeps the total number of nodes and corresponding multiple traces. The next step is to merge overlapping traces and obtain a single trace for each neuron branch. In our method this is accomplished by the process of node grouping (Figs.~\ref{fig:method}E and \ref{fig:merging}C) as detailed in Algorithm~\ref{alg:grouping}. It iteratively takes from the refined set $\bar{\mathcal{N}}$ an as-yet ungrouped node with the highest cross-correlation value, finds all its neighboring nodes within the predefined Euclidean distance $r_g$, and groups them by calculating the mean value of each element while accumulating all node links and mapping their indexes to the group node index list. This results in a new set $\hat{\mathcal{N}} = \lbrace \hat{n}_1,\dots,\hat{n}_P \rbrace$, $P \leq M$, of group nodes:
-\begin{equation}
-\label{eq:hat_n_k}
-\hat{n}_k=\lbrace\hat{x}_k, \hat{y}_k, \hat{z}_k, \hat{r}_k, \hat{c}_k, \hat{\mathcal{I}}_k\rbrace
-\end{equation}
-and any two $\hat{n}_i$ and $\hat{n}_j$ are connected if there exists a link between any of the refined nodes captured by these two, as revealed by the accumulated index sets $\hat{\mathcal{I}}_i$ and $\hat{\mathcal{I}}_j$. Thus, all existing inter-node connections $\bar{\mathcal{I}}$ are preserved, and are projected into the inter-group connections $\hat{\mathcal{I}}$.
+%\subsection{Node Grouping}
+%\label{subsec:node-grouping}
+%Although the previous step results in refined node estimates, it keeps the total number of nodes and corresponding multiple traces. The next step is to merge overlapping traces and obtain a single trace for each neuron branch. In our method this is accomplished by the process of node grouping (Figs.~\ref{fig:method}E and \ref{fig:merging}C) as detailed in Algorithm~\ref{alg:grouping}. It iteratively takes from the refined set $\bar{\mathcal{N}}$ an as-yet ungrouped node with the highest cross-correlation value, finds all its neighboring nodes within the predefined Euclidean distance $r_g$, and groups them by calculating the mean value of each element while accumulating all node links and mapping their indexes to the group node index list. This results in a new set $\hat{\mathcal{N}} = \lbrace \hat{n}_1,\dots,\hat{n}_P \rbrace$, $P \leq M$, of group nodes:
+%\begin{equation}
+%\label{eq:hat_n_k}
+%\hat{n}_k=\lbrace\hat{x}_k, \hat{y}_k, \hat{z}_k, \hat{r}_k, \hat{c}_k, \hat{\mathcal{I}}_k\rbrace
+%\end{equation}
+%and any two $\hat{n}_i$ and $\hat{n}_j$ are connected if there exists a link between any of the refined nodes captured by these two, as revealed by the accumulated index sets $\hat{\mathcal{I}}_i$ and $\hat{\mathcal{I}}_j$. Thus, all existing inter-node connections $\bar{\mathcal{I}}$ are preserved, and are projected into the inter-group connections $\hat{\mathcal{I}}$.
 
-\subsection{Tree Construction}
-\label{subsec:tree-construction}
-The final step of our method is the construction of a graph representing the complete neuronal arbor. This is facilitated by the bidirectional connectivity of the group nodes in $\hat{\mathcal{N}}$. However, similar to a real neuron, the final graph must be a tree, in which the nodes are unidirectionally linked (Figs.~\ref{fig:method}F and \ref{fig:merging}D), as also required by the SWC file format for storing digital neuron reconstructions \citep{stockley1993system, cannon1998line}. Starting from the soma node, or from the group node with the highest cross-correlation value if no soma was found in the image, the nodes in $\hat{\mathcal{N}}$ are iteratively traversed using a breadth-first search (BFS) algorithm. In this process it is possible to discard any isolated branches and single-node terminal branches (false positives).
+%\subsection{Tree Construction}
+%\label{subsec:tree-construction}
+%The final step of our method is the construction of a graph representing the complete neuronal arbor. This is facilitated by the bidirectional connectivity of the group nodes in $\hat{\mathcal{N}}$. However, similar to a real neuron, the final graph must be a tree, in which the nodes are unidirectionally linked (Figs.~\ref{fig:method}F and \ref{fig:merging}D), as also required by the SWC file format for storing digital neuron reconstructions \citep{stockley1993system, cannon1998line}. Starting from the soma node, or from the group node with the highest cross-correlation value if no soma was found in the image, the nodes in $\hat{\mathcal{N}}$ are iteratively traversed using a breadth-first search (BFS) algorithm. In this process it is possible to discard any isolated branches and single-node terminal branches (false positives).
 
-\subsection{Implementation Details}
-\label{subsec:implementation}
-Our method, which we call Probabilistic Neuron Reconstructor (PNR), was implemented in C++ as a plugin for the freely available and extendable bioimage visualization and analysis tool Vaa3D \citep{peng2010v3d, peng2014extensible}.\footnote{http://vaa3d.org} The source code of PNR is freely available for non-commercial use.\footnote{https://bitbucket.org/miroslavradojevic/pnr} As mentioned in the preceding sections, the method has a number of free parameters, which are summarized in Table~\ref{tab:params}, where we also list default values.
+%\subsection{Implementation Details}
+%\label{subsec:implementation}
+%Our method, which we call Probabilistic Neuron Reconstructor (PNR), was implemented in C++ as a plugin for the freely available and extendable bioimage visualization and analysis tool Vaa3D \citep{peng2010v3d, peng2014extensible}.\footnote{http://vaa3d.org} The source code of PNR is freely available for non-commercial use.\footnote{https://bitbucket.org/miroslavradojevic/pnr} As mentioned in the preceding sections, the method has a number of free parameters, which are summarized in Table~\ref{tab:params}, where we also list default values.
 
-\begin{table}[t!]
-\small\centering
-\begin{tabular}{@{}c@{\hspace{1em}}c@{\hspace{2em}}l@{}}
-\hline
-Parameter & Value & Description \\
-\hline
-$r_s$ & 6 [voxels] & Erosion radius \\
-$\sigma$ & $\{ 2,4,6 \}$ [voxels]  & Scale combinations \\ % \{ \{ 2 \},\{ 2,4 \},\}
-$\tau$ & 10 [8-bit scale] & Local maxima tolerance \\ % $ \{ 8, 10, 12 \} $
-$N$ & 20 & Number of samples \\
-$\kappa$ & 3 [voxels] & Circular variance \\
-$d$ & 3 [voxels] & Tracing step size \\
-$\zeta$ & 1 [voxels] & Scale variance \\
-$K$ & 20 & Likelihood sensitivity \\
-$c_{\text{min}}$ & 0.5 & Correlation threshold \\ % $\lbrace 0.4, 0.5 \rbrace$
-$L$ & 200 & Iteration limit \\
-$n$ & 1 [voxels] & Density volume \\
-$\delta_n$ & 4 [count/voxel] & Node density limit \\
-$r_g$ & 2 [voxels] & Grouping radius \\
-\hline
-\end{tabular}
-\caption{Parameters of our method and default values. The ordering is according to first mention in the main text.}
-\label{tab:params}
-\end{table}
+%\begin{table}[t!]
+%\small\centering
+%\begin{tabular}{@{}c@{\hspace{1em}}c@{\hspace{2em}}l@{}}
+%\hline
+%Parameter & Value & Description \\
+%\hline
+%$r_s$ & 6 [voxels] & Erosion radius \\
+%$\sigma$ & $\{ 2,4,6 \}$ [voxels]  & Scale combinations \\ % \{ \{ 2 \},\{ 2,4 \},\}
+%$\tau$ & 10 [8-bit scale] & Local maxima tolerance \\ % $ \{ 8, 10, 12 \} $
+%$N$ & 20 & Number of samples \\
+%$\kappa$ & 3 [voxels] & Circular variance \\
+%$d$ & 3 [voxels] & Tracing step size \\
+%$\zeta$ & 1 [voxels] & Scale variance \\
+%$K$ & 20 & Likelihood sensitivity \\
+%$c_{\text{min}}$ & 0.5 & Correlation threshold \\ % $\lbrace 0.4, 0.5 \rbrace$
+%$L$ & 200 & Iteration limit \\
+%$n$ & 1 [voxels] & Density volume \\
+%$\delta_n$ & 4 [count/voxel] & Node density limit \\
+%$r_g$ & 2 [voxels] & Grouping radius \\
+%\hline
+%\end{tabular}
+%\caption{Parameters of our method and default values. The ordering is according to first mention in the main text.}
+%\label{tab:params}
+%\end{table}
 
-\begin{figure*}[t!]
-\centering
-\begin{tabular}{@{}c@{\hspace{0.5cm}}c@{}}
-\includegraphics[height=5.75cm]{./fig/datasets.syn/overview_all} &
-\includegraphics[height=5.75cm]{./fig/datasets.syn/overview_one} \\
-(a) & (b) 
-\end{tabular}
-\caption{Illustration of the synthetic neuron data set used in the presented experiments. (a) Example images of the 10 selected neurons simulated at SNR = 4 and COR = 0.0. (b) Different simulations of the neuron indicated by the red outline in (a) for SNR = 2, 3, 4, 5, and 10 (from left to right) and COR = 0.0, 1.0, and 2.0 (from top to bottom). The marked image in (b) is the same as the marked image in (a). All examples shown here are maximum intensity projections of the 3D synthetic images with inverted intensities for better visualization.}
-\label{fig:data-synthetic}
-\end{figure*}
+%\begin{figure*}[t!]
+%\centering
+%\begin{tabular}{@{}c@{\hspace{0.5cm}}c@{}}
+%\includegraphics[height=5.75cm]{./fig/datasets.syn/overview_all} &
+%\includegraphics[height=5.75cm]{./fig/datasets.syn/overview_one} \\
+%(a) & (b) 
+%\end{tabular}
+%\caption{Illustration of the synthetic neuron data set used in the presented experiments. (a) Example images of the 10 selected neurons simulated at SNR = 4 and COR = 0.0. (b) Different simulations of the neuron indicated by the red outline in (a) for SNR = 2, 3, 4, 5, and 10 (from left to right) and COR = 0.0, 1.0, and 2.0 (from top to bottom). The marked image in (b) is the same as the marked image in (a). All examples shown here are maximum intensity projections of the 3D synthetic images with inverted intensities for better visualization.}
+%\label{fig:data-synthetic}
+%\end{figure*}
 
-\section{Experimental Results}
-\label{sec:experimental-results}
-The performance of our PNR method was evaluated using both synthetic and real fluorescence microscopy image stacks of single neurons and was compared to several alternative 3D neuron reconstruction methods that yielded favorable performance in the BigNeuron project \citep{peng2015bigneuron}. These included the second all-path pruning method (APP2) \citep{xiao2013app2}, NeuroGPS-Tree (GPS) \citep{quan2016neurogps}, BigNeuron's minimum spanning tree (MST) method, and we also added our recently published alternative probabilistic method based on probability hypothesis density filtering (PHD) \citep{radojevic2017automated}.
+%\section{Experimental Results}
+%\label{sec:experimental-results}
+%The performance of our PNR method was evaluated using both synthetic and real fluorescence microscopy image stacks of single neurons and was compared to several alternative 3D neuron reconstruction methods that yielded favorable performance in the BigNeuron project \citep{peng2015bigneuron}. These included the second all-path pruning method (APP2) \citep{xiao2013app2}, NeuroGPS-Tree (GPS) \citep{quan2016neurogps}, BigNeuron's minimum spanning tree (MST) method, and we also added our recently published alternative probabilistic method based on probability hypothesis density filtering (PHD) \citep{radojevic2017automated}.
 
-To quantify performance we adopted the commonly used measures of distance and overlap of neuron reconstructions with respect to the ground truth (in the case of synthetic images) or the gold-standard reconstructions obtained by manual annotation (in the case of real images). The distance measures were the average minimal reciprocal spatial distance (SD) between nodes in the reconstructions being compared, the substantial spatial distance (SSD) using only the nodes with a spatial distance larger than a threshold S, and the percentage of these substantially distant nodes (\%SSD), all computed after densely resampling each reconstruction to reduce the distance between its adjacent nodes to one voxel (see \citeauthor{peng2010v3d} \citeyear{peng2010v3d} for details). The overlap measures were precision (P), recall (R), and the F score \citep{powers2011evaluation}, computed from the numbers of true-positive (TP), false-positive (FP) and false-negative (FN) nodes according to the spatial distance threshold S.
+%To quantify performance we adopted the commonly used measures of distance and overlap of neuron reconstructions with respect to the ground truth (in the case of synthetic images) or the gold-standard reconstructions obtained by manual annotation (in the case of real images). The distance measures were the average minimal reciprocal spatial distance (SD) between nodes in the reconstructions being compared, the substantial spatial distance (SSD) using only the nodes with a spatial distance larger than a threshold S, and the percentage of these substantially distant nodes (\%SSD), all computed after densely resampling each reconstruction to reduce the distance between its adjacent nodes to one voxel (see \citeauthor{peng2010v3d} \citeyear{peng2010v3d} for details). The overlap measures were precision (P), recall (R), and the F score \citep{powers2011evaluation}, computed from the numbers of true-positive (TP), false-positive (FP) and false-negative (FN) nodes according to the spatial distance threshold S.
 
-All experiments were performed on a MacBook Pro with 2.2 GHz Intel Core i7 processor and 16 GB RAM memory to test the practicality of the methods on a typical computer system. For each method we optimized the score for each performance measure by exploring a grid of possible parameter values around the default ones (see Table~\ref{tab:params} for our method and the cited papers for the other methods). To keep the experiments feasible, we set the maximum allowed processing time per stack and method to 2 hours. In the sequel, to save space, we show only the F scores (higher is better) and SSD scores (lower is better), but our conclusions are based on the complete body of results.
+%All experiments were performed on a MacBook Pro with 2.2 GHz Intel Core i7 processor and 16 GB RAM memory to test the practicality of the methods on a typical computer system. For each method we optimized the score for each performance measure by exploring a grid of possible parameter values around the default ones (see Table~\ref{tab:params} for our method and the cited papers for the other methods). To keep the experiments feasible, we set the maximum allowed processing time per stack and method to 2 hours. In the sequel, to save space, we show only the F scores (higher is better) and SSD scores (lower is better), but our conclusions are based on the complete body of results.
 
-\subsection{Experiments on Synthetic Neuron Images}
-\label{subsec:eval-sim}
-Prior to evaluating how well our method emulates expert manual reconstruction in real neuron images, we first performed a controlled experiment using synthetic neuron images, with known ground-truth reconstructions and predefined levels of signal-to-noise ratio (SNR) and inter-voxel correlation (COR). This allowed us to study the robustness of our method compared to the others as a function of these image quality factors. For this experiment we selected 10 neurons from the BigNeuron training data set \citep{peng2015bigneuron}, representative of the range of morphological complexities in the data set, and for which node radius information (non-default) was available in the corresponding gold-standard reconstructions in SWC format.
+%\subsection{Experiments on Synthetic Neuron Images}
+%\label{subsec:eval-sim}
+%Prior to evaluating how well our method emulates expert manual reconstruction in real neuron images, we first performed a controlled experiment using synthetic neuron images, with known ground-truth reconstructions and predefined levels of signal-to-noise ratio (SNR) and inter-voxel correlation (COR). This allowed us to study the robustness of our method compared to the others as a function of these image quality factors. For this experiment we selected 10 neurons from the BigNeuron training data set \citep{peng2015bigneuron}, representative of the range of morphological complexities in the data set, and for which node radius information (non-default) was available in the corresponding gold-standard reconstructions in SWC format.
 
-We developed a plugin for ImageJ \citep{schneider2012} called SWC2IMG,\footnote{https://github.com/imagescience/SWC2IMG} which takes any SWC file as input and simulates fluorescence microscopy imaging of all neuronal branches in the file at a specified SNR and COR level, producing an image stack whose true digital reconstruction is the very input. It assumes that in practice, because of the relatively large spatial extent of even a single neuron with its complete arbor, the combination of optical magnification factor and digital image matrix size in real neuron images is typically such that the voxel size is larger than the point spread function (PSF), implying that the partial-volume effect of digitization is more prominent than the optical blurring by the microscope. Based on this, the plugin simulates the imaging simply by estimating for each voxel which fraction of its volume is occupied by the neuron. Next, it simulates noise by using the Poisson noise model representative of optical imaging, which defines SNR as the image intensity inside the neuron above the background, divided by the standard deviation of the noise inside \citep{sheppard2006}. And finally, to allow for correlated signal and noise, which we found to improve the visual realism of the simulated images, the plugin also offers the possibility to apply Gaussian smoothing at a specified scale, being the COR parameter, while preserving the SNR level. Generally, the lower the SNR and/or the higher the COR level, the more challenging the data and the reconstruction problem.
+%We developed a plugin for ImageJ \citep{schneider2012} called SWC2IMG,\footnote{https://github.com/imagescience/SWC2IMG} which takes any SWC file as input and simulates fluorescence microscopy imaging of all neuronal branches in the file at a specified SNR and COR level, producing an image stack whose true digital reconstruction is the very input. It assumes that in practice, because of the relatively large spatial extent of even a single neuron with its complete arbor, the combination of optical magnification factor and digital image matrix size in real neuron images is typically such that the voxel size is larger than the point spread function (PSF), implying that the partial-volume effect of digitization is more prominent than the optical blurring by the microscope. Based on this, the plugin simulates the imaging simply by estimating for each voxel which fraction of its volume is occupied by the neuron. Next, it simulates noise by using the Poisson noise model representative of optical imaging, which defines SNR as the image intensity inside the neuron above the background, divided by the standard deviation of the noise inside \citep{sheppard2006}. And finally, to allow for correlated signal and noise, which we found to improve the visual realism of the simulated images, the plugin also offers the possibility to apply Gaussian smoothing at a specified scale, being the COR parameter, while preserving the SNR level. Generally, the lower the SNR and/or the higher the COR level, the more challenging the data and the reconstruction problem.
 
-Using this plugin we created a synthetic data set containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig:data-synthetic}). Specifically, we considered SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2. Thus, our synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, which we attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore we present the results only for those.
+%Using this plugin we created a synthetic data set containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig:data-synthetic}). Specifically, we considered SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2. Thus, our synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, which we attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore we present the results only for those.
 
-\begin{figure}[t!]
-\centering\tiny
-\begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
-& \hspace{3.5em}S = 2 & \hspace{3.5em}S = 3 \\[0.02\columnwidth]
-\rotatebox{90}{\hspace{0.5em}COR = 0} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=2,cor=0)} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=3,cor=0)} \\
-\\[0.01\columnwidth]
-\rotatebox{90}{\hspace{0.5em}COR = 1} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=2,cor=1)} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=3,cor=1)}
-\end{tabular}
-\caption{Average F score of the methods for the synthetic images as a function of SNR. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
-\label{fig:f[snr]_synthetic}
-\end{figure}
+%\begin{figure}[t!]
+%\centering\tiny
+%\begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
+%& \hspace{3.5em}S = 2 & \hspace{3.5em}S = 3 \\[0.02\columnwidth]
+%\rotatebox{90}{\hspace{0.5em}COR = 0} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=2,cor=0)} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=3,cor=0)} \\
+%\\[0.01\columnwidth]
+%\rotatebox{90}{\hspace{0.5em}COR = 1} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=2,cor=1)} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_F(snr,S=3,cor=1)}
+%\end{tabular}
+%\caption{Average F score of the methods for the synthetic images as a function of SNR. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
+%\label{fig:f[snr]_synthetic}
+%\end{figure}
 
-\begin{figure}[t!]
-\centering\tiny
-\begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
-& \hspace{3.5em}S = 2 & \hspace{3.5em}S = 3 \\[0.02\columnwidth]
-\rotatebox{90}{\hspace{0.5em}COR = 0} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=2,cor=0)} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=3,cor=0)} \\
-\\[0.01\columnwidth]
-\rotatebox{90}{\hspace{0.5em}COR = 1} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=2,cor=1)} &
-\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=3,cor=1)}
-\end{tabular}
-\caption{Average SSD score of the methods for the synthetic images as a function of SNR. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
-\label{fig:ssd[snr]_synthetic}
-\end{figure}
+%\begin{figure}[t!]
+%\centering\tiny
+%\begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
+%& \hspace{3.5em}S = 2 & \hspace{3.5em}S = 3 \\[0.02\columnwidth]
+%\rotatebox{90}{\hspace{0.5em}COR = 0} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=2,cor=0)} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=3,cor=0)} \\
+%\\[0.01\columnwidth]
+%\rotatebox{90}{\hspace{0.5em}COR = 1} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=2,cor=1)} &
+%\includegraphics[align=c,width=0.47\columnwidth]{./fig/exp.syn/compare_snr/_SSD(snr,S=3,cor=1)}
+%\end{tabular}
+%\caption{Average SSD score of the methods for the synthetic images as a function of SNR. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
+%\label{fig:ssd[snr]_synthetic}
+%\end{figure}
 
-\begin{figure*}[t!]
-\centering\tiny
-\begin{tabular}{@{}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{}}
-& \hspace{4em}SNR = 2 & \hspace{4em}SNR = 4 & \hspace{4em}SNR = 5 & \hspace{4em}SNR = 10 \\[0.01\textwidth]
-\rotatebox{90}{\hspace{1em}S = 2} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=2)} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=4)} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=5)} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=10)} \\
-\\[0.005\textwidth]
-\rotatebox{90}{\hspace{1em}S = 3} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=2)} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=4)} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=5)} &
-\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=10)}
-\end{tabular}
-\caption{Average F score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
-\label{fig:f[cor]_synthetic}
-\end{figure*}
+%\begin{figure*}[t!]
+%\centering\tiny
+%\begin{tabular}{@{}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{}}
+%& \hspace{4em}SNR = 2 & \hspace{4em}SNR = 4 & \hspace{4em}SNR = 5 & \hspace{4em}SNR = 10 \\[0.01\textwidth]
+%\rotatebox{90}{\hspace{1em}S = 2} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=2)} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=4)} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=5)} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=2,snr=10)} \\
+%\\[0.005\textwidth]
+%\rotatebox{90}{\hspace{1em}S = 3} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=2)} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=4)} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=5)} &
+%\includegraphics[align=c,width=0.238\textwidth]{./fig/exp.syn/compare_cor/_F(cor,S=3,snr=10)}
+%\end{tabular}
+%\caption{Average F score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
+%\label{fig:f[cor]_synthetic}
+%\end{figure*}
 
 \begin{figure*}[t!]
 \centering\tiny
