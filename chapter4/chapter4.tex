@@ -231,9 +231,9 @@ The final step of our method is the construction of a graph representing the com
 
 \subsection{Implementation Details}
 \label{subsec:implementation}
-Our method, which we call Probabilistic Neuron Reconstructor (PNR), was implemented in C++ as a plugin for the freely available and extendable bioimage visualization and analysis tool Vaa3D \cite{peng2010v3d, peng2014extensible}.\footnote{http://vaa3d.org} The source code of PNR is freely available for non-commercial use.\footnote{https://bitbucket.org/miroslavradojevic/pnr} As mentioned in the preceding sections, the method has a number of free parameters, which are summarized in Table~\ref{tab:params}, where we also list default values.
-
-\begin{table}%[t!]
+Our method, which we call Probabilistic Neuron Reconstructor (PNR)\footnote{The source code of the method is freely available for non-commercial use from \url{https://bitbucket.org/miroslavradojevic/pnr}}, was implemented in C++ as a plugin for the freely available and extendable bioimage visualization and analysis tool Vaa3D \cite{peng2010v3d, peng2014extensible}.\footnote{http://vaa3d.org} As mentioned in the preceding sections, the method has a number of free parameters, which are summarized in Table~\ref{tab:params}, where we also list default values.
+%The source code of PNR is freely available for non-commercial use.\footnote{https://bitbucket.org/miroslavradojevic/pnr}
+\begin{table}
 	\small\centering
 	\begin{tabular}{@{}c@{\hspace{1em}}c@{\hspace{2em}}l@{}}
 		\hline
@@ -297,45 +297,6 @@ Prior to evaluating how well our method emulates expert manual reconstruction in
 \end{figure}
 We developed a plugin for ImageJ \cite{schneider2012} called SWC2IMG,\footnote{https://github.com/imagescience/SWC2IMG} which takes any SWC file as input and simulates fluorescence microscopy imaging of all neuronal branches in the file at a specified SNR and COR level, producing an image stack whose true digital reconstruction is the very input. It assumes that in practice, because of the relatively large spatial extent of even a single neuron with its complete arbor, the combination of optical magnification factor and digital image matrix size in real neuron images is typically such that the voxel size is larger than the point spread function (PSF), implying that the partial-volume effect of digitization is more prominent than the optical blurring by the microscope. Based on this, the plugin simulates the imaging simply by estimating for each voxel which fraction of its volume is occupied by the neuron. Next, it simulates noise by using the Poisson noise model representative of optical imaging, which defines SNR as the image intensity inside the neuron above the background, divided by the standard deviation of the noise inside \cite{sheppard2006}. And finally, to allow for correlated signal and noise, which we found to improve the visual realism of the simulated images, the plugin also offers the possibility to apply Gaussian smoothing at a specified scale, being the COR parameter, while preserving the SNR level. Generally, the lower the SNR and/or the higher the COR level, the more challenging the data and the reconstruction problem.
 
-%%%%%%%%
-\begin{figure}
-	\centering
-	\begin{subfigure}{0.45\textwidth} 
-		\tiny           
-	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
-	S = 1 & S = 2 & S = 3 \\[0.5em]
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo} \\
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo}
-	\end{tabular}
-	\caption{SwissRanger by MESA}
-	\label{fig:SRl}
-	\end{subfigure}
-		\quad
-	\begin{subfigure}{0.45\textwidth}
-		\tiny
-	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
-	S = 1 & S = 2 & S = 3 \\[0.5em]
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo} \\
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo} &
-	\includegraphics[width=0.3\columnwidth]{foo}
-	\end{tabular}
-	\caption{D-Imager by Panasonic}
-	\label{fig:D-Imager}
-	\end{subfigure}
-	\caption{TOF depth cameras}\label{fig:TOF}
-\end{figure}
-%%%%%%%%
-
-Testing reference Fig.~\ref{fig:SRl}, Fig.~\ref{fig:D-Imager}, Fig.~\ref{fig:TOF}.
-
-
 Using this plugin we created a synthetic data set containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig:data-synthetic}). Specifically, we considered SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2. Thus, our synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, which we attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore we present the results only for those.
 
 \begin{figure}
@@ -356,55 +317,53 @@ Using this plugin we created a synthetic data set containing image stacks for a 
 
 \begin{figure}
 	\centering\tiny
-	\begin{tabular}{ccccc}
-		& \hspace{4em}SNR = 2 & \hspace{4em}SNR = 4 & \hspace{4em}SNR = 5 & \hspace{4em}SNR = 10 \\[0.01\textwidth]
-		\rotatebox{90}{\hspace{1em}S = 2} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8a} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8b} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8c} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8d} \\
-		\\[0.005\textwidth]
-		\rotatebox{90}{\hspace{1em}S = 3} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8e} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8f} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8g} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig8h}
+	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
+		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
+		\rotatebox[origin=c]{90}{S = 2} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8a} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8b} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8c} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8d} \\
+		\\[0.2ex]
+		\rotatebox[origin=c]{90}{S = 3} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8e} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8f} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8g} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8h}
 	\end{tabular}
 	\caption{Average F score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
 	\label{fig8}
 \end{figure}
-
 \begin{figure}
 	\centering\tiny
-	\begin{tabular}{ccccc}
-		& \hspace{4em}SNR = 2 & \hspace{4em}SNR = 4 & \hspace{4em}SNR = 5 & \hspace{4em}SNR = 10 \\[0.01\textwidth]
-		\rotatebox{90}{\hspace{0.8em}S = 2} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9a_shift} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9b} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9c} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9d} \\
-		\\[0.005\textwidth]
-		\rotatebox{90}{\hspace{0.8em}S = 3} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9e} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9f} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9g} &
-		\includegraphics[align=c,width=0.238\textwidth]{fig9h}
+	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
+		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
+		\rotatebox[origin=c]{90}{S = 2} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9a_shift} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9b} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9c} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9d} \\
+		\\[0.2ex]
+		\rotatebox[origin=c]{90}{S = 3} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9e} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9f} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9g} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9h}
 	\end{tabular}
 	\caption{Average SSD score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).}
 	\label{fig9}
 \end{figure}
-
 \begin{figure}
 	\centering\tiny
-	\begin{tabular}{c@{}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}}
-		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5em]
-	    \hspace{-1em}\rotatebox[origin=c]{90}{COR = 0}  &
+	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
+		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
+	    \rotatebox[origin=c]{90}{COR = 0}  &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10a} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10b} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10c} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10d} \\
-		\\[0.005\textwidth]
-		\hspace{-1em}\rotatebox[origin=c]{90}{COR = 1}  &
+		\\[0.2ex]
+		\rotatebox[origin=c]{90}{COR = 1}  &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10e} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10f} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig10g} &
@@ -416,15 +375,15 @@ Using this plugin we created a synthetic data set containing image stacks for a 
 
 \begin{figure}
 	\centering\tiny
-	\begin{tabular}{c@{}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}}
-		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5em]
-		\hspace{-1em}\rotatebox[origin=c]{90}{COR = 0} &
+	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
+		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
+		\rotatebox[origin=c]{90}{COR = 0} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11a} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11b} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11c} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11d} \\
-		\\[0.005\textwidth]
-		\hspace{-1em}\rotatebox[origin=c]{90}{COR = 1} &
+		\\[0.2ex]
+		\rotatebox[origin=c]{90}{COR = 1} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11e} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11f} &
 		\includegraphics[align=c,width=0.23\textwidth]{fig11g} &
@@ -433,17 +392,16 @@ Using this plugin we created a synthetic data set containing image stacks for a 
 	\caption{Average SSD score of the methods for the synthetic images as a function of S. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).}
 	\label{fig11}
 \end{figure}
-
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{}}
 		\rotatebox[origin=c]{90}{SNR = 2} &
 		\includegraphics[align=c,width=0.15\textwidth]{fig12a1}& 
 		\includegraphics[align=c,width=0.15\textwidth]{fig12a2}& 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=2_gps}& 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=2_mst}& 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=2_phd}&
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=2_pnr}\\
+		\includegraphics[align=c,width=0.15\textwidth]{fig12a3}& 
+		\includegraphics[align=c,width=0.15\textwidth]{fig12a4}& 
+		\includegraphics[align=c,width=0.15\textwidth]{fig12a5}&
+		\includegraphics[align=c,width=0.15\textwidth]{fig12a6}\\
 		\\[-1ex]
 		\rotatebox[origin=c]{90}{SNR = 3} &
 		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3__MAX} &
@@ -508,10 +466,10 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 \begin{figure}
 	\centering
 	\begin{tabular}{cc}
-		\includegraphics[width=0.45\columnwidth]{fig14a} &
-		\includegraphics[width=0.45\columnwidth]{fig14b} \\%[0.01\columnwidth]
-		\includegraphics[width=0.45\columnwidth]{fig14c} &
-		\includegraphics[width=0.45\columnwidth]{fig14d} 
+		\includegraphics[width=0.35\columnwidth]{fig14a} &
+		\includegraphics[width=0.35\columnwidth]{fig14b} \\%[0.01\columnwidth]
+		\includegraphics[width=0.35\columnwidth]{fig14c} &
+		\includegraphics[width=0.35\columnwidth]{fig14d} 
 	\end{tabular}
 	\caption{Performance comparison for the OPF data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
 	\label{fig14}
@@ -545,7 +503,7 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 	\centering
 	\begin{tabular}{@{}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{}} 
 		& APP2 & GPS & MST & PHD & PNR \\[0.5ex]
-		\includegraphics[width=0.158\textwidth]{106_overview} &
+		\includegraphics[width=0.158\textwidth]{fig17} &
 		\includegraphics[width=0.158\textwidth]{106_app2_overlay} & % choose "106_app2" or "106_app2_overlay"
 		\includegraphics[width=0.158\textwidth]{106_gps_overlay} & % choose "106_gps" or "106_gps_overlay"
 		\includegraphics[width=0.158\textwidth]{106_mst_overlay} &
@@ -614,7 +572,40 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 \label{sec:conclusions}
 A new fully automated probabilistic neuron reconstruction method (PNR) based on sequential Monte Carlo filtering is presented in this chapter. It traces individual neuron branches from automatically detected seed points repeatedly but statistically independently to acquire more evidence and to be more robust to noise and other artifacts. The traces are subsequently refined, merged, and put into a tree representation for further analysis. We evaluated the method on both synthetic and real neuron images and compared it to various other state-of-the-art neuron reconstruction methods (APP2 GPS, MST, PHD) using commonly used quantitative performance measures (we presented F and SSD scores). To obtain realistic synthetic data we developed a novel simulator (SWC2IMG) that can turn any given SWC file into an image stack of specified quality whose ground truth reconstruction is the input. For the evaluation on real data we used about 100 single-neuron fluorescence microscopy image stacks of widely varying quality and complexity, with corresponding manual reconstructions serving as the gold standard, from three different data sets used in the DIADEM and BigNeuron studies. The results show conclusively that the proposed method is generally favorable and also outperforms our own alternative neuron reconstruction method based on probability hypothesis density (PHD) filtering we presented recently. Nevertheless, there still remains much room for further improvement, as none of the quantitative scores were near perfect for any of the considered methods even for high SNR levels and very lenient distance thresholds. Possible directions for future work within the presented probabilistic framework would be to explore other state transition and measurement models. Alternatively, since no single method always performs best on all images of a given data set, and the results of different methods are likely complementary, another possible direction could be to combine multiple methods either during tracing or in a post-processing step. The latter approach is already being explored in the BigNeuron project. But regardless of the outcome of this effort we conclude that the method proposed in this paper may already prove to be of great use in many cases. Our software implementation of the method will be made freely available for non-commercial use upon publication.
 
-\section{Information Sharing Statement}
-The source code of the presented method is freely available for non-commercial use from \url{https://bitbucket.org/miroslavradojevic/pnr}.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}
+	\centering
+	\begin{subfigure}{0.45\textwidth} 
+		\tiny           
+		\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
+			S = 1 & S = 2 & S = 3 \\[0.5em]
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo} \\
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo}
+		\end{tabular}
+		\caption{SwissRanger by MESA}
+		\label{fig:SRl}
+	\end{subfigure}
+	\quad
+	\begin{subfigure}{0.45\textwidth}
+		\tiny
+		\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
+			S = 1 & S = 2 & S = 3 \\[0.5em]
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo} \\
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo} &
+			\includegraphics[width=0.3\columnwidth]{foo}
+		\end{tabular}
+		\caption{D-Imager by Panasonic}
+		\label{fig:D-Imager}
+	\end{subfigure}
+	\caption{TOF depth cameras}\label{fig:TOF}
+\end{figure}
+Testing reference Fig.~\ref{fig:SRl}, Fig.~\ref{fig:D-Imager}, Fig.~\ref{fig:TOF}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %------------------------------------------------------------------------
