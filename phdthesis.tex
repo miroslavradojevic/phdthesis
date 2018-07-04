@@ -6,10 +6,9 @@
 % 
 % ************************************************************************
 
-\documentclass[10pt, twoside, openright]{report}
+\documentclass[10pt, twoside, openright]{report}%, draft
 
 \setcounter{secnumdepth}{3}
-
 \usepackage{./styfiles/mya4layout}
 \usepackage{./styfiles/myheadings}
 \usepackage{./styfiles/myquote}
@@ -26,11 +25,15 @@
 \usepackage{rotating}
 \usepackage{adjustbox,graphbox} % to align images to center
 \usepackage{upgreek,color,mathtools,algorithm,algpseudocode,grffile}% txfonts
-\usepackage[caption=false]{subfig}
+%\usepackage[caption=false]{subfig}%Don't use subfigure and subcaption both. Also, subfigure is obsolete. Newer one is subfig.
+\usepackage{subcaption}
 \usepackage[mathscr]{euscript}
 \usepackage{url}
 \usepackage[toc]{glossaries}
 \usepackage{pagecolor}
+\usepackage{showframe}
+\usepackage{multicol}
+\usepackage{lipsum}
 
 \bibliographystyle{./styfiles/mybibstyle}
 
