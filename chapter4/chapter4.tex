@@ -281,39 +281,44 @@ All experiments were performed on a MacBook Pro with 2.2 GHz Intel Core i7 proce
 \label{subsec:eval-sim}
 Prior to evaluating how well our method emulates expert manual reconstruction in real neuron images, we first performed a controlled experiment using synthetic neuron images, with known ground-truth reconstructions and predefined levels of signal-to-noise ratio (SNR) and inter-voxel correlation (COR). This allowed us to study the robustness of our method compared to the others as a function of these image quality factors. For this experiment we selected 10 neurons from the BigNeuron training data set \cite{peng2015bigneuron}, representative of the range of morphological complexities in the data set, and for which node radius information (non-default) was available in the corresponding gold-standard reconstructions in SWC format.
 \begin{figure}
-	\centering\tiny
-	\begin{tabular}{ccc}
-		& \hspace{3.5em}S = 2 & \hspace{3.5em}S = 3 \\[0.5em]
-		\rotatebox{90}{\hspace{0.5em}COR = 0} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig6a} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig6b} \\
-		\\[0.01\columnwidth]
-		\rotatebox{90}{\hspace{0.5em}COR = 1} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig6c} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig6d}
-	\end{tabular}
-	\caption{Average F score of the methods for the synthetic images as a function of SNR. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
-	\label{fig6}
+	\centering
+	\begin{subfigure}{0.47\textwidth} 
+		\centering\tiny
+		\begin{tabular}{c@{\hspace{0.02\textwidth}}c@{}c@{}}
+	& \hspace{2.5em}S = 2 & \hspace{2.5em}S = 3 \\[0.5em]
+	\rotatebox[origin=c]{90}{COR = 0} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig6a} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig6b} \\
+	\\[0.01\columnwidth]
+	\rotatebox[origin=c]{90}{COR = 1} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig6c} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig6d}
+		\end{tabular}
+		\caption{Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
+		\label{fig6}
+	\end{subfigure}
+	\hspace{0.01\textwidth}
+	\begin{subfigure}{0.47\textwidth}
+		\centering\tiny
+		\begin{tabular}{c@{\hspace{0.02\textwidth}}c@{}c@{}}
+	& \hspace{2.5em}S = 2 & \hspace{2.5em}S = 3 \\[0.5em]
+	\rotatebox[origin=c]{90}{COR = 0} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig7a} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig7b} \\
+	\\[0.01\textwidth]
+	\rotatebox[origin=c]{90}{COR = 1} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig7c} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig7d}
+		\end{tabular}
+		\caption{Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
+		\label{fig7}
+	\end{subfigure}
+	\caption{Average score of the methods for the synthetic images as a function of SNR: a) F score and b) SSD score. }
+	\label{fig6and7}
 \end{figure}
 We developed a plugin for ImageJ \cite{schneider2012} called SWC2IMG,\footnote{https://github.com/imagescience/SWC2IMG} which takes any SWC file as input and simulates fluorescence microscopy imaging of all neuronal branches in the file at a specified SNR and COR level, producing an image stack whose true digital reconstruction is the very input. It assumes that in practice, because of the relatively large spatial extent of even a single neuron with its complete arbor, the combination of optical magnification factor and digital image matrix size in real neuron images is typically such that the voxel size is larger than the point spread function (PSF), implying that the partial-volume effect of digitization is more prominent than the optical blurring by the microscope. Based on this, the plugin simulates the imaging simply by estimating for each voxel which fraction of its volume is occupied by the neuron. Next, it simulates noise by using the Poisson noise model representative of optical imaging, which defines SNR as the image intensity inside the neuron above the background, divided by the standard deviation of the noise inside \cite{sheppard2006}. And finally, to allow for correlated signal and noise, which we found to improve the visual realism of the simulated images, the plugin also offers the possibility to apply Gaussian smoothing at a specified scale, being the COR parameter, while preserving the SNR level. Generally, the lower the SNR and/or the higher the COR level, the more challenging the data and the reconstruction problem.
 
 Using this plugin we created a synthetic data set containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig:data-synthetic}). Specifically, we considered SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2. Thus, our synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, which we attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore we present the results only for those.
-
-\begin{figure}
-	\centering\tiny
-	\begin{tabular}{ccc}%c@{\hspace{0.02\columnwidth}}
-		& \hspace{3.5em}S = 2 & \hspace{3.5em}S = 3 \\[0.5em]
-		\rotatebox{90}{\hspace{0.5em}COR = 0} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig7a} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig7b} \\
-		\\[0.01\columnwidth]
-		\rotatebox{90}{\hspace{0.5em}COR = 1} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig7c} &
-		\includegraphics[align=c,width=0.25\columnwidth]{fig7d}
-	\end{tabular}
-	\caption{Average SSD score of the methods for the synthetic images as a function of SNR. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
-	\label{fig7}
-\end{figure}
 
 \begin{figure}
 	\centering\tiny
@@ -372,7 +377,6 @@ Using this plugin we created a synthetic data set containing image stacks for a 
 	\caption{Average F score of the methods for the synthetic images as a function of S. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
 	\label{fig10}
 \end{figure}
-
 \begin{figure}
 	\centering\tiny
 	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
@@ -451,16 +455,15 @@ Using this plugin we created a synthetic data set containing image stacks for a 
 From the average F and SSD scores of the methods as a function of SNR for a few sample values of COR and S (Figs.~\ref{fig6} and \ref{fig7}) we generally observe that, as expected, increasing the SNR improves the performance of all methods (increasing F and decreasing SSD scores). We also note that the two probabilistic methods (PHD and PNR) are more robust against noise (especially according to F) and that our proposed method (PNR) is often superior overall. The results also show that, as expected, increasing the value of COR (which yields more difficult images) has a strong negative impact on the performance of all methods (lower F and higher SSD scores for the same SNR). This is confirmed when looking more in-depth at the results as a function of COR (Figs.~\ref{fig8} and \ref{fig9}). Additionally, again as expected, in all cases we observe that increasing the value of S (meaning being more lenient in matching reconstructions to the ground truth) may also strongly affect the scores of all methods (meaning higher F scores, but in this case also higher SSD scores, as the latter includes only node distances larger than S). This is confirmed when looking explicitly at the performance of the methods as a function of S (Figs.~\ref{fig10} and \ref{fig11}). These results reveal that both the absolute and the relative performance of different methods being compared may depend on S. This is an important observation, since in all studies we are aware of, the somewhat arbitrary value of S = 2 is taken for granted in calculating performance and ranking the methods. Our results (Figs.~\ref{fig10} and \ref{fig11}) show that taking other values of S may yield a different ranking. Notwithstanding this finding, our results also show that under most experimental conditions (SNR, COR, S), the proposed method (PNR) yields superior results. While our previous probabilistic neuron tracing method (PHD) \cite{radojevic2017automated} is often a strong competitor, the results indicate that our new method is more favorable, which we believe can be ascribed to its better models for seed point extraction and branch tracing.
 
 Together, the results of our experiments on synthetic neuron images suggest that tracing the image structures repeatedly and in a statistically independently way, indeed yields more evidence about the underlying neuron branches and leads to better reconstructions. This also follows from a visual comparison of the reconstructions (Fig.~\ref{fig12}). Especially at low SNRs, pruning and fast-marching based methods tend to oversegment the images, while our probabilistic methods still perform relatively well regardless. Even at high SNRs, when most of the methods perform comparably, our proposed method follows the branch structures more closely (see zooms in the last row of Fig.~\ref{fig12}).
+\subsection{Experiments on Real Neuron Images}
+\label{subsec:eval-real}
+In addition to synthetic data we also used three real neuron image data sets to evaluate the absolute and relative performance of our method. The first two are the olfactory projection fibers (OPF) data set (9 image stacks) and neocortical layer-1 axons (NCL1A) data set (16 image stacks) from the DIADEM challenge \cite{brown2011diadem}, and the third is part of the BigNeuron (BGN) training data set (76 image stacks) \cite{peng2015bigneuron}, all imaged with fluorescence microscopy (confocal or two-photon) and manually annotated as described in detail in the cited works and corresponding resources. Being the smallest of the three, in terms of both neuronal volume and complexity, OPF is probably the most often used data set in the field. NCL1A is often used as it contains neuronal network-like structures and no clear somas. And BGN is the largest, most diverse, and thus most challenging data set for evaluating neuron reconstruction methods. Together, the 100+ image stacks in these data sets have a wide variety of image qualities and volumes (10 MB to 2 GB per stack) and portray a wide range of neuronal shapes and complexities (Fig.~\ref{fig13}), representative of many studies. For some stacks in the BGN data set, the voxel size was unknown, and in these cases we used a default x:y:z voxel aspect ratio of 1:1:2, reflecting the typically lower resolution in the depth dimension. Also, because of the mentioned processing time constraint, 3 of the 76 image stacks could not be reconstructed by all methods, so the presented results are based on the remaining 73.
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{fig13}
 	\caption{Illustration of the real neuron image data sets used in the presented experiments. Examples are shown of (A) the OPF data set (4 of 9 stacks), (B) the NCL1A data set (6 of 16 stacks), and (C) the BGN data set (13 of 76 stacks). Each example shows the maximum intensity projection of the image stack (left panel) but with inverted intensities for better visualization, and the corresponding manual reconstruction (right panel) as a surface rendering (in red), both generated using Vaa3D \cite{peng2010v3d}.}
 	\label{fig13}
 \end{figure}
-\subsection{Experiments on Real Neuron Images}
-\label{subsec:eval-real}
-In addition to synthetic data we also used three real neuron image data sets to evaluate the absolute and relative performance of our method. The first two are the olfactory projection fibers (OPF) data set (9 image stacks) and neocortical layer-1 axons (NCL1A) data set (16 image stacks) from the DIADEM challenge \cite{brown2011diadem}, and the third is part of the BigNeuron (BGN) training data set (76 image stacks) \cite{peng2015bigneuron}, all imaged with fluorescence microscopy (confocal or two-photon) and manually annotated as described in detail in the cited works and corresponding resources. Being the smallest of the three, in terms of both neuronal volume and complexity, OPF is probably the most often used data set in the field. NCL1A is often used as it contains neuronal network-like structures and no clear somas. And BGN is the largest, most diverse, and thus most challenging data set for evaluating neuron reconstruction methods. Together, the 100+ image stacks in these data sets have a wide variety of image qualities and volumes (10 MB to 2 GB per stack) and portray a wide range of neuronal shapes and complexities (Fig.~\ref{fig13}), representative of many studies. For some stacks in the BGN data set, the voxel size was unknown, and in these cases we used a default x:y:z voxel aspect ratio of 1:1:2, reflecting the typically lower resolution in the depth dimension. Also, because of the mentioned processing time constraint, 3 of the 76 image stacks could not be reconstructed by all methods, so the presented results are based on the remaining 73.
-
 From the results of the experiments on these three real data sets (Figs.~\ref{fig14}-\ref{fig16}) we observe that, as in the experiments on synthetic data, the probabilistic methods PHD and PNR typically show superior performance in terms of both F and SSD score. Of these two methods, our proposed PNR method consistently shows the smallest performance spread, indicating it is more robust than our previously published PHD method. For the BGN data set, being the most diverse of the three, the performance spread (including outliers) of all methods is the largest, and the increase in performance as a function of S is the smallest, as expected. Nevertheless, the PNR method consistently shows the best overall performance especially for this data set. In other words, for any given data set similar to those considered in this study, PNR is the favorable method a priori. Obviously this does not necessarily mean that PNR will give the best reconstruction for each and every image stack in the data set, but simply that the chances are higher. This is confirmed when we look at a few example image stacks from the three data sets and the corresponding best reconstructions produced by the different methods by maximizing the F score in the parameter grid search (Figs.~\ref{fig17}-\ref{fig19}). As these examples show, although PNR often outperforms the other methods, in specific cases one of the other methods may give better reconstructions. But altogether we believe the results justify the conclusion that our PNR method is a valuable addition to the neuron reconstruction toolbox.
 
 \begin{figure}
@@ -489,7 +492,7 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 
 \begin{figure}
 	\centering
-	\begin{tabular}{cc}%{@{}c@{\hspace{0.02\columnwidth}}c@{}}
+	\begin{tabular}{c@{}c@{}}
 		\includegraphics[width=0.35\columnwidth]{fig16a} &
 		\includegraphics[width=0.35\columnwidth]{fig16b} \\%[0.01\columnwidth]
 		\includegraphics[width=0.35\columnwidth]{fig16c} &
@@ -503,12 +506,12 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 	\centering
 	\begin{tabular}{@{}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{}} 
 		& APP2 & GPS & MST & PHD & PNR \\[0.5ex]
-		\includegraphics[width=0.158\textwidth]{fig17} &
-		\includegraphics[width=0.158\textwidth]{106_app2_overlay} & % choose "106_app2" or "106_app2_overlay"
-		\includegraphics[width=0.158\textwidth]{106_gps_overlay} & % choose "106_gps" or "106_gps_overlay"
-		\includegraphics[width=0.158\textwidth]{106_mst_overlay} &
-		\includegraphics[width=0.158\textwidth]{106_phd_overlay} &
-		\includegraphics[width=0.158\textwidth]{106_pnr_overlay} \\[0.5ex]
+		\includegraphics[width=0.158\textwidth]{fig17a} &
+		\includegraphics[width=0.158\textwidth]{fig17b} &
+		\includegraphics[width=0.158\textwidth]{fig17c} &
+		\includegraphics[width=0.158\textwidth]{fig17d} &
+		\includegraphics[width=0.158\textwidth]{fig17e} &
+		\includegraphics[width=0.158\textwidth]{fig17f} \\[0.5ex]
 		& F = 0.885  & F = 0.919  & F = 0.934 & F = 0.921 & F = 0.929 \\
 	\end{tabular}
 	\caption{Example neuron reconstructions of an image stack from the OPF data set. Shown are the original arbor (volume rendering on the left) and the reconstructions (overlaid surface renderings in red) of the different methods (indicated at the top) corresponding to the best F score (given below each reconstruction) for S = 2 with respect to the available manual reconstruction.}
@@ -519,19 +522,18 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 	\centering
 	\begin{tabular}{@{}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{}} 
 		& APP2 & GPS & MST & PHD & PNR \\[0.5ex]
-		\includegraphics[width=0.158\textwidth]{201_img} &
-		\includegraphics[width=0.158\textwidth]{201_app2_overlay} & % choose "201_app2" or "201_app2_overlay"
-		\includegraphics[width=0.158\textwidth]{201_gps_overlay} &
+		\includegraphics[width=0.158\textwidth]{fig18a} &
+		\includegraphics[width=0.158\textwidth]{fig18b} &
+		\includegraphics[width=0.158\textwidth]{fig18c} &
 		\includegraphics[width=0.158\textwidth]{201_mst_overlay} &
 		\includegraphics[width=0.158\textwidth]{201_phd_overlay} &
 		\includegraphics[width=0.158\textwidth]{201_pnr_overlay} \\[0.5ex]
 		& F = 0.792 & F = 0.631 & F = 0.790 & F = 0.810 & F = 0.838 \\
 	\end{tabular}
 	\caption{Example neuron reconstructions of an image stack from the NCL1A data set. Shown are the original arbor (volume rendering on the left) and the reconstructions (overlaid surface renderings in red) of the different methods (indicated at the top) corresponding to the best F score (given below each reconstruction) for S = 2 with respect to the available manual reconstruction.}
-	\label{fig18}%fig:vizual-ncl1a
+	\label{fig18}
 \end{figure}
-
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\begin{tabular}{@{}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{\hspace{0.01\textwidth}}c@{}} 
 		& APP2 & GPS & MST & PHD & PNR \\[0.5ex]
@@ -571,41 +573,3 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 \section{Conclusions} 
 \label{sec:conclusions}
 A new fully automated probabilistic neuron reconstruction method (PNR) based on sequential Monte Carlo filtering is presented in this chapter. It traces individual neuron branches from automatically detected seed points repeatedly but statistically independently to acquire more evidence and to be more robust to noise and other artifacts. The traces are subsequently refined, merged, and put into a tree representation for further analysis. We evaluated the method on both synthetic and real neuron images and compared it to various other state-of-the-art neuron reconstruction methods (APP2 GPS, MST, PHD) using commonly used quantitative performance measures (we presented F and SSD scores). To obtain realistic synthetic data we developed a novel simulator (SWC2IMG) that can turn any given SWC file into an image stack of specified quality whose ground truth reconstruction is the input. For the evaluation on real data we used about 100 single-neuron fluorescence microscopy image stacks of widely varying quality and complexity, with corresponding manual reconstructions serving as the gold standard, from three different data sets used in the DIADEM and BigNeuron studies. The results show conclusively that the proposed method is generally favorable and also outperforms our own alternative neuron reconstruction method based on probability hypothesis density (PHD) filtering we presented recently. Nevertheless, there still remains much room for further improvement, as none of the quantitative scores were near perfect for any of the considered methods even for high SNR levels and very lenient distance thresholds. Possible directions for future work within the presented probabilistic framework would be to explore other state transition and measurement models. Alternatively, since no single method always performs best on all images of a given data set, and the results of different methods are likely complementary, another possible direction could be to combine multiple methods either during tracing or in a post-processing step. The latter approach is already being explored in the BigNeuron project. But regardless of the outcome of this effort we conclude that the method proposed in this paper may already prove to be of great use in many cases. Our software implementation of the method will be made freely available for non-commercial use upon publication.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}
-	\centering
-	\begin{subfigure}{0.45\textwidth} 
-		\tiny           
-		\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
-			S = 1 & S = 2 & S = 3 \\[0.5em]
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo} \\
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo}
-		\end{tabular}
-		\caption{SwissRanger by MESA}
-		\label{fig:SRl}
-	\end{subfigure}
-	\quad
-	\begin{subfigure}{0.45\textwidth}
-		\tiny
-		\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c@{}}
-			S = 1 & S = 2 & S = 3 \\[0.5em]
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo} \\
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo} &
-			\includegraphics[width=0.3\columnwidth]{foo}
-		\end{tabular}
-		\caption{D-Imager by Panasonic}
-		\label{fig:D-Imager}
-	\end{subfigure}
-	\caption{TOF depth cameras}\label{fig:TOF}
-\end{figure}
-Testing reference Fig.~\ref{fig:SRl}, Fig.~\ref{fig:D-Imager}, Fig.~\ref{fig:TOF}.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%------------------------------------------------------------------------

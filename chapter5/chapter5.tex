@@ -4,29 +4,21 @@
 % using machine learning 
 %
 % ************************************************************************
+%Automated neuron detection in high-content fluorescence microscopy images using machine learning
 \chpos{15mm}{8mm}
 \chapter[Automated neuron detection in high-content fluorescence microscopy images using machine learning]{Automated neuron detection in high-content fluorescence microscopy images using machine learning}
-\chaptermark{Automated neuron detection in high-content images using machine learning}%in high-content fluorescence microscopy images 
+\chaptermark{Automated neuron detection in high-content images using machine learning}
 \label{ch5:ndetchml}
 % abstract
-{\small \lettrine{T}{he} study of neuronal morphology in relation to function, and the development of effective medicines to positively impact this relationship in patients suffering from neurodegenerative diseases, increasingly involves image-based high-content screening and analysis. The first critical step toward fully automated high-content image analyses in such studies is to detect all neuronal cells and distinguish them from possible non-neuronal cells or artifacts in the images. Here we investigate the performance of well-established machine learning techniques for this purpose. These include
-	support vector machines, random forests, k-nearest neighbors,
-	and generalized linear model classifiers, operating on
-	an extensive set of image features extracted using the compound
-	hierarchy of algorithms representing morphology, and
-	the scale-invariant feature transform. We present experiments
-	on a dataset of rat hippocampal neurons from our own studies
-	to find the most suitable classifier(s) and subset(s) of features
-	in the common practical setting where there is very
-	limited annotated data for training. The results indicate that
-	a random forests classifier using the right feature subset ranks
-	best for the considered task, although its performance is not
-	statistically significantly better than some support vector machine
-	based classification models.\par}
+{\small \lettrine{T}{he} study of neuronal morphology in relation to function, and the development of effective medicines to positively impact this relationship in patients suffering from neurodegenerative diseases, increasingly involves image-based high-content screening and analysis. The first critical step toward fully automated high-content image analyses in such studies is to detect all neuronal cells and distinguish them from possible non-neuronal cells or artifacts in the images. Here we investigate the performance of well-established machine learning techniques for this purpose. These include support vector machines, random forests, k-nearest neighbors, and generalized linear model classifiers, operating on an extensive set of image features extracted using the compound hierarchy of algorithms representing morphology, and the scale-invariant feature transform. We present experiments on a dataset of rat hippocampal neurons from our own studies to find the most suitable classifier(s) and subset(s) of features in the common practical setting where there is very limited annotated data for training. The results indicate that a random forests classifier using the right feature subset ranks best for the considered task, although its performance is not statistically significantly better than some support vector machine based classification models.\par}
 \vspace*{12em}
 % ************************************************************************
 \begin{publish}
-	Based upon: G. Mata, M. Radojevi\'{c}, E. Meijering, ``Automated neuron detection in high-content fluorescence microscopy images using machine learning'', \textit{Neuroinformatics}, \textit{in review}
+	Based upon: G. Mata, M. Radojevi\'{c}, C. Fernandez-Lozano, I. Smal, M. Morales, E. Meijering, J. Rubio, ``Automated neuron detection in high-content fluorescence microscopy images using machine learning'', \textit{Neuroinformatics}, \textit{in review}
 \end{publish}%vol. 0, no. 0, pp.0-0, 2018.
+
 \section{Introduction}
 \label{sec:intro}
+Neurons are special cells in the sense that they codify and transmit information in the form of action potentials. Networks consisting of many billions of neurons, such as in the brains of higher organisms, are extraordinarily complex and perform many different functions. Since the pioneering work of \cite{ramon2008histologia} it is well known that the morphology of neurons vary widely in different parts of the brain and that neuronal morphology and function are intricately linked. Moreover, in healthy conditions, neuronal (sub)networks within the brain are dynamic and continuously readjust their connections during the lifetime of an organism in response to external stimuli, in order to refine existing functions or learn new ones \cite{ascolitrees}. Conversely, in pathological conditions, disease processes destructively alter neuronal morphology and cause progressive loss of function, such as in Alzheimer's and Parkinson's disease, but also in aging \cite{van2001need}. Thus the study of neuronal cell morphology in relation to function, in health and disease, is of high importance for developing suitable drugs and therapies \cite{meijering2010neuron}.
+
+A convenient tool to visualize large numbers of cultured cells for phenotypic profiling and analysis in drug discovery is high-content fluorescence microscopy imaging \cite{xia2012concise, Antony-2013, Singh-2014, Bougen-Zhukov-2017}. By automated acquisition it produces very large amounts of image data, which cannot be analyzed manually but require automated high-content analysis (HCA) in order to take full advantage of all captured information. HCA is also used increasingly in neuroscience research \cite{D08, ARB09, Jain-2012} and various image processing pipelines have been developed for quantitative analysis of neuronal cells in high-content images \cite{Vallotton-2007, Zhang-2007, Wu-2010, Dehmelt-2011, RN12, Charoenkwan-2013, Smafield-2015}. However, especially in screening applications, where the image quality is often relatively low and may vary widely between experiments, the challenge remains to develop more accurate and more robust image analysis methods \cite{Sommer-2013, Kraus-2016, Meijering-2016}.
