@@ -16,3 +16,5 @@ cover/cover.pdf
 *.glo
 *.nlo
 *.ist
+*.fls
+*.fdb_latexmk
