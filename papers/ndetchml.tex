@@ -54,68 +54,68 @@
 
 %The first critical step in any HCA pipeline is the detection of the objects of interest in the images. It is well recognized now in many areas of microscopic image analysis that machine learning based classification methods are an excellent choice for this task and typically outperform non-learning methods based on manually defined rules \citep{Horvath-2011, Sommer-2013, Kraus-2016, Arganda-Carreras-2017}. However, which classifiers work best, and on which sets of image features, may depend on the specific image data and detection task, and needs to be determined experimentally before using HCA on a routine basis in a given application.
 
-In this paper we investigate the performance of machine learning methods for the specific task of detecting neuronal cells in high-content fluorescence microscopy images as a first step toward fully automated HCA in our neuroscientific studies. We recently presented an early version of our work at a conference \citep{Mata-2016} and report here on a significant extension of that work including more classifiers, more extensive experiments and results, and a much deeper and more solid (statistical) analysis and discussion of the findings. {\color{red}We explore classifiers based on precalculated image features in order to determine which combinations of classifiers and features work best in a practical setting where there is very limited annotated data for training. Specifically, we consider various state-of-the-art classifiers based on support vector machines (SVM), random forests (RF), k-nearest neighbors (KNN), and generalized linear models (in particular GLMNET)}, operating on more than a thousand image features extracted using the compound hierarchy of algorithms representing morphology (CHARM) and the scale-invariant feature transform (SIFT).
+%In this paper we investigate the performance of machine learning methods for the specific task of detecting neuronal cells in high-content fluorescence microscopy images as a first step toward fully automated HCA in our neuroscientific studies. We recently presented an early version of our work at a conference \citep{Mata-2016} and report here on a significant extension of that work including more classifiers, more extensive experiments and results, and a much deeper and more solid (statistical) analysis and discussion of the findings. {\color{red}We explore classifiers based on precalculated image features in order to determine which combinations of classifiers and features work best in a practical setting where there is very limited annotated data for training. Specifically, we consider various state-of-the-art classifiers based on support vector machines (SVM), random forests (RF), k-nearest neighbors (KNN), and generalized linear models (in particular GLMNET)}, operating on more than a thousand image features extracted using the compound hierarchy of algorithms representing morphology (CHARM) and the scale-invariant feature transform (SIFT).
 
-\section{Materials and Methods}
-\label{sec:matmet}
+%\section{Materials and Methods}
+%\label{sec:matmet}
 
-To facilitate reproducibility of our study we made use of published image data and employed publicly available software tools. Here we successively describe the image dataset, the used methods for extracting image features, and the considered machine learning methods. {\color{red}All materials and methods are available as part of this publication from http://www. unirioja.es/cu/jurubio/ANDHCFMIUML/.}
+%To facilitate reproducibility of our study we made use of published image data and employed publicly available software tools. Here we successively describe the image dataset, the used methods for extracting image features, and the considered machine learning methods. {\color{red}All materials and methods are available as part of this publication from http://www. unirioja.es/cu/jurubio/ANDHCFMIUML/.}
 
-\subsection{Image Dataset}
-\label{sec:data}
+%\subsection{Image Dataset}
+%\label{sec:data}
 
-The high-content image data used in this study is from our ongoing research into effective treatments for neurological disorders \citep{Cuesto-2011, Enriquez-Barreto-2014, Enriquez-Barreto-2016}. We describe the acquisition of the images, their annotation, and the strategy we used to obtain a well-balanced dataset for training of the machine learning algorithms.
+%The high-content image data used in this study is from our ongoing research into effective treatments for neurological disorders \citep{Cuesto-2011, Enriquez-Barreto-2014, Enriquez-Barreto-2016}. We describe the acquisition of the images, their annotation, and the strategy we used to obtain a well-balanced dataset for training of the machine learning algorithms.
 
-\subsubsection{Image Acquisition}
-\label{sec:acquisition}
+%\subsubsection{Image Acquisition}
+%\label{sec:acquisition}
 
-\begin{figure*}[!t]
-\centering
-\begin{tabular}{@{}c@{\hspace{0.05\textwidth}}c@{}}
-	\begin{tabular}{@{}c@{}}
-		\includegraphics[width=0.5\textwidth]{fig01a} \\[1ex]
-		(a) Example high-content image. Scale bar: 500$\mu$m. \\
-	\end{tabular} &
-	\begin{tabular}{@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}}
-		\includegraphics[width=0.085\textwidth]{fig01b01} &
-		\includegraphics[width=0.085\textwidth]{fig01b02} &
-		\includegraphics[width=0.085\textwidth]{fig01b03} &
-		\includegraphics[width=0.085\textwidth]{fig01b04} &
-		\includegraphics[width=0.085\textwidth]{fig01b05} \\
-		\includegraphics[width=0.085\textwidth]{fig01b06} &
-		\includegraphics[width=0.085\textwidth]{fig01b07} &
-		\includegraphics[width=0.085\textwidth]{fig01b08} &
-		\includegraphics[width=0.085\textwidth]{fig01b09} &
-		\includegraphics[width=0.085\textwidth]{fig01b10} \\
-		\includegraphics[width=0.085\textwidth]{fig01b11} &
-		\includegraphics[width=0.085\textwidth]{fig01b12} &
-		\includegraphics[width=0.085\textwidth]{fig01b13} &
-		\includegraphics[width=0.085\textwidth]{fig01b14} &
-		\includegraphics[width=0.085\textwidth]{fig01b15} \\[1ex]
-		\multicolumn{5}{c}{(b) Example patches considered as positives (blue squares).} \\[4ex]
-		\includegraphics[width=0.085\textwidth]{fig01c01} &
-		\includegraphics[width=0.085\textwidth]{fig01c02} &
-		\includegraphics[width=0.085\textwidth]{fig01c03} &
-		\includegraphics[width=0.085\textwidth]{fig01c04} &
-		\includegraphics[width=0.085\textwidth]{fig01c05} \\
-		\includegraphics[width=0.085\textwidth]{fig01c06} &
-		\includegraphics[width=0.085\textwidth]{fig01c07} &
-		\includegraphics[width=0.085\textwidth]{fig01c08} &
-		\includegraphics[width=0.085\textwidth]{fig01c09} &
-		\includegraphics[width=0.085\textwidth]{fig01c10} \\
-		\includegraphics[width=0.085\textwidth]{fig01c11} &
-		\includegraphics[width=0.085\textwidth]{fig01c12} &
-		\includegraphics[width=0.085\textwidth]{fig01c13} &
-		\includegraphics[width=0.085\textwidth]{fig01c14} &
-		\includegraphics[width=0.085\textwidth]{fig01c15} \\[1ex]
-		\multicolumn{5}{c}{(c) Example patches considered as negatives (magenta squares).} \\
-	\end{tabular} \\
-\end{tabular}
-\caption{Part of a high-content fluorescence microscopy image (a) where the blue squares highlight some example patches containing neuronal structure and the magenta squares depict some example patches containing background. These squares are enlarged in (b) and (c) for a better visualization. The intensities of the shown images are inverted compared to their originals for displaying purposes.}
-\label{fig:example}
-\end{figure*}
+%\begin{figure*}[!t]
+%\centering
+%\begin{tabular}{@{}c@{\hspace{0.05\textwidth}}c@{}}
+%	\begin{tabular}{@{}c@{}}
+%		\includegraphics[width=0.5\textwidth]{fig01a} \\[1ex]
+%		(a) Example high-content image. Scale bar: 500$\mu$m. \\
+%	\end{tabular} &
+%	\begin{tabular}{@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}p{0.09\textwidth}@{}}
+%		\includegraphics[width=0.085\textwidth]{fig01b01} &
+%		\includegraphics[width=0.085\textwidth]{fig01b02} &
+%		\includegraphics[width=0.085\textwidth]{fig01b03} &
+%		\includegraphics[width=0.085\textwidth]{fig01b04} &
+%		\includegraphics[width=0.085\textwidth]{fig01b05} \\
+%		\includegraphics[width=0.085\textwidth]{fig01b06} &
+%		\includegraphics[width=0.085\textwidth]{fig01b07} &
+%		\includegraphics[width=0.085\textwidth]{fig01b08} &
+%		\includegraphics[width=0.085\textwidth]{fig01b09} &
+%		\includegraphics[width=0.085\textwidth]{fig01b10} \\
+%		\includegraphics[width=0.085\textwidth]{fig01b11} &
+%		\includegraphics[width=0.085\textwidth]{fig01b12} &
+%		\includegraphics[width=0.085\textwidth]{fig01b13} &
+%		\includegraphics[width=0.085\textwidth]{fig01b14} &
+%		\includegraphics[width=0.085\textwidth]{fig01b15} \\[1ex]
+%		\multicolumn{5}{c}{(b) Example patches considered as positives (blue squares).} \\[4ex]
+%		\includegraphics[width=0.085\textwidth]{fig01c01} &
+%		\includegraphics[width=0.085\textwidth]{fig01c02} &
+%		\includegraphics[width=0.085\textwidth]{fig01c03} &
+%		\includegraphics[width=0.085\textwidth]{fig01c04} &
+%		\includegraphics[width=0.085\textwidth]{fig01c05} \\
+%		\includegraphics[width=0.085\textwidth]{fig01c06} &
+%		\includegraphics[width=0.085\textwidth]{fig01c07} &
+%		\includegraphics[width=0.085\textwidth]{fig01c08} &
+%		\includegraphics[width=0.085\textwidth]{fig01c09} &
+%		\includegraphics[width=0.085\textwidth]{fig01c10} \\
+%		\includegraphics[width=0.085\textwidth]{fig01c11} &
+%		\includegraphics[width=0.085\textwidth]{fig01c12} &
+%		\includegraphics[width=0.085\textwidth]{fig01c13} &
+%		\includegraphics[width=0.085\textwidth]{fig01c14} &
+%		\includegraphics[width=0.085\textwidth]{fig01c15} \\[1ex]
+%		\multicolumn{5}{c}{(c) Example patches considered as negatives (magenta squares).} \\
+%	\end{tabular} \\
+%\end{tabular}
+%\caption{Part of a high-content fluorescence microscopy image (a) where the blue squares highlight some example patches containing neuronal structure and the magenta squares depict some example patches containing background. These squares are enlarged in (b) and (c) for a better visualization. The intensities of the shown images are inverted compared to their originals for displaying purposes.}
+%\label{fig:example}
+%\end{figure*}
 
-Rat hippocampal neurons were cultured and transfected with green fluorescent protein (GFP) and imaged with a Leica SP5 automated confocal fluorescence microscope using its Matrix modules and a 20$\times$ lens. The imaged neurons, coming from a part of the brain (the hippocampus) that is well known to be involved in higher functions such as learning and memory \citep{S92}, typically have a pyramidal soma with a complex dendritric tree \citep{GAB98}, and their in-vivo morphological features are well conserved in culture conditions. We acquired eight two-dimensional (2D) high-content images (total size $>$1 GB), each with a size of about 10,000\,$\times$\,12,000 pixels, covering approximately 70\,mm${}^2$ of culture dish {\color{red}. Each image is a mosaic made up of tiles of size 1024\,$\times$\,1024 pixels, automatically acquired and stitched using the Leica Matrix module. Prior to imaging, the user has to select the desired culture area within the field of view, and the module calculates the tiles to be imaged in order to cover the chosen area, considering 10\% overlap between neighboring tiles. Each mosaic contains} on the order of 40 transfected neurons (Fig.\ \ref{fig:example}). Our specimens usually have about 100 neurons, but more than half of them are not or only partly imaged, as they are in different optical planes or close to the borders of the dish, making the automated detection of relevant image structures (complete neurons) as opposed to irrelevant image structures (incomplete neurons, astrocytes, and artifacts) quite challenging.
+%Rat hippocampal neurons were cultured and transfected with green fluorescent protein (GFP) and imaged with a Leica SP5 automated confocal fluorescence microscope using its Matrix modules and a 20$\times$ lens. The imaged neurons, coming from a part of the brain (the hippocampus) that is well known to be involved in higher functions such as learning and memory \citep{S92}, typically have a pyramidal soma with a complex dendritric tree \citep{GAB98}, and their in-vivo morphological features are well conserved in culture conditions. We acquired eight two-dimensional (2D) high-content images (total size $>$1 GB), each with a size of about 10,000\,$\times$\,12,000 pixels, covering approximately 70\,mm${}^2$ of culture dish {\color{red}. Each image is a mosaic made up of tiles of size 1024\,$\times$\,1024 pixels, automatically acquired and stitched using the Leica Matrix module. Prior to imaging, the user has to select the desired culture area within the field of view, and the module calculates the tiles to be imaged in order to cover the chosen area, considering 10\% overlap between neighboring tiles. Each mosaic contains} on the order of 40 transfected neurons (Fig.\ \ref{fig:example}). Our specimens usually have about 100 neurons, but more than half of them are not or only partly imaged, as they are in different optical planes or close to the borders of the dish, making the automated detection of relevant image structures (complete neurons) as opposed to irrelevant image structures (incomplete neurons, astrocytes, and artifacts) quite challenging.
 
 \subsubsection{Image Annotation}
 \label{sec:annotation}
