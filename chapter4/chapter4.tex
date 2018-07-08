@@ -266,7 +266,7 @@ Our method, which we call Probabilistic Neuron Reconstructor (PNR)\footnote{The 
 		(a) & (b) 
 	\end{tabular}
 	\caption{Illustration of the synthetic neuron data set used in the presented experiments. (a) Example images of the 10 selected neurons simulated at SNR = 4 and COR = 0.0. (b) Different simulations of the neuron indicated by the red outline in (a) for SNR = 2, 3, 4, 5, and 10 (from left to right) and COR = 0.0, 1.0, and 2.0 (from top to bottom). The marked image in (b) is the same as the marked image in (a). All examples shown here are maximum intensity projections of the 3D synthetic images with inverted intensities for better visualization.}
-	\label{fig5}%fig:data-synthetic
+	\label{fig5}
 \end{figure}
 
 \section{Experimental Results}
@@ -318,7 +318,7 @@ Prior to evaluating how well our method emulates expert manual reconstruction in
 \end{figure}
 We developed a plugin for ImageJ \cite{schneider2012} called SWC2IMG,\footnote{https://github.com/imagescience/SWC2IMG} which takes any SWC file as input and simulates fluorescence microscopy imaging of all neuronal branches in the file at a specified SNR and COR level, producing an image stack whose true digital reconstruction is the very input. It assumes that in practice, because of the relatively large spatial extent of even a single neuron with its complete arbor, the combination of optical magnification factor and digital image matrix size in real neuron images is typically such that the voxel size is larger than the point spread function (PSF), implying that the partial-volume effect of digitization is more prominent than the optical blurring by the microscope. Based on this, the plugin simulates the imaging simply by estimating for each voxel which fraction of its volume is occupied by the neuron. Next, it simulates noise by using the Poisson noise model representative of optical imaging, which defines SNR as the image intensity inside the neuron above the background, divided by the standard deviation of the noise inside \cite{sheppard2006}. And finally, to allow for correlated signal and noise, which we found to improve the visual realism of the simulated images, the plugin also offers the possibility to apply Gaussian smoothing at a specified scale, being the COR parameter, while preserving the SNR level. Generally, the lower the SNR and/or the higher the COR level, the more challenging the data and the reconstruction problem.
 
-Using this plugin we created a synthetic data set containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig:data-synthetic}). Specifically, we considered SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2. Thus, our synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, which we attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore we present the results only for those.
+Using this plugin we created a synthetic data set containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig5}). Specifically, we considered SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2. Thus, our synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, which we attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore we present the results only for those.
 
 \begin{figure}
 	\centering\tiny
@@ -398,55 +398,56 @@ Using this plugin we created a synthetic data set containing image stacks for a 
 \end{figure}
 \begin{figure}
 	\centering
-	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{}}
-		\rotatebox[origin=c]{90}{SNR = 2} &
-		\includegraphics[align=c,width=0.15\textwidth]{fig12a1}& 
-		\includegraphics[align=c,width=0.15\textwidth]{fig12a2}& 
-		\includegraphics[align=c,width=0.15\textwidth]{fig12a3}& 
-		\includegraphics[align=c,width=0.15\textwidth]{fig12a4}& 
-		\includegraphics[align=c,width=0.15\textwidth]{fig12a5}&
-		\includegraphics[align=c,width=0.15\textwidth]{fig12a6}\\
+	\begin{tabular}{c@{\hspace{0.5em}}p{0.15\textwidth}c@{}c@{}c@{}c@{}c@{}}
+		\rotatebox[origin=c]{90}{SNR = 2}  & \multicolumn{6}{c}{\includegraphics[align=c,width=0.9\textwidth]{fig12a}} \\
 		\\[-1ex]
-		\rotatebox[origin=c]{90}{SNR = 3} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3__MAX} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3_app2} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3_gps} & 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3_mst} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3_phd} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=3_pnr} \\
+		\rotatebox[origin=c]{90}{SNR = 3}  & \multicolumn{6}{c}{\includegraphics[align=c,width=0.9\textwidth]{fig12b}} \\
 		\\[-1ex]
-		\rotatebox[origin=c]{90}{SNR = 4} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=4__MAX} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=4_app2} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=4_gps} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=4_mst} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=4_phd} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=4_pnr} \\
+		\rotatebox[origin=c]{90}{SNR = 4}  & \multicolumn{6}{c}{\includegraphics[align=c,width=0.9\textwidth]{fig12c}} \\
 		\\[-1ex]
-		\rotatebox[origin=c]{90}{SNR = 5} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=5__MAX} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=5_app2} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=5_gps} & 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=5_mst} & 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=5_phd} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=5_pnr} \\
+		\rotatebox[origin=c]{90}{SNR = 5}  & \multicolumn{6}{c}{\includegraphics[align=c,width=0.9\textwidth]{fig12d}} \\
 		\\[-1ex]
-		\rotatebox[origin=c]{90}{SNR = 10} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10__MAX} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_app2} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_gps} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_mst} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_phd} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_pnr} \\
+		\rotatebox[origin=c]{90}{SNR = 10} & \multicolumn{6}{c}{\includegraphics[align=c,width=0.9\textwidth]{fig12e}} \\
 		\\[-1ex]
-		&
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_ZOOM} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_app2_ZOOM} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_gps_ZOOM} & 
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_mst_ZOOM} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_phd_ZOOM} &
-		\includegraphics[align=c,width=0.15\textwidth]{150_cor=0.0_snr=10_pnr_ZOOM} \\ 
-		&  & APP2 & GPS & MST & PHD & PNR
+		                                   & \multicolumn{6}{c}{\includegraphics[align=c,width=0.9\textwidth]{fig12f}} \\
+		                                   & \hspace{0.15\textwidth}  & APP2 & GPS & MST & PHD & PNR
+%c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}c@{\hspace{0.2em}}		
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12a1}& 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12a2}& 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12a3}& 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12a4}& 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12a5}&
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12a6}
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12b1} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12b2} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12b3} & 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12b4} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12b5} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12b6} 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12c1} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12c2} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12c3} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12c4} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12c5} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12c6} 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12d1} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12d2} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12d3} & 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12d4} & 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12d5} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12d6} \\
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12e1} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12e2} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12e3} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12e4} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12e5} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12e6} \\
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12f1} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12f2} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12f3} & 
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12f4} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12f5} &
+%		\includegraphics[align=c,width=0.15\textwidth]{fig12f6} \\ 
 	\end{tabular}
 	\caption{Visual comparison of neuron reconstructions produced by the considered methods from synthetic image stacks of a single neuron at different SNR levels. The image stacks (generated used COR = 0) are shown as inverted maximum intensity projections (left column) and the reconstructions of the different methods (remaining columns) are shown in red as surface renderings.}
 	\label{fig12}
@@ -558,12 +559,12 @@ From the results of the experiments on these three real data sets (Figs.~\ref{fi
 		\includegraphics[width=0.158\textwidth]{fig19c5} &
 		\includegraphics[width=0.158\textwidth]{fig19c6} \\[0.5ex]
 		& F = 0.646 & F = 0.656 & F = 0.619 & F = 0.447 & F = 0.724 \\[2ex]
-		\includegraphics[width=0.158\textwidth]{zebrafish_larve_RGC_UW_02_img} &
-		\includegraphics[width=0.158\textwidth]{zebrafish_larve_RGC_UW_02_app2} &
-		\includegraphics[width=0.158\textwidth]{zebrafish_larve_RGC_UW_02_gps} &
-		\includegraphics[width=0.158\textwidth]{zebrafish_larve_RGC_UW_02_mst} &
-		\includegraphics[width=0.158\textwidth]{zebrafish_larve_RGC_UW_02_phd} &
-		\includegraphics[width=0.158\textwidth]{zebrafish_larve_RGC_UW_02_pnr} \\[0.5ex]
+		\includegraphics[width=0.158\textwidth]{fig19d1} &
+		\includegraphics[width=0.158\textwidth]{fig19d2} &
+		\includegraphics[width=0.158\textwidth]{fig19d3} &
+		\includegraphics[width=0.158\textwidth]{fig19d4} &
+		\includegraphics[width=0.158\textwidth]{fig19d5} &
+		\includegraphics[width=0.158\textwidth]{fig19d6} \\[0.5ex]
 		& F = 0.471 & F = 0.451 & F = 0.413 & F = 0.588 & F = 0.592 \\
 	\end{tabular}
 	\caption{Example neuron reconstructions of four image stacks from the BGN data set. Shown are the original arbors (volume renderings on the left) and the reconstructions (overlaid surface renderings in red) of the different methods (indicated at the top) corresponding to the best F score (given below each reconstruction) for S = 2 with respect to the available manual reconstruction.}
