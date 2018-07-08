@@ -120,7 +120,7 @@
 \makeglossaries
 \loadglsentries{abbreviations}
 % ************************************************************************
-%\includeonly{}
+\includeonly{./chapter5/chapter5,./bibliography}
 % ************************************************************************
 \begin{document}
 \selectlanguage{english}
@@ -128,18 +128,18 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-%\include{./coverpage}
-%\include{./titlepage}
-%\include{./colophon}
-%\include{./formalpage}
-%\include{./preface}
-%\include{./contents}
+\include{./coverpage}
+\include{./titlepage}
+\include{./colophon}
+\include{./formalpage}
+\include{./preface}
+\include{./contents}
 
 %\glsaddall
 %\printglossaries
 %\printglossary[style=long]
 
-%\printglossary[style=long,type=\acronymtype,title={List of Abbreviations}]
+\printglossary[style=long,type=\acronymtype,title={List of Abbreviations}]
 
 % ************************************************************************
 \pagenumbering{arabic}
@@ -147,27 +147,27 @@
 
 \setlength{\parindent}{15pt}
 
-%\graphicspath{{./chapter1/}}
-%\include{./chapter1/chapter1}
+\graphicspath{{./chapter1/}}
+\include{./chapter1/chapter1}
 
-%\graphicspath{{./chapter2/}}
-%\include{./chapter2/chapter2}
+\graphicspath{{./chapter2/}}
+\include{./chapter2/chapter2}
 
-%\graphicspath{{./chapter3/}}
-%\include{./chapter3/chapter3}
+\graphicspath{{./chapter3/}}
+\include{./chapter3/chapter3}
 
-%\graphicspath{{./chapter4/}}
-%\include{./chapter4/chapter4}
+\graphicspath{{./chapter4/}}
+\include{./chapter4/chapter4}
 
 \graphicspath{{./chapter5/}}
 \include{./chapter5/chapter5}
 
 \include{./bibliography}
-%\include{./summary}
-%\include{./samenvatting}
-%\include{./portfolio}
-%\include{./publications}
-%\include{./curriculum}
+\include{./summary}
+\include{./samenvatting}
+\include{./portfolio}
+\include{./publications}
+\include{./curriculum}
 
 % ************************************************************************
 \end{document}
