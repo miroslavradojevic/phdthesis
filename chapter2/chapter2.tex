@@ -59,7 +59,7 @@ The aim of the feature extraction step is to compute a set of quantitative featu
 
 \subsubsection{Foreground Selection}
 \label{subsubsec:foreground-selection}
-To determine whether a pixel location $(x,y)$ in a given image $I$ should be considered as foreground or background, we analyze the local intensity variation $\rho(x,y)$ within a circular neighborhood of radius $r_{d}$ centered at that location. To avoid making strong assumptions about the local intensity distribution we chose to use the difference between the $95^\textrm{th}$ and the $5^\textrm{th}$ percentile of the intensities within the neighborhood as the measure of variation:
+To determine whether a pixel location $(x,y)$ in a given image $I$ should be considered as foreground or background, the local intensity variation $\rho(x,y)$ within a circular neighborhood of radius $r_{d}$ centered at that location is analyzed. To avoid making strong assumptions about the local intensity distribution, the difference between the $95^\textrm{th}$ and the $5^\textrm{th}$ percentile of the intensities within the neighborhood is used as the measure of variation:
 \begin{gather} 
 \rho(x,y) = \mathcal{P}_{95}(\mathcal{I}_{xy}) - \mathcal{P}_{5}(\mathcal{I}_{xy}) \\
 \mathcal{I}_{xy} = \left\{\, I(m,n)\ |\ (m-x)^{2}+(n-y)^{2} \leq r_d^2\, \right\} \\
