@@ -99,26 +99,26 @@ kD\begin{bmatrix} \sin\alpha \\ -\!\cos\alpha \end{bmatrix} +
 \end{equation}
 and the summation is performed over all $(m,n)$ for which the kernel is defined. That is, $p(x,y,\alpha,k,D)$ is the correlation of the image with the kernel patch rotated over angle $\alpha$ and shifted over a distance $kD$ with respect to $(x,y)$ in the direction corresponding to that angle (Fig.~\ref{fig3}). In practice, $p$ is calculated for a discrete set of angles, $\alpha_{i}=i/(2\pi N_{\alpha}),\, i=0,\dots,N_{\alpha}-1$, where $N_{\alpha}$ is automatically set such that the circle with radius $kD$ is sampled with pixel resolution. The parameter $k$ is typically set slightly larger than 0.5 so as to scan the neighborhood around the considered pixel $(x,y)$. To obtain the image intensity at non-integer transformed locations $(x_{m,n},y_{m,n})$, linear interpolation is used.
 
-In contrast with previous works, which used differential kernels for directional filtering and profiling \cite{yu1998rotated, can1999rapid, zhang2007automated}, we employ the matched kernel (Eq.~\ref{eq:G}), which avoids noise amplification. Although applying a set of rotated kernels is computationally more demanding than Hessian or steerable filtering based methods, it provides more geometrical flexibility in matching the kernels with the structures of interest while retaining excellent directional sensitivity. In our framework, the computational burden is drastically reduced by the foreground selection step, and further reduction is possible since the filtering process is highly parallelizable.
+In contrast with previous works, which used differential kernels for directional filtering and profiling \cite{yu1998rotated, can1999rapid, zhang2007automated}, this approach employs the matched kernel (Eq.~\ref{eq:G}), which avoids noise amplification. Although applying a set of rotated kernels is computationally more demanding than Hessian or steerable filtering based methods, it provides more geometrical flexibility in matching the kernels with the structures of interest while retaining excellent directional sensitivity. In our framework, the computational burden is drastically reduced by the foreground selection step, and further reduction is possible since the filtering process is highly parallelizable.
 
-After computing the angular profile we further process it in order to extract several features (Fig.~\ref{fig4}) relevant for critical-point detection and characterization:
+The computed angular profile is further processed in order to extract several features (Fig.~\ref{fig4}) relevant for critical-point detection and characterization:
 
-\paragraph{Peaks.} At each foreground pixel location we first determine how many and in which direction line-like image structures pass through it. This is done by finding the local maxima (``peaks'') in the angular profile at that location. Since the oriented kernels act as low-pass filters, the profile is sufficiently smooth to extract the peaks reliably using the iterative line searching algorithm \cite{flannery1992numerical}. The found peaks correspond to angles $\hat{\alpha}_{i}, i=1,\dots,N_{\hat{\alpha}}$, in which directions the image intensities are the highest. Here $N_{\hat{\alpha}}\leq 4$ to accommodate terminations, normal body points, and junctions (bifurcations and crossovers).
+\paragraph{Peaks.} At each foreground pixel location, method determines the number and direction of the line-like image structures which pass through it. This is done by finding the local maxima (``peaks'') in the angular profile at that location. Since the oriented kernels act as low-pass filters, the profile is sufficiently smooth to extract the peaks reliably using the iterative line searching algorithm \cite{flannery1992numerical}. The found peaks correspond to angles $\hat{\alpha}_{i}, i=1,\dots,N_{\hat{\alpha}}$, in which directions the image intensities are the highest. Here $N_{\hat{\alpha}}\leq 4$ to accommodate terminations, normal body points, and junctions (bifurcations and crossovers).
 
-\paragraph{Likelihood.} For each $\hat{\alpha}_{i}$ we calculate a likelihood $l_i \in \left[ 0, 1 \right]  $ from the angular profile according to:
+\paragraph{Likelihood.} For each $\hat{\alpha}_{i}$, likelihood $l_i \in \left[ 0, 1 \right]  $ is calculated from the angular profile according to:
 \begin{equation} 
 l_i = \frac{p(x,y,\hat{\alpha}_{i},k,D)-p_{\min}}{p_{\max}-p_{\min}}
 \end{equation}
 where $p_{\min}$ and $p_{\max}$ denote, respectively, the minimum and maximum of $p(x,y,\alpha,k,D)$ over $\alpha$.
 
-\paragraph{Energy.} Next we consider the local grid $\uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$ for each $\hat{\alpha}_{i}$ (Fig.~\ref{fig4}), consisting of the transformed coordinates $(x_{m,n},y_{m,n})$ corresponding to $\alpha=\hat{\alpha}_{i}$ (Eq.~\ref{eq:xymn}), and we extract a refined centerline point set $\lambda_{i}$ (or ``streamline'') on this grid by finding for each $n$ the local maximum over $m$:
+\paragraph{Energy.} Next, the local grid $\uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$ is considered for each $\hat{\alpha}_{i}$ (Fig.~\ref{fig4}), consisting of the transformed coordinates $(x_{m,n},y_{m,n})$ corresponding to $\alpha=\hat{\alpha}_{i}$ (Eq.~\ref{eq:xymn}), and a refined centerline point set $\lambda_{i}$ (or ``streamline'') is extracted over this grid by finding for each $n$ the local maximum over $m$:
 \begin{gather}
 \label{eq:refine-centerline} 
 \lambda_{i} = \left\{(x_{\hat{m}_{n},n},y_{\hat{m}_{n},n})\right\}_{n\,\in\,\left[-D/2,D/2\right]}\\[0.5ex]
 \hat{m}_{n} = \argmax_{m\,\in\,\left[-D/2,D/2\right]} I(x_{m,n},y_{m,n})
 \label{eq:hatm}
 \end{gather}
-We quantify how much the streamline deviates from a straight line by estimating its bending energy $u_{i}\geq0$ as:
+The degree of the streamline deviation from a straight line is quantified by estimating its bending energy $u_{i}\geq0$ as:
 \begin{equation}
 u_{i} = \frac{1}{\Updelta m}\sum_{n} \left( \hat{m}_{n-1} - 2\hat{m}_{n} + \hat{m}_{n+1} \right)^2
 \end{equation}
@@ -131,7 +131,7 @@ where $\Updelta m$ is the pixel spacing in the direction of $m$ and the summatio
 	\label{fig4}
 \end{figure}
 
-\paragraph{Correlation.} Given a streamline $\lambda_{i}$ we estimate the orthogonal direction at each point in the set by averaging the orthogonal directions of the two neighboring streamline segments corresponding to that point (that is, from the point to the next point, and from the point to the previous point). Using these direction estimates we sample a refined local grid $\Uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$, consisting of image coordinates $(\tilde{x}_{m,n},\tilde{y}_{m,n})$ relative to the streamline (Fig.~\ref{fig4}), and compute a normalized cross-correlation \cite{lewis1995fast} score $c_{i}\in[-1,1]$ as:
+\paragraph{Correlation.} Given a streamline $\lambda_{i}$ we estimate the orthogonal direction at each point in the set by averaging the orthogonal directions of the two neighboring streamline segments corresponding to that point (that is, from the point to the next point, and from the point to the previous point). Using these direction estimates a refined local grid $\Uppi_{i}(x,y,\hat{\alpha}_{i},k,D)$ is sampled, consisting of image coordinates $(\tilde{x}_{m,n},\tilde{y}_{m,n})$ relative to the streamline (Fig.~\ref{fig4}), and compute a normalized cross-correlation \cite{lewis1995fast} score $c_{i}\in[-1,1]$ as:
 \begin{equation} 
 \label{eq:correlation}
 c_{i} = \frac{\sum_{m}\sum_{n} \bigl[I(\tilde{x}_{m,n},\tilde{y}_{m,n})-\bar{I}\bigr] \bigl[G(m,n)-\bar{G}\bigr]}{\sqrt{\sum_{m}\sum_{n}\bigl[I(\tilde{x}_{m,n},\tilde{y}_{m,n})-\bar{I}\bigr]^{2}\sum_{m}\sum_{n}\bigl[G(m,n)-\bar{G}\bigr]^{2}}}
