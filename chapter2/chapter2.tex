@@ -74,7 +74,7 @@ For each selected foreground location, a local angular profile is computed and a
 G(x,y)=\textrm{e}^{-x^2/2\sigma_{\!\!D}^{2}}/S
 \label{eq:G}
 \end{equation}
-where $S$ is a normalization factor such that the sum of $G(x,y)$ over all kernel pixels is unity. We chose the Gaussian both because we observed that the cross-sectional profile of axons and dendrites in our applications is approximately Gaussian-like and because the Gaussian is a theoretically well-justified filter for regularization purposes. The parameters $D$ and $\sigma_{\!D}$ determine the size and shape of the kernel profile and should correspond to the expected branch diameter.
+where $S$ is a normalization factor such that the sum of $G(x,y)$ over all kernel pixels is unity. The Gaussian is selected both because the cross-sectional profile of axons and dendrites in such applications is observed to be approximately Gaussian-like and because the Gaussian is a theoretically well-justified filter for regularization purposes. The parameters $D$ and $\sigma_{\!D}$ determine the size and shape of the kernel profile and should correspond to the expected branch diameter.
 
 \begin{figure}[!t]
 	\centering
@@ -83,7 +83,7 @@ where $S$ is a normalization factor such that the sum of $G(x,y)$ over all kerne
 	\label{fig3}
 \end{figure}
 
-Using the kernel we compute the local angular profile at any pixel location $(x,y)$ in the given image $I$ as:
+The local angular profile at any pixel location $(x,y)$ in the given image $I$ is computed using the kernel as:
 \begin{equation}
 p(x,y,\alpha,k,D)=\sum_{m}\sum_{n} I(x_{m,n},y_{m,n})\,G(m,n)
 \label{eq:angularprofile}
