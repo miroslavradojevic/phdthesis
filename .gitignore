@@ -18,3 +18,4 @@ cover/cover.pdf
 *.ist
 *.fls
 *.fdb_latexmk
+*.synctex(bysy)
