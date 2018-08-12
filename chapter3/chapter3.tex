@@ -47,7 +47,7 @@ where $\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1})$ denotes the multi-
 	\centering
 	\includegraphics[width=0.8\linewidth]{fig1}
 	\caption{Method overview. Each multi-object filtering round is initialized with $N_0$ seeds. If the seed pool is not exhausted by the end of the current round, a new round is started, and this is repeated until all seeds have been processed.}
-	\label{fig1}
+	\label{ch3_fig1}
 \end{figure}
 \subsection{Probability hypothesis density filtering}
 \label{ssec:prob-hyp-den}
@@ -92,7 +92,7 @@ The multi-object filtering scheme proposed for neuron tracing defines the object
 \mathrm{x} = \left[ \mathrm{p}_{\mathrm{x}}, \mathrm{v}_{\mathrm{x}} \right] = \left[x, y, z, v_x, v_y, v_z\right] 
 \label{eq:obj-state}
 \end{equation}
-where $\mathrm{p}_{\mathrm{x}}=[x, y, z]$ denotes the location and $\mathrm{v}_{\mathrm{x}}=[v_x, v_y, v_z]$ the local orientation of a tubular segment. Filtering starts from a set of $N_0$ seeds (Fig.~\ref{fig1}) sampled from a seed pool consisting of the local maxima of the tubularity image $\tau(x,y,z)$ computed from the original image using Hessian-based multiscale line filtering \cite{sato1998three} and min-max normalized to $[0,1]$. Local maxima are sorted in descending order so that seeds with high tubularity (meaning high confidence in the underlying image structure being a neuron branch) are processed first. To avoid seeds being selected too close together, in other words to ensure good spatial coverage of the neuron with seeds, for each selected seed (while going from top to bottom of the sorted list) the seeds within a circular neighborhood with radius $r_0$ are ignored in the current round. If, after SMC-PHD filtering (described in following Sec.~\ref{ssec:smc-phd-rec}), the seed pool is not exhausted, a new round is started by selecting a new set of seeds. During filtering, the observation consists of the location and corresponding tubularity value:
+where $\mathrm{p}_{\mathrm{x}}=[x, y, z]$ denotes the location and $\mathrm{v}_{\mathrm{x}}=[v_x, v_y, v_z]$ the local orientation of a tubular segment. Filtering starts from a set of $N_0$ seeds (Fig.~\ref{ch3_fig1}) sampled from a seed pool consisting of the local maxima of the tubularity image $\tau(x,y,z)$ computed from the original image using Hessian-based multiscale line filtering \cite{sato1998three} and min-max normalized to $[0,1]$. Local maxima are sorted in descending order so that seeds with high tubularity (meaning high confidence in the underlying image structure being a neuron branch) are processed first. To avoid seeds being selected too close together, in other words to ensure good spatial coverage of the neuron with seeds, for each selected seed (while going from top to bottom of the sorted list) the seeds within a circular neighborhood with radius $r_0$ are ignored in the current round. If, after SMC-PHD filtering (described in following Sec.~\ref{ssec:smc-phd-rec}), the seed pool is not exhausted, a new round is started by selecting a new set of seeds. During filtering, the observation consists of the location and corresponding tubularity value:
 \begin{equation}
 \mathrm{z} = \left[ \mathrm{p}_{\mathrm{z}}, \tau_{\mathrm{z}} \right] = \left[x, y, z, \tau\right]
 \label{eq:observation}
