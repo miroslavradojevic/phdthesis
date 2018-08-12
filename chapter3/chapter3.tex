@@ -27,7 +27,6 @@ In this chapter, a new method for neuron tracing in optical microscopy images is
 
 \section{Methods}
 \label{sec:methods}
-
 \subsection{Multi-object Bayesian filtering} 
 \label{ssec:multi-obj-bay-filt}
 Single-object tracking is considered as a Bayesian inference problem \cite{bar2004estimation, sarkka2013bayesian}. The key idea is to estimate the posterior probability density function (pdf) $f_{k|k}(\mathrm{x}_k | \mathrm{z}_{1:k})$, where $\mathrm{x}_k$ denotes the object state at iteration $k$, and $\mathrm{z}_{1:k}$ the sequence of observations from iterations $1$ to $k$ inclusive. Estimation is accomplished by sequentially applying prior knowledge to predict the state in the next iteration and updating this estimate with available observations. Similarly, multi-object tracking can be formulated as the problem of updating predictions of the multi-object state $\mathrm{X}_k = \{\mathrm{x}_{k,1},\ldots,\mathrm{x}_{k,N_k}\}$ with multi-object observations $\mathrm{Z}_k = \{\mathrm{z}_{k,1},\ldots,\mathrm{z}_{k,M_k}\}$, where $N_k$ and $M_k$ denote the number of objects and observations at iteration $k$, respectively. The prediction is thus formulated as:
@@ -243,12 +242,12 @@ Algorithms~\ref{alg:delin} and~\ref{alg:smc-phd} provide a step-by-step overview
 \label{sec:results}
 \subsection{Neuron data sets} 
 \label{subsec:neuron-datasets}
-For evaluating the performance of the proposed method for both 2D and 3D neuron tracing, three data sets (Fig.~\ref{fig5}) were used. All datasets consist of real neuron images acquired with fluorescence microscopy. Two data sets are 3D image stacks from the DIADEM challenge \cite{brown2011diadem}: neocortical layer-1 axons (NCL1A) with 16 image stacks and olfactory projection fibers (OPF) with 9 image stacks. The third data set (HCN) consists of 30 2D images of hippocampal neurons \cite{steiner2002overexpression}. Together the data sets show a good variety of image contrast and structural complexity. Further details about the images can be retreived from the corresponding, cited publications.
+For evaluating the performance of the proposed method for both 2D and 3D neuron tracing, three data sets (Fig.~\ref{ch3_fig5}) were used. All datasets consist of real neuron images acquired with fluorescence microscopy. Two data sets are 3D image stacks from the DIADEM challenge \cite{brown2011diadem}: neocortical layer-1 axons (NCL1A) with 16 image stacks and olfactory projection fibers (OPF) with 9 image stacks. The third data set (HCN) consists of 30 2D images of hippocampal neurons \cite{steiner2002overexpression}. Together the data sets show a good variety of image contrast and structural complexity. Further details about the images can be retreived from the corresponding, cited publications.
 \begin{figure}
 	\centering
 	\includegraphics[width=\linewidth]{fig5}
 	\caption{Example images with tracing results of the data sets used in the evaluation. Top row: NCL1A image stacks (volume rendered) showing a network of neocortical layer-1 axons. Middle row: OPF image stacks (volume rendered) showing olfactory projection fibers. Bottom row: HCN images showing hippocampal neurons. The tracings (overlaid in red) were obtained with the proposed method using 20 seeds and at most 10 rounds (up to 40 for the top row to capture more detail). For illustration purposes the image intensities are inverted in these visualizations compared to the originals, and the tracings are offset with respect to the neuron structures for better visual comparison.}
-	\label{fig5}
+	\label{ch3_fig5}
 \end{figure}
 \subsection{Performance measures}
 \label{subsec:performance-measures}
@@ -286,12 +285,12 @@ The accuracy of the tracings produced by the proposed method was assessed by com
 		\includegraphics[align=c,width=0.2\columnwidth]{fig6h2} \\
 	\end{tabular}
 	\caption{Performance as a function of numbers of seeds and rounds for four example cases from the OPF (a-d) and the HCN (e-h) data set. Similar trends were observed for all cases in the respective data sets. Left panel per case: Precision (P), recall (R), and F-score (F) after one round initialized with different numbers of seeds ($N_0$). Right panel per case: The scores after multiple rounds with a fixed number of seeds ($N_0=40$). Fifth-order polynomial curves were fit to the data to show approximate trends.}
-	\label{fig6}
+	\label{ch3_fig6}
 \end{figure}
 
 \subsection{Evaluation of method behavior} 
 \label{subsec:evaluation-of-method-behavior}
-First, behavior of the presented method was evaluated as a function of the number of seeds and rounds. For this experiment P, R, and F values were measured for 1) a single round of filtering with different numbers of seeds and 2) multiple rounds of filtering using a fixed number of seeds. Since the algorithm showcased in this chapter operates probabilistically, the results of five repetitions of the experiment were averaged. The results for the NCL1A data set are shown in Fig.~\ref{fig7} and for the other data sets in Fig.~\ref{fig6}. As expected, R and F generally increase, but P slightly decreases as the number of seeds and rounds increase, indicating an increase in the number of FP detections. The specific patterns may differ depending on the image content, but the observations indicate that as a function of the number of seeds, the increase of R and F levels off beyond about 40, therefore this value was subsequently used. As a function of the number of rounds, R and F level off after about 4 rounds, indicating there is no need in practice to run the method exhaustively on all possible seed points. This can be explained from the fact that seed selection proceeds from highest to lowest tubularity value, so that later seeds correspond to less and less valuable image structures, and the resulting tracings will be dropped due to low particle weights. Examples of traced neurons for the different data sets are shown in Fig.~\ref{fig5}. As can be observed from the examples in the top row of the figure, images with more fuzzy and fragmented structures may require more rounds to capture more detail. Alternatively, a better tubularity filter may be needed.
+First, behavior of the presented method was evaluated as a function of the number of seeds and rounds. For this experiment P, R, and F values were measured for 1) a single round of filtering with different numbers of seeds and 2) multiple rounds of filtering using a fixed number of seeds. Since the algorithm showcased in this chapter operates probabilistically, the results of five repetitions of the experiment were averaged. The results for the NCL1A data set are shown in Fig.~\ref{ch3_fig7} and for the other data sets in Fig.~\ref{ch3_fig6}. As expected, R and F generally increase, but P slightly decreases as the number of seeds and rounds increase, indicating an increase in the number of FP detections. The specific patterns may differ depending on the image content, but the observations indicate that as a function of the number of seeds, the increase of R and F levels off beyond about 40, therefore this value was subsequently used. As a function of the number of rounds, R and F level off after about 4 rounds, indicating there is no need in practice to run the method exhaustively on all possible seed points. This can be explained from the fact that seed selection proceeds from highest to lowest tubularity value, so that later seeds correspond to less and less valuable image structures, and the resulting tracings will be dropped due to low particle weights. Examples of traced neurons for the different data sets are shown in Fig.~\ref{ch3_fig5}. As can be observed from the examples in the top row of the figure, images with more fuzzy and fragmented structures may require more rounds to capture more detail. Alternatively, a better tubularity filter may be needed.
 
 \begin{figure}[!b]
 	\centering
@@ -300,13 +299,12 @@ First, behavior of the presented method was evaluated as a function of the numbe
 		\includegraphics[width=0.45\linewidth]{fig7b} \\
 	\end{tabular}
 	\caption{Performance of the proposed method as a function of numbers of seeds and rounds for an example image stack from the NCL1A data set. Similar trends were observed for all stacks in the data set. Left panel: Precision (P), recall (R), and F-score (F) after one round initialized with different numbers of seeds ($N_0$). Right panel: The scores after multiple rounds with a fixed number of seeds ($N_0=40$). Fifth-order polynomial fitting was used to show the approximate F-score trend.}
-	\label{fig7}
+	\label{ch3_fig7}
 \end{figure}
 
 \subsection{Comparison with other methods}
 \label{subsec:comparison-with-other-methods}
-Next the performance of the introduced method (PHD) was compared with several alterative methods, namely all-path pruning (APP2) \cite{xiao2013app2}, NeuroGPS-Tree (GPS) \cite{quan2016neurogps}, minimum spanning tree (MST) tracing as used in the BigNeuron project \cite{peng2015bigneuron}, and Neural Circuit Tracer (NCT) \cite{chothani2011automated}. For each of these methods the scores were optimized by trying all possible parameter values on a grid. The results for the NCL1A data set are shown in Fig.~\ref{fig12}, for the OPF data sets in Fig.~\ref{fig8} and HCN in Fig.~\ref{fig9}. Further observation shows that showcased method (results indicated in red) performs comparably or even better than the state-of-the-art methods. This suggests there may indeed be an advantage in using probabilistic approaches such as the one proposed in this work. It is also noticeable that NCT (results indicated in blue), while performing superiorly in most cases, required significant user interaction and manual correction to enable export of the tracings to the standard SWC file format used throughout the evaluations. Thus the results of this method include a high level of expert input and could serve as a reference. All other methods including the presented one were fully automatic after parameter selection.
-
+Next the performance of the introduced method (PHD) was compared with several alterative methods, namely all-path pruning (APP2) \cite{xiao2013app2}, NeuroGPS-Tree (GPS) \cite{quan2016neurogps}, minimum spanning tree (MST) tracing as used in the BigNeuron project \cite{peng2015bigneuron}, and Neural Circuit Tracer (NCT) \cite{chothani2011automated}. For each of these methods the scores were optimized by trying all possible parameter values on a grid. The results for the NCL1A data set are shown in Fig.~\ref{ch3_fig12}, for the OPF data sets in Fig.~\ref{ch3_fig8} and HCN in Fig.~\ref{ch3_fig9}. Further observation shows that showcased method (results indicated in red) performs comparably or even better than the state-of-the-art methods. This suggests there may indeed be an advantage in using probabilistic approaches such as the one proposed in this work. It is also noticeable that NCT (results indicated in blue), while performing superiorly in most cases, required significant user interaction and manual correction to enable export of the tracings to the standard SWC file format used throughout the evaluations. Thus the results of this method include a high level of expert input and could serve as a reference. All other methods including the presented one were fully automatic after parameter selection.
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{0.02\columnwidth}}c@{\hspace{0.02\columnwidth}}c}
@@ -318,7 +316,7 @@ Next the performance of the introduced method (PHD) was compared with several al
 		\includegraphics[width=0.31\columnwidth]{fig8f} \\
 	\end{tabular}
 	\caption{Performance comparison of the proposed method with several other methods on the OPF data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
-	\label{fig8}% S4 fig:compare-opf
+	\label{ch3_fig8}
 \end{figure}
 
 \begin{figure}
@@ -332,10 +330,10 @@ Next the performance of the introduced method (PHD) was compared with several al
 		\includegraphics[width=0.31\columnwidth]{pssd_saria} \\
 	\end{tabular}
 	\caption{Performance comparison of the proposed method with several other methods on the HCN data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
-	\label{fig9}% S5 fig:compare-saria
+	\label{ch3_fig9}
 \end{figure}
 
-To further demonstrate the advantage of the presented method over the others in challenging situations, the case when neuron fibers meet, run closely parallel to each other for some distance, and then diverge again was studied. In order to analyze the behavior of the different methods in a controlled manner, with increasing distance between the fibers, the images with two fibers of similar intensity and scale were synthesized. The results, shown in supplementary Fig.~\ref{fig10}, demonstrate that the method introduced in this chapter (PHD), similar to GPS, yields more faithful tracings than APP2 and MST. NCT was not included in these experiments for reasons mentioned above. Not surprisingly, all methods break down when the fibers overlap completely. In addition, even more challenging case was created, with three fibers of different intensity and scale. The results, shown in supplementary Fig.~\ref{fig11}, illustrate that the proposed method outperforms even the best alternatives.
+To further demonstrate the advantage of the presented method over the others in challenging situations, the case when neuron fibers meet, run closely parallel to each other for some distance, and then diverge again was studied. In order to analyze the behavior of the different methods in a controlled manner, with increasing distance between the fibers, the images with two fibers of similar intensity and scale were synthesized. The results, shown in supplementary Fig.~\ref{ch3_fig10}, demonstrate that the method introduced in this chapter (PHD), similar to GPS, yields more faithful tracings than APP2 and MST. NCT was not included in these experiments for reasons mentioned above. Not surprisingly, all methods break down when the fibers overlap completely. In addition, even more challenging case was created, with three fibers of different intensity and scale. The results, shown in supplementary Fig.~\ref{ch3_fig11}, illustrate that the proposed method outperforms even the best alternatives.
 
 \begin{figure}
 	\centering
@@ -362,7 +360,7 @@ To further demonstrate the advantage of the presented method over the others in 
 		\includegraphics[align=c,width=0.2\columnwidth]{fig10p} \\
 	\end{tabular}
 	\caption{Ability of the tested methods to separate two fibers of similar intensity and scale running closely in parallel. The examples show cases with gradually increasing distance between the fibers: overlap (left column), just separated (middle column), and clearly separated (right column). The tracing results of PHD, GPS, APP2, MST are overlaid (with slight offset) in red color.}
-	\label{fig10} % S6 fig:phd-advantage-2
+	\label{ch3_fig10}
 \end{figure}
 
 \begin{figure}%[!t]
@@ -391,7 +389,7 @@ To further demonstrate the advantage of the presented method over the others in 
 		\includegraphics[align=c,width=0.2\columnwidth]{fig11p} \\
 	\end{tabular}
 	\caption{Ability of the tested methods to separate three fibers with different intensity and scale running closely in parallel. The examples show cases with gradually increasing distance between the fibers: overlap (left column), just separated (middle column), and clearly separated (right column). The tracing results of PHD, GPS, APP2, MST are overlaid (with slight offset) in red color.}
-	\label{fig11} % S7 fig:phd-advantage-3
+	\label{ch3_fig11}
 \end{figure}
 
 In terms of computational efficiency it turned out difficult to directly compare the methods. This was mainly due to the use of different programming languages (Java versus C++) and the varying efficiencies of underlying software libraries used on the different operating systems which were considered and used for the computation (Linux Ubuntu and Mac OS). Moreover further observations suggest that the absolute as well as the relative execution times of the different methods varied widely depending on the image content. Generally, APP2 method was found to be the fastest (on the order of seconds per image), and PHD up to about one order of magnitude slower, while GPS and MST were either slower or faster than PHD depending on the configuration. NCT is ignored here for mentioned reasons. From these observations it is possible to draw a conclusion that the efficiency of showcased method is comparable to the state of the art.
@@ -407,7 +405,7 @@ In terms of computational efficiency it turned out difficult to directly compare
 		\includegraphics[width=0.31\columnwidth]{fig12f} \\
 	\end{tabular}
 	\caption{Performance comparison of the method with several other methods on the NCL1A data set. For each method and each measure, the plotted box indicates the 25-75 percentile, the horizontal bar indicates the median score, and the whiskers and outliers are drawn using the default settings of R.}
-	\label{fig12}
+	\label{ch3_fig12}
 \end{figure}
 
 \section{Conclusions}

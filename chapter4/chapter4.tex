@@ -61,7 +61,7 @@ The soma typically has a considerably larger diameter than the individual branch
 		(b) $p(\mathrm{z} | \mathrm{x})=\textrm{e}^{Kc_{\mathrm{x}}}$ \\
 	\end{tabular}
 	\caption{Functions used in the prediction and update steps of the SMC filtering: (a) the prediction importance sampling distribution (for ease of visualization a 2D example is given) and (b) the measurement likelihood function for different values of $K$.}
-	\label{fig2}% fig:pred-lhood
+	\label{ch4_fig2}
 \end{figure}
 
 \subsection{Seed Extraction}
@@ -82,7 +82,7 @@ p(\mathrm{x}_i | \mathrm{z}_{0:i}) \approx \sum_{k=1}^{N} w_i^k \delta(\mathrm{x
 \end{equation}
 where the weights are normalized so that $\sum_k w_i^k = 1$.
 
-Each iteration in SMC filtering consists of a prediction step and an update step. In the prediction step, given the samples $\mathrm{x}_{i-1}^k$ from the previous iteration, $N$ new samples $\mathrm{x}_i^k$ are drawn using the state transition prior. The importance sampling distribution that is used for this is (Fig.~\ref{fig2}a):
+Each iteration in SMC filtering consists of a prediction step and an update step. In the prediction step, given the samples $\mathrm{x}_{i-1}^k$ from the previous iteration, $N$ new samples $\mathrm{x}_i^k$ are drawn using the state transition prior. The importance sampling distribution that is used for this is (Fig.~\ref{ch4_fig2}a):
 \begin{equation}
 p(\mathrm{x}_i  | \mathrm{x}_{i-1}^k) =
 \begin{cases}
@@ -96,11 +96,11 @@ p(\mathrm{x}_i  | \mathrm{x}_{i-1}^k) =
 \end{equation}
 where $I_0$ denotes the zero-order Bessel function of the first kind, $\kappa$ is the circular variance parameter, $\eta$ is a normalization factor that makes the prediction over all $N$ samples integrate to unity, $d_i= || \mathrm{p}_i - \mathrm{p}_{i-1}^k ||$ is the Euclidean distance between the predicted position and the sample position in the previous iteration, $d$ is the tracing step size, and $\zeta$ the scale variance parameter. Each predicted state is assigned a unit direction $\mathrm{v}_i = (\mathrm{p}_i - \mathrm{p}_{i-1}^k) / || \mathrm{p}_i - \mathrm{p}_{i-1}^k ||$ defined by two consecutive positions. And $\sigma_i-\sigma_{i-1}^k$ represents the difference in scales, which contributes to the importance sampling function by a Gaussian component, giving a higher value to state samples that retain the scale.
 
-In the update step, the newly drawn samples are updated using the following likelihood function (Fig.~\ref{fig2}b):
+In the update step, the newly drawn samples are updated using the following likelihood function (Fig.~\ref{ch4_fig2}b):
 \begin{equation}
 p(\mathrm{z} | \mathrm{x}) = e^{K c_{\mathrm{x}}}
 \end{equation}
-where $K$ determines the sensitivity to the normalized cross-correlation $c_{\mathrm{x}}\in[-1,1]$, which quantifies the similarity of the underlying image structure for $\mathrm{x}=\left[ \mathrm{p}, \mathrm{v}, \sigma \right]$ to a cylindrical template model with Gaussian profile (Fig.~\ref{fig3}):
+where $K$ determines the sensitivity to the normalized cross-correlation $c_{\mathrm{x}}\in[-1,1]$, which quantifies the similarity of the underlying image structure for $\mathrm{x}=\left[ \mathrm{p}, \mathrm{v}, \sigma \right]$ to a cylindrical template model with Gaussian profile (Fig.~\ref{ch4_fig3}):
 \begin{equation}
 \label{eq:corr}
 c_\mathrm{x} = 
@@ -141,14 +141,14 @@ and renormalized so that $\sum_k w_i^k = 1$. To avoid weight deterioration, syst
 		(a) 3D  & (b)  2D
 	\end{tabular}
 	\caption{Cylindrical template intensity model $G_{\sigma}$. The model has a Gaussian profile in coordinates $k$ and $l$ and is constant in coordinate $m$. Both the 3D (a) and the 2D (b) version is shown.}
-	\label{fig3}
+	\label{ch4_fig3}
 \end{figure}
 
 Filtering is terminated if the average correlation value $\sum_{k} c_{\mathrm{x}_i^k}/N$ drops below the threshold $c_{\text{min}}$, indicating the end of the underlying neuron branch in the image, or if the iteration limit $L$ is reached. Since the filtering is done for each seed, and in both (opposite) directions, the same neuron branch may be traced many times over, but in a probabilistically independent way, providing accumulating evidence about the presence and location of the branches. However, to avoid excessive over-tracing and to reduce the computation time, the method also monitors the node density $D_n$ per image volume unit $n \times n \times n$ and terminate the tracing if the density in the current position exceeds the limit $\delta_n$.
 
 \subsection{Trace Refinement}
 \label{subsec:trace-refinement}
-After the tracing step, each neuron branch may have multiple corresponding traces, and each trace node has bidirectional links to neighboring nodes (Figs.~\ref{ch4_fig1}D and \ref{fig4}A) to allow trace traversal in any of the possible directions in the final tree construction step. Denoting the total number of traces by $T$, and the nodes of any given trace $t$ by $n_i^t$, $i=1,\dots,M^t$, it is possible to write the complete set of nodes as:
+After the tracing step, each neuron branch may have multiple corresponding traces, and each trace node has bidirectional links to neighboring nodes (Figs.~\ref{ch4_fig1}D and \ref{ch4_fig4}A) to allow trace traversal in any of the possible directions in the final tree construction step. Denoting the total number of traces by $T$, and the nodes of any given trace $t$ by $n_i^t$, $i=1,\dots,M^t$, it is possible to write the complete set of nodes as:
 \begin{equation}
 \label{eq:N}
 \mathcal{N} = \bigg\{
@@ -169,7 +169,7 @@ The goal of the trace refinement step is to exploit the cumulative evidence prov
 \label{eq:bar_n_k}
 \bar{n}_k = \lbrace \bar{x}_k, \bar{y}_k, \bar{z}_k, \bar{r}_k, \bar{c}_k, \bar{\mathcal{I}}_k \rbrace
 \end{equation}
-by applying mean-shifting \cite{cheng1995mean}, resulting in an updated node set $\bar{\mathcal{N}}$. Mean-shifting iteratively moves each node element to the local mean of the nodes in its vicinity. This reduces the variance of the estimates but preserves the linking of the nodes: $\bar{\mathcal{I}}=\mathcal{I}$. In practice, five iterations are sufficient to reach satisfactory radial trace alignment (Fig.~\ref{fig4}B). The kernel size used in the mean-shifting process is taken to be the initial radius of each node. In the implementation, prior to mean-shifting, all traces are resampled with a step size of one voxel to get a more fine-grained result.
+by applying mean-shifting \cite{cheng1995mean}, resulting in an updated node set $\bar{\mathcal{N}}$. Mean-shifting iteratively moves each node element to the local mean of the nodes in its vicinity. This reduces the variance of the estimates but preserves the linking of the nodes: $\bar{\mathcal{I}}=\mathcal{I}$. In practice, five iterations are sufficient to reach satisfactory radial trace alignment (Fig.~\ref{ch4_fig4}B). The kernel size used in the mean-shifting process is taken to be the initial radius of each node. In the implementation, prior to mean-shifting, all traces are resampled with a step size of one voxel to get a more fine-grained result.
 \begin{algorithm}
 	\caption{Node grouping.}
 	\label{alg:grouping}
@@ -210,7 +210,7 @@ by applying mean-shifting \cite{cheng1995mean}, resulting in an updated node set
 
 \subsection{Node Grouping}
 \label{subsec:node-grouping}
-Although the previous step results in refined node estimates, it keeps the total number of nodes and corresponding multiple traces. The next step is to merge overlapping traces and obtain a single trace for each neuron branch. This is accomplished with the node grouping process (Figs.~\ref{ch4_fig1}E and \ref{fig4}C) as detailed in Algorithm~\ref{alg:grouping}. It iteratively takes from the refined set $\bar{\mathcal{N}}$ an as-yet ungrouped node with the highest cross-correlation value, finds all its neighboring nodes within the predefined Euclidean distance $r_g$, and groups them by calculating the mean value of each element while accumulating all node links and mapping their indexes to the group node index list. This results in a new set $\hat{\mathcal{N}} = \lbrace \hat{n}_1,\dots,\hat{n}_P \rbrace$, $P \leq M$, of group nodes:
+Although the previous step results in refined node estimates, it keeps the total number of nodes and corresponding multiple traces. The next step is to merge overlapping traces and obtain a single trace for each neuron branch. This is accomplished with the node grouping process (Figs.~\ref{ch4_fig1}E and \ref{ch4_fig4}C) as detailed in Algorithm~\ref{alg:grouping}. It iteratively takes from the refined set $\bar{\mathcal{N}}$ an as-yet ungrouped node with the highest cross-correlation value, finds all its neighboring nodes within the predefined Euclidean distance $r_g$, and groups them by calculating the mean value of each element while accumulating all node links and mapping their indexes to the group node index list. This results in a new set $\hat{\mathcal{N}} = \lbrace \hat{n}_1,\dots,\hat{n}_P \rbrace$, $P \leq M$, of group nodes:
 \begin{equation}
 \label{eq:hat_n_k}
 \hat{n}_k=\lbrace\hat{x}_k, \hat{y}_k, \hat{z}_k, \hat{r}_k, \hat{c}_k, \hat{\mathcal{I}}_k\rbrace
@@ -220,11 +220,11 @@ and any two $\hat{n}_i$ and $\hat{n}_j$ are connected if there exists a link bet
 	\centering
 	\includegraphics[width=0.7\columnwidth]{fig4}
 	\caption{Trace merging: (A) accumulated traces, (B) trace refinement, (C) node grouping, (D) tree traversal.}
-	\label{fig4}
+	\label{ch4_fig4}
 \end{figure}
 \subsection{Tree Construction}
 \label{subsec:tree-construction}
-The final step of the showcased method is the construction of a graph representing the complete neuronal arbor. This is facilitated by the bidirectional connectivity of the group nodes in $\hat{\mathcal{N}}$. However, similar to a real neuron, the final graph must be a tree, in which the nodes are unidirectionally linked (Figs.~\ref{ch4_fig1}F and \ref{fig4}D), as also required by the SWC file format for storing digital neuron reconstructions \cite{stockley1993system, cannon1998line}. Starting from the soma node, or from the group node with the highest cross-correlation value if no soma was found in the image, the nodes in $\hat{\mathcal{N}}$ are iteratively traversed using a breadth-first search (BFS) algorithm. In this process it is possible to discard any isolated branches and single-node terminal branches (false positives).
+The final step of the showcased method is the construction of a graph representing the complete neuronal arbor. This is facilitated by the bidirectional connectivity of the group nodes in $\hat{\mathcal{N}}$. However, similar to a real neuron, the final graph must be a tree, in which the nodes are unidirectionally linked (Figs.~\ref{ch4_fig1}F and \ref{ch4_fig4}D), as also required by the SWC file format for storing digital neuron reconstructions \cite{stockley1993system, cannon1998line}. Starting from the soma node, or from the group node with the highest cross-correlation value if no soma was found in the image, the nodes in $\hat{\mathcal{N}}$ are iteratively traversed using a breadth-first search (BFS) algorithm. In this process it is possible to discard any isolated branches and single-node terminal branches (false positives).
 
 \subsection{Implementation Details}
 \label{subsec:implementation}
@@ -262,7 +262,7 @@ The method showcased in this chapter, named Probabilistic Neuron Reconstructor (
 		(a) & (b) 
 	\end{tabular}
 	\caption{Illustration of the synthetic neuron data set used in the presented experiments. (a) Example images of the 10 selected neurons simulated at SNR = 4 and COR = 0.0. (b) Different simulations of the neuron indicated by the red outline in (a) for SNR = 2, 3, 4, 5, and 10 (from left to right) and COR = 0.0, 1.0, and 2.0 (from top to bottom). The marked image in (b) is the same as the marked image in (a). All examples shown here are maximum intensity projections of the 3D synthetic images with inverted intensities for better visualization.}
-	\label{fig5}
+	\label{ch4_fig5}
 \end{figure}
 
 \section{Experimental Results}
@@ -291,7 +291,7 @@ Prior to evaluating how well introduced method emulates expert manual reconstruc
 	\includegraphics[align=c,width=0.48\textwidth]{fig6d}
 		\end{tabular}
 		\caption{Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
-		\label{fig6}
+		\label{ch4_fig6}
 	\end{subfigure}
 	\hspace{0.01\textwidth}
 	\begin{subfigure}{0.47\textwidth}
@@ -307,14 +307,14 @@ Prior to evaluating how well introduced method emulates expert manual reconstruc
 	\includegraphics[align=c,width=0.48\textwidth]{fig7d}
 		\end{tabular}
 		\caption{Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
-		\label{fig7}
+		\label{ch4_fig7}
 	\end{subfigure}
 	\caption{Average score of the methods for the synthetic images as a function of SNR: a) F score and b) SSD score. }
 	\label{fig6and7}
 \end{figure}
 A dedicated plugin for ImageJ \cite{schneider2012nih} called SWC2IMG was developed for this purpose\footnote{https://github.com/imagescience/SWC2IMG}. The plugin takes any SWC file as input and simulates fluorescence microscopy imaging of all neuronal branches in the file at a specified SNR and COR level, producing an image stack whose true digital reconstruction is the very input. It assumes that in practice, because of the relatively large spatial extent of even a single neuron with its complete arbor, the combination of optical magnification factor and digital image matrix size in real neuron images is typically such that the voxel size is larger than the point spread function (PSF), implying that the partial-volume effect of digitization is more prominent than the optical blurring by the microscope. Based on this, the plugin simulates the imaging simply by estimating for each voxel which fraction of its volume is occupied by the neuron. Next, it simulates noise by using the Poisson noise model representative of optical imaging, which defines SNR as the image intensity inside the neuron above the background, divided by the standard deviation of the noise inside \cite{sheppard2006signal}. And finally, to allow for correlated signal and noise, which was found to improve the visual realism of the simulated images, the plugin also offers the possibility to apply Gaussian smoothing at a specified scale, being the COR parameter, while preserving the SNR level. Generally, the lower the SNR and/or the higher the COR level, the more challenging the data and the reconstruction problem.
 
-Using this plugin a synthetic data set was created containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{fig5}). Specifically, SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2 were considered. Thus, the generated synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore the results are presented only for those.
+Using this plugin a synthetic data set was created containing image stacks for a range of SNR and COR values for each neuron (Fig.~\ref{ch4_fig5}). Specifically, SNR = 1, 2, 3, 4, 5, 10, 20, and COR = 0, 0.5, 1, 1.5, 2 were considered. Thus, the generated synthetic data set consisted of 10 (neurons) $\times$ 7 (SNR levels) $\times$ 5 (COR levels) $=$ 350 image stacks, attempted to reconstruct optimally using the five considered methods (APP2, GPS, MST, PHD, PNR) and a parameter grid-search approach. However, some of the images were very challenging, especially the ones with many branches and low SNR or high COR values, causing the methods to sometimes require excessive computation times or even to get stuck altogether. Because of the mentioned time constraint, not all methods were able to complete all the reconstructions, and it turned out that only 7 out of the 10 neurons could be reconstructed by all the methods for all SNR and COR values. Therefore the results are presented only for those.
 
 \begin{figure}
 	\centering\tiny
@@ -333,7 +333,7 @@ Using this plugin a synthetic data set was created containing image stacks for a
 		\includegraphics[align=c,width=0.23\textwidth]{fig8h}
 	\end{tabular}
 	\caption{Average F score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
-	\label{fig8}
+	\label{ch4_fig8}
 \end{figure}
 \begin{figure}
 	\centering\tiny
@@ -352,7 +352,7 @@ Using this plugin a synthetic data set was created containing image stacks for a
 		\includegraphics[align=c,width=0.23\textwidth]{fig9h}
 	\end{tabular}
 	\caption{Average SSD score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).}
-	\label{fig9}
+	\label{ch4_fig9}
 \end{figure}
 \begin{figure}
 	\centering\tiny
@@ -371,7 +371,7 @@ Using this plugin a synthetic data set was created containing image stacks for a
 		\includegraphics[align=c,width=0.23\textwidth]{fig10h}
 	\end{tabular}
 	\caption{Average F score of the methods for the synthetic images as a function of S. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
-	\label{fig10}
+	\label{ch4_fig10}
 \end{figure}
 \begin{figure}
 	\centering\tiny
@@ -390,7 +390,7 @@ Using this plugin a synthetic data set was created containing image stacks for a
 		\includegraphics[align=c,width=0.23\textwidth]{fig11h}
 	\end{tabular}
 	\caption{Average SSD score of the methods for the synthetic images as a function of S. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).}
-	\label{fig11}
+	\label{ch4_fig11}
 \end{figure}
 \begin{figure}
 	\centering % c@{\hspace{0.2em}}
@@ -451,22 +451,22 @@ Using this plugin a synthetic data set was created containing image stacks for a
 		& & APP2 & GPS & MST & PHD & PNR
 	\end{tabular}
 	\caption{Visual comparison of neuron reconstructions produced by the considered methods from synthetic image stacks of a single neuron at different SNR levels. The image stacks (generated used COR = 0) are shown as inverted maximum intensity projections (left column) and the reconstructions of the different methods (remaining columns) are shown in red as surface renderings.}
-	\label{fig12}
+	\label{ch4_fig12}
 \end{figure}
 
-From the average F and SSD scores of the methods as a function of SNR for a few sample values of COR and S (Figs.~\ref{fig6} and \ref{fig7}) it is possible to observe that, as expected, increasing the SNR generally improves the performance of all methods (increasing F and decreasing SSD scores). It is also noteworthy that the two probabilistic methods (PHD and PNR) are more robust against noise (especially according to F) and that the method proposed in this chapter (PNR) is often superior overall. The results also show that, as expected, increasing the value of COR (which yields more difficult images) has a strong negative impact on the performance of all methods (lower F and higher SSD scores for the same SNR). This is confirmed when looking more in-depth at the results as a function of COR (Figs.~\ref{fig8} and \ref{fig9}). Additionally, again as expected in all cases, further observations indicate that increasing the value of S (meaning being more lenient in matching reconstructions to the ground truth) may also strongly affect the scores of all methods (meaning higher F scores, but in this case also higher SSD scores, as the latter includes only node distances larger than S). This is confirmed when looking explicitly at the performance of the methods as a function of S (Figs.~\ref{fig10} and \ref{fig11}). These results reveal that both the absolute and the relative performance of different methods being compared may depend on S. This is an important observation, since in all studies available in the known existing literature, the somewhat arbitrary value of S = 2 is taken for granted in calculating performance and ranking the methods. Presented results (Figs.~\ref{fig10} and \ref{fig11}) show that taking other values of S may yield a different ranking. Notwithstanding this finding, displayed results also show that under most experimental conditions (SNR, COR, S), the proposed method (PNR) yields superior results. While the alternative, probabilistic neuron tracing method (PHD) \cite{radojevic2017automated} is often a strong competitor, the results indicate that the PNR method is more favorable, which is possible to ascribe to its better models for seed point extraction and branch tracing.
+From the average F and SSD scores of the methods as a function of SNR for a few sample values of COR and S (Figs.~\ref{ch4_fig6} and \ref{ch4_fig7}) it is possible to observe that, as expected, increasing the SNR generally improves the performance of all methods (increasing F and decreasing SSD scores). It is also noteworthy that the two probabilistic methods (PHD and PNR) are more robust against noise (especially according to F) and that the method proposed in this chapter (PNR) is often superior overall. The results also show that, as expected, increasing the value of COR (which yields more difficult images) has a strong negative impact on the performance of all methods (lower F and higher SSD scores for the same SNR). This is confirmed when looking more in-depth at the results as a function of COR (Figs.~\ref{ch4_fig8} and \ref{ch4_fig9}). Additionally, again as expected in all cases, further observations indicate that increasing the value of S (meaning being more lenient in matching reconstructions to the ground truth) may also strongly affect the scores of all methods (meaning higher F scores, but in this case also higher SSD scores, as the latter includes only node distances larger than S). This is confirmed when looking explicitly at the performance of the methods as a function of S (Figs.~\ref{ch4_fig10} and \ref{ch4_fig11}). These results reveal that both the absolute and the relative performance of different methods being compared may depend on S. This is an important observation, since in all studies available in the known existing literature, the somewhat arbitrary value of S = 2 is taken for granted in calculating performance and ranking the methods. Presented results (Figs.~\ref{ch4_fig10} and \ref{ch4_fig11}) show that taking other values of S may yield a different ranking. Notwithstanding this finding, displayed results also show that under most experimental conditions (SNR, COR, S), the proposed method (PNR) yields superior results. While the alternative, probabilistic neuron tracing method (PHD) \cite{radojevic2017automated} is often a strong competitor, the results indicate that the PNR method is more favorable, which is possible to ascribe to its better models for seed point extraction and branch tracing.
 
-Together, the results of the experiments on synthetic neuron images suggest that tracing the image structures repeatedly and in a statistically independently way, indeed yields more evidence about the underlying neuron branches and leads to better reconstructions. This also follows from a visual comparison of the reconstructions (Fig.~\ref{fig12}). Especially at low SNRs, pruning and fast-marching based methods tend to oversegment the images, while the probabilistic methods still perform relatively well regardless. Even at high SNRs, when most of the methods perform comparably, the proposed method follows the branch structures more closely (see zooms in the last row of Fig.~\ref{fig12}).
+Together, the results of the experiments on synthetic neuron images suggest that tracing the image structures repeatedly and in a statistically independently way, indeed yields more evidence about the underlying neuron branches and leads to better reconstructions. This also follows from a visual comparison of the reconstructions (Fig.~\ref{ch4_fig12}). Especially at low SNRs, pruning and fast-marching based methods tend to oversegment the images, while the probabilistic methods still perform relatively well regardless. Even at high SNRs, when most of the methods perform comparably, the proposed method follows the branch structures more closely (see zooms in the last row of Fig.~\ref{ch4_fig12}).
 \subsection{Experiments on Real Neuron Images}
 \label{subsec:eval-real}
-In addition to synthetic data, three real neuron image data sets were used to evaluate the absolute and relative performance of the presented method. The first two are the olfactory projection fibers (OPF) data set (9 image stacks) and neocortical layer-1 axons (NCL1A) data set (16 image stacks) from the DIADEM challenge \cite{brown2011diadem}, and the third is part of the BigNeuron (BGN) training data set (76 image stacks) \cite{peng2015bigneuron}, all imaged with fluorescence microscopy (confocal or two-photon) and manually annotated as described in detail in the cited works and corresponding resources. Being the smallest of the three, in terms of both neuronal volume and complexity, OPF is probably the most often used data set in the field. NCL1A is often used as it contains neuronal network-like structures and no clear somas. And BGN is the largest, most diverse, and thus most challenging data set for evaluating neuron reconstruction methods. Together, the 100+ image stacks in these data sets have a wide variety of image qualities and volumes (10 MB to 2 GB per stack) and portray a wide range of neuronal shapes and complexities (Fig.~\ref{fig13}), representative of many studies. For some stacks in the BGN data set, the voxel size was unknown, and in these cases the default x:y:z voxel aspect ratio of 1:1:2 was used, reflecting the typically lower resolution in the depth dimension. Also, because of the mentioned processing time constraint, 3 of the 76 image stacks could not be reconstructed by all methods, so the presented results are based on the remaining 73.
+In addition to synthetic data, three real neuron image data sets were used to evaluate the absolute and relative performance of the presented method. The first two are the olfactory projection fibers (OPF) data set (9 image stacks) and neocortical layer-1 axons (NCL1A) data set (16 image stacks) from the DIADEM challenge \cite{brown2011diadem}, and the third is part of the BigNeuron (BGN) training data set (76 image stacks) \cite{peng2015bigneuron}, all imaged with fluorescence microscopy (confocal or two-photon) and manually annotated as described in detail in the cited works and corresponding resources. Being the smallest of the three, in terms of both neuronal volume and complexity, OPF is probably the most often used data set in the field. NCL1A is often used as it contains neuronal network-like structures and no clear somas. And BGN is the largest, most diverse, and thus most challenging data set for evaluating neuron reconstruction methods. Together, the 100+ image stacks in these data sets have a wide variety of image qualities and volumes (10 MB to 2 GB per stack) and portray a wide range of neuronal shapes and complexities (Fig.~\ref{ch4_fig13}), representative of many studies. For some stacks in the BGN data set, the voxel size was unknown, and in these cases the default x:y:z voxel aspect ratio of 1:1:2 was used, reflecting the typically lower resolution in the depth dimension. Also, because of the mentioned processing time constraint, 3 of the 76 image stacks could not be reconstructed by all methods, so the presented results are based on the remaining 73.
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{fig13}
 	\caption{Illustration of the real neuron image data sets used in the presented experiments. Examples are shown of (A) the OPF data set (4 of 9 stacks), (B) the NCL1A data set (6 of 16 stacks), and (C) the BGN data set (13 of 76 stacks). Each example shows the maximum intensity projection of the image stack (left panel) but with inverted intensities for better visualization, and the corresponding manual reconstruction (right panel) as a surface rendering (in red), both generated using Vaa3D \cite{peng2010v3d}.}
-	\label{fig13}
+	\label{ch4_fig13}
 \end{figure}
-The results of the experiments on these three real data sets (Figs.~\ref{fig14}-\ref{fig16}) indicate that, as in the experiments on synthetic data, the probabilistic methods PHD and PNR typically show superior performance in terms of both F and SSD score. Of these two methods, the PNR method proposed in this chapter consistently shows the smallest performance spread, indicating it is more robust than the alternative PHD method. For the BGN data set, being the most diverse of the three, the performance spread (including outliers) of all methods is the largest, and the increase in performance as a function of S is the smallest, as expected. Nevertheless, the PNR method consistently shows the best overall performance especially for this data set. In other words, for any given data set similar to those considered in this study, PNR is the favorable method a priori. Obviously this does not necessarily mean that PNR will give the best reconstruction for each and every image stack in the data set, but simply that the chances are higher. This is confirmed when looking at a few example image stacks from the three data sets and the corresponding best reconstructions produced by the different methods by maximizing the F score in the parameter grid search (Figs.~\ref{fig17}-\ref{fig19}). As these examples show, although PNR often outperforms the other methods, in specific cases one of the other methods may give better reconstructions. But altogether the experimentation results suggest the conclusion that the PNR method showcased throughout this chapter is a valuable addition to the neuron reconstruction toolbox.
+The results of the experiments on these three real data sets (Figs.~\ref{ch4_fig14}-\ref{ch4_fig16}) indicate that, as in the experiments on synthetic data, the probabilistic methods PHD and PNR typically show superior performance in terms of both F and SSD score. Of these two methods, the PNR method proposed in this chapter consistently shows the smallest performance spread, indicating it is more robust than the alternative PHD method. For the BGN data set, being the most diverse of the three, the performance spread (including outliers) of all methods is the largest, and the increase in performance as a function of S is the smallest, as expected. Nevertheless, the PNR method consistently shows the best overall performance especially for this data set. In other words, for any given data set similar to those considered in this study, PNR is the favorable method a priori. Obviously this does not necessarily mean that PNR will give the best reconstruction for each and every image stack in the data set, but simply that the chances are higher. This is confirmed when looking at a few example image stacks from the three data sets and the corresponding best reconstructions produced by the different methods by maximizing the F score in the parameter grid search (Figs.~\ref{ch4_fig17}-\ref{ch4_fig19}). As these examples show, although PNR often outperforms the other methods, in specific cases one of the other methods may give better reconstructions. But altogether the experimentation results suggest the conclusion that the PNR method showcased throughout this chapter is a valuable addition to the neuron reconstruction toolbox.
 
 \begin{figure}
 	\centering
@@ -477,7 +477,7 @@ The results of the experiments on these three real data sets (Figs.~\ref{fig14}-
 		\includegraphics[width=0.35\columnwidth]{fig14d} 
 	\end{tabular}
 	\caption{Performance comparison for the OPF data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
-	\label{fig14}
+	\label{ch4_fig14}
 \end{figure}
 
 \begin{figure}
@@ -489,7 +489,7 @@ The results of the experiments on these three real data sets (Figs.~\ref{fig14}-
 		\includegraphics[width=0.35\columnwidth]{fig15d}
 	\end{tabular}
 	\caption{Performance comparison for the NCL1A data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
-	\label{fig15}
+	\label{ch4_fig15}
 \end{figure}
 
 \begin{figure}
@@ -501,7 +501,7 @@ The results of the experiments on these three real data sets (Figs.~\ref{fig14}-
 		\includegraphics[width=0.35\columnwidth]{fig16d}
 	\end{tabular}
 	\caption{Performance comparison for the BGN data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
-	\label{fig16}
+	\label{ch4_fig16}
 \end{figure}
 
 \begin{figure}
@@ -517,7 +517,7 @@ The results of the experiments on these three real data sets (Figs.~\ref{fig14}-
 		& F = 0.885  & F = 0.919  & F = 0.934 & F = 0.921 & F = 0.929 \\
 	\end{tabular}
 	\caption{Example neuron reconstructions of an image stack from the OPF data set. Shown are the original arbor (volume rendering on the left) and the reconstructions (overlaid surface renderings in red) of the different methods (indicated at the top) corresponding to the best F score (given below each reconstruction) for S = 2 with respect to the available manual reconstruction.}
-	\label{fig17}
+	\label{ch4_fig17}
 \end{figure}
 
 \begin{figure}
@@ -533,7 +533,7 @@ The results of the experiments on these three real data sets (Figs.~\ref{fig14}-
 		& F = 0.792 & F = 0.631 & F = 0.790 & F = 0.810 & F = 0.838 \\
 	\end{tabular}
 	\caption{Example neuron reconstructions of an image stack from the NCL1A data set. Shown are the original arbor (volume rendering on the left) and the reconstructions (overlaid surface renderings in red) of the different methods (indicated at the top) corresponding to the best F score (given below each reconstruction) for S = 2 with respect to the available manual reconstruction.}
-	\label{fig18}
+	\label{ch4_fig18}
 \end{figure}
 \begin{figure}[h!]
 	\centering
@@ -569,7 +569,7 @@ The results of the experiments on these three real data sets (Figs.~\ref{fig14}-
 		& F = 0.471 & F = 0.451 & F = 0.413 & F = 0.588 & F = 0.592 \\
 	\end{tabular}
 	\caption{Example neuron reconstructions of four image stacks from the BGN data set. Shown are the original arbors (volume renderings on the left) and the reconstructions (overlaid surface renderings in red) of the different methods (indicated at the top) corresponding to the best F score (given below each reconstruction) for S = 2 with respect to the available manual reconstruction.}
-	\label{fig19}
+	\label{ch4_fig19}
 \end{figure}
 
 \section{Conclusions} 
