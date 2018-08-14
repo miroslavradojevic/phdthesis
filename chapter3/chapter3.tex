@@ -16,7 +16,7 @@
 \end{publish}
 
 \section{Introduction}
-\label{sec:introduction}
+\label{ch3:sec:introduction}
 Accurate reconstruction of the tree-like structure of neuronal cells from optical microscopy images is a crucial step in automating the analysis of single neuron morphology or the connectivity of neuronal networks \cite{meijering2010neuron, donohue2011automated, peng2015bigneuron}. Microscopic images provide detailed information about the geometrical and topological properties of the neuronal arbors. Extracting and representing this information in a faithful and convenient digital format is key to many studies \cite{ascoli2002computational, ascoli2007neuromorpho, svoboda2011past, senft2011brief, halavi2012digital, lu2015quantitative}, as digital reconstructions enable neurobiologists to use computational approaches in addressing open issues in brain research, such as the relation between neuron structure and function, and the effects of neurodegenerative disease processes and drug compounds on neuron development and connectivity.
 
 Existing approaches to tracing neurons in images can be broadly divided into global and local approaches. Global approaches consider the problem from the whole-image perspective and typically involve global image segmentation \cite{wearne2005new, basu2013segmentation, de2016graph} or global optimization strategies \cite{turetken2011automated, xiao2013app2}. Local approaches, on the other hand, use local image exploration strategies starting from seed points \cite{peng2011automatic, choromanska2012automatic, yang2013distance} to find segments of the neuronal tree, which are then merged into a full tree representation. Both approaches have advantages and disadvantages and they are often combined to profit from their complementarity \cite{zhao2011automated, jimenez2015improved}.
@@ -26,20 +26,20 @@ A wide variety of computational concepts have been proposed in developing automa
 In this chapter, a new method for neuron tracing in optical microscopy images is proposed that operates probabilistically rather than deterministically. Focusing on delineating the branch centerlines, it utilizes a Bayesian approach to blend two sources of information: the model (based on prior knowledge) and the measurements (from the image data). The main novelty is that it combines the problems of neuron segment detection and linking into one framework by performing simultaneous multi-object tracking. Traditional multi-object (also referred to as multi-target) tracking techniques \cite{mahler2007statistical, stone2013bayesian} typically assume the number of objects to be known and/or they explicitly associate measurements with objects which are then Bayesian filtered individually \cite{bar1995multitarget}. In arbor tracing, the number of objects (neuron segments) is unknown a priori, therefore a different approach is used, based on filtering the so-called probability hypothesis density (\gls{phd}) function \cite{mahler2003multitarget}. PHD filtering has gained popularity in recent years as a robust approach to tracking, since it is able to compensate for missing detections and to remove noise and clutter, while reducing the computational complexity from exponential to linear as the number of objects grows. Applications include radar and sonar tracking \cite{tobias2005probability, clark2007particle}, video surveillance \cite{maggio2008efficient, wang2008data}, and even motion tracking in microscopy \cite{wood2012simplified, schlangen2016marker}, but had not been explored for neuron tracing yet. Moreover, presented application differs fundamentally from other works in the sense that the filtering is applied in space rather than in time.  The proposed method is evaluated on a variety of real image data (both 2D and 3D) taking expert manual annotations as the gold standard. Its performance is also compared with several state-of-the-art tools for neuron tracing \cite{chothani2011automated, xiao2013app2, quan2016neurogps}.
 
 \section{Methods}
-\label{sec:methods}
+\label{ch3:sec:methods}
 \subsection{Multi-object Bayesian filtering} 
-\label{ssec:multi-obj-bay-filt}
+\label{ch3:ssec:multi-obj-bay-filt}
 Single-object tracking is considered as a Bayesian inference problem \cite{bar2004estimation, sarkka2013bayesian}. The key idea is to estimate the posterior probability density function (pdf) $f_{k|k}(\mathrm{x}_k | \mathrm{z}_{1:k})$, where $\mathrm{x}_k$ denotes the object state at iteration $k$, and $\mathrm{z}_{1:k}$ the sequence of observations from iterations $1$ to $k$ inclusive. Estimation is accomplished by sequentially applying prior knowledge to predict the state in the next iteration and updating this estimate with available observations. Similarly, multi-object tracking can be formulated as the problem of updating predictions of the multi-object state $\mathrm{X}_k = \{\mathrm{x}_{k,1},\ldots,\mathrm{x}_{k,N_k}\}$ with multi-object observations $\mathrm{Z}_k = \{\mathrm{z}_{k,1},\ldots,\mathrm{z}_{k,M_k}\}$, where $N_k$ and $M_k$ denote the number of objects and observations at iteration $k$, respectively. The prediction is thus formulated as:
 \begin{equation}
 f_{k|k-1}(\mathrm{X}_k | \mathrm{Z}_{1:k-1}) = 
 \int\!\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1}) f_{k-1|k-1}(\mathrm{X}_{k-1}|\mathrm{Z}_{1:k-1}) \delta\mathrm{X}_{k-1}
-\label{eq:prediction}
+\label{ch3:eq:prediction}
 \end{equation}
 along with the update:
 \begin{equation}
 f_{k|k}(\mathrm{X}_k|\mathrm{Z}_{1:k}) =
 \frac{\vartheta_k(\mathrm{Z}_k|\mathrm{X}_k) f_{k|k-1}(\mathrm{X}_k|\mathrm{Z}_{1:k-1})}{\int\!\vartheta_k(\mathrm{Z}_k|\mathrm{X})f_{k|k-1}(\mathrm{X}|\mathrm{Z}_{1:k-1}) \delta\mathrm{X}}\qquad\qquad
-\label{eq:update}
+\label{ch3:eq:update}
 \end{equation}
 where $\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1})$ denotes the multi-object state transition probability and $\vartheta_k(\mathrm{Z}_k|\mathrm{X}_k)$ the multi-object likelihood. Filtering the multi-object posterior $f_{k|k}(\mathrm{X}_k | \mathrm{Z}_{1:k})$ suffers from serious practical obstacles, as the multi-object state can be very high-dimensional and hard to sample and integrate efficiently. Moreover, it is necessary to take into account changes in object numbers, which adds an often intractable combinatorial burden. Thus more feasible solutions are needed.
 \begin{figure}
@@ -49,7 +49,7 @@ where $\mathrm{\Pi}_{k|k-1}(\mathrm{X}_k | \mathrm{X}_{k-1})$ denotes the multi-
 	\label{ch3_fig1}
 \end{figure}
 \subsection{Probability hypothesis density filtering}
-\label{ssec:prob-hyp-den}
+\label{ch3:ssec:prob-hyp-den}
 To overcome the difficulties of direct multi-object Bayesian filtering, presented solution proposes instead to filter the first-order statistical moment of the multi-object posterior $f_{k|k}(\mathrm{X}_{k}|\mathrm{Z}_{1:k})$, computed as
 \begin{equation}
 D_{k|k}(\mathrm{x}|\mathrm{Z}_{1:k}) = \int\!\delta_{\mathrm{X}}(\mathrm{x})f_{k|k}(\mathrm{X}|\mathrm{Z}_{1:k})\delta\mathrm{X}
@@ -60,7 +60,7 @@ where $\delta_{\mathrm{X}}$ denotes the sum of Dirac deltas at elements of $\mat
 \begin{figure}
 	\centering
 	\includegraphics[width=.9\linewidth]{fig2}
-	\caption{PHD filtering using a particle representation. (A) Each object $i$ at iteration $k$ has a state $\mathrm{x}_{k,i}$ that is represented by random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$. (B) In the transition from iteration $k-1$ to $k$ an object ($\mathrm{x}'$) may disappear ($\emptyset$), persist ($\mathrm{x}_{\mathrm{p}}$), or spawn ($\mathrm{x}_{\mathrm{s}}$) according to the corresponding transition functions. Here $p_S$ is shorthand notation for $p_{S,k|k-1}(\mathrm{x}')$, since in practice a constant is used (Table~\ref{tab:params}). (C) For each particle a prediction $\mathrm{x}_{k-1|k-1}^n \rightarrow \mathrm{x}_{k|k-1}^n$ is made within radius $r_k$ according to the transition functions for persistence (p) and spawning (s).}
+	\caption{PHD filtering using a particle representation. (A) Each object $i$ at iteration $k$ has a state $\mathrm{x}_{k,i}$ that is represented by random particles $\mathrm{x}_{k|k}^{n}$ with corresponding weights $\omega_{k|k}^{n}$. (B) In the transition from iteration $k-1$ to $k$ an object ($\mathrm{x}'$) may disappear ($\emptyset$), persist ($\mathrm{x}_{\mathrm{p}}$), or spawn ($\mathrm{x}_{\mathrm{s}}$) according to the corresponding transition functions. Here $p_S$ is shorthand notation for $p_{S,k|k-1}(\mathrm{x}')$, since in practice a constant is used (Table~\ref{ch3:tab:params}). (C) For each particle a prediction $\mathrm{x}_{k-1|k-1}^n \rightarrow \mathrm{x}_{k|k-1}^n$ is made within radius $r_k$ according to the transition functions for persistence (p) and spawning (s).}
 	\label{ch3_fig2}
 \end{figure}
 Formally stated, PHD filtering proceeds by iterating the sequence consisting of the prediction, formulated as
@@ -214,7 +214,7 @@ For the single-object likelihood in Eq.~\ref{eq:phd-update} a Gaussian function 
 
 \subsubsection{Implementation details}
 \label{sssec:implementation-details}
-Algorithms~\ref{alg:delin} and~\ref{alg:smc-phd} provide a step-by-step overview of the introduced PHD-filtering based neuron tracing method. For testing purposes the method was implemented in Java as a plugin for ImageJ \cite{abramoff2004image}. The method has several parameters for which default parameters are given in Table~\ref{tab:params}. Based on the acquired experience, most of them do not require extensive tuning and the default values were used for the showcased experiments. An important aspect of any SMC-based algorithm is to use a sufficient number of particles in the approximations. The conducted experiments indicate that values of 10-20 are sufficient for $\rho$ and $\eta$ since the objects of interest in neuron-related applications are approximately 1D structures in 3D space and therefore are easily covered. Higher values can lead to higher accuracy and precision but at proportionally higher computational cost. The most important parameters are the numbers of seeds $N_0$ and rounds (Fig.~\ref{ch3_fig2}) and in the experiments (described next) the performance of the presented algorithm was tested for different values of these parameters.
+Algorithms~\ref{alg:delin} and~\ref{alg:smc-phd} provide a step-by-step overview of the introduced PHD-filtering based neuron tracing method. For testing purposes the method was implemented in Java as a plugin for ImageJ \cite{abramoff2004image}. The method has several parameters for which default parameters are given in Table~\ref{ch3:tab:params}. Based on the acquired experience, most of them do not require extensive tuning and the default values were used for the showcased experiments. An important aspect of any SMC-based algorithm is to use a sufficient number of particles in the approximations. The conducted experiments indicate that values of 10-20 are sufficient for $\rho$ and $\eta$ since the objects of interest in neuron-related applications are approximately 1D structures in 3D space and therefore are easily covered. Higher values can lead to higher accuracy and precision but at proportionally higher computational cost. The most important parameters are the numbers of seeds $N_0$ and rounds (Fig.~\ref{ch3_fig2}) and in the experiments (described next) the performance of the presented algorithm was tested for different values of these parameters.
 
 \begin{table}
 	\small\centering
@@ -235,13 +235,13 @@ Algorithms~\ref{alg:delin} and~\ref{alg:smc-phd} provide a step-by-step overview
 	\end{tabular}
 	\vspace{0.5\baselineskip}
 	\caption{Parameters of the proposed method with their default values. In accompanying implementation constants values were used for the object detection probability $p_D=p_{D,k}$ and the object survival probability $p_S=p_{S,k|k-1}$.}
-	\label{tab:params}
+	\label{ch3:tab:params}
 \end{table}
 
 \section{Results}
-\label{sec:results}
+\label{ch3:sec:results}
 \subsection{Neuron data sets} 
-\label{subsec:neuron-datasets}
+\label{ch3:subsec:neuron-datasets}
 For evaluating the performance of the proposed method for both 2D and 3D neuron tracing, three data sets (Fig.~\ref{ch3_fig5}) were used. All datasets consist of real neuron images acquired with fluorescence microscopy. Two data sets are 3D image stacks from the DIADEM challenge \cite{brown2011diadem}: neocortical layer-1 axons (NCL1A) with 16 image stacks and olfactory projection fibers (OPF) with 9 image stacks. The third data set (HCN) consists of 30 2D images of hippocampal neurons \cite{steiner2002overexpression}. Together the data sets show a good variety of image contrast and structural complexity. Further details about the images can be retreived from the corresponding, cited publications.
 \begin{figure}
 	\centering
@@ -409,7 +409,7 @@ In terms of computational efficiency it turned out difficult to directly compare
 \end{figure}
 
 \section{Conclusions}
-\label{sec:conclusions}
+\label{ch3:sec:conclusions}
 A new method for tracing the branch centerlines of neurons based on Bayesian multi-object tracking using probability hypothesis density (PHD) filtering was presented. The method is able to simultaneously trace out multiple neuron structures in a probabilistic fashion so that the same neuron segments may be covered multiple times and are thus supported by more evidence. PHD filtering solves the computational problems of direct Bayesian multi-object tracking and allows convenient handling of bifurcations and terminations during the tracing process by modeling of spawned objects and observation clutter. The results of experiments on various fluorescence microscopy image data sets of real neurons showed that the proposed method performs comparably or better than alternative state-of-the-art neuron tracing methods.
 
 The current version of the proposed method is initialized with seed points sampled from the local maxima (from highest to lowest) of the tubularity filter response. This is a rather rudimentary approach that may sometimes result in missed branches (false negatives). Ideally, seeds should be strategically distributed so that they cover as many branches of the neuron structure as possible while avoiding background artifacts, and this is an important topic for further research. In addition, the current mechanism responsible for trace termination, based on the clutter term of the PHD filter, relies strongly on the tubularity score and thus is sensitive to local interruptions in neuron staining. This could be remedied by using a better tubularity filter and/or refining the clutter model. Thus, the future work would involve further study over the possibility of further improvements achieved using different transition and observations models. One of the future aims is also to extend the method to perform local branch radius estimation during tracing in order to obtain complete neuron reconstructions.

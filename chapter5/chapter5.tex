@@ -17,7 +17,7 @@
 \end{publish}
 
 \section{Introduction}
-\label{sec:intro}
+\label{ch5:sec:intro}
 
 Neurons are special cells in the sense that they codify and transmit information in the form of action potentials. Networks consisting of many billions of neurons, such as in the brains of higher organisms, are extraordinarily complex and perform many different functions. Since the pioneering work of \cite{ramon2008histologia} it is well known that the morphology of neurons vary widely in different parts of the brain and that neuronal morphology and function are intricately linked. Moreover, in healthy conditions, neuronal (sub)networks within the brain are dynamic and continuously readjust their connections during the lifetime of an organism in response to external stimuli, in order to refine existing functions or learn new ones \cite{ascolitrees}. Conversely, in pathological conditions, disease processes destructively alter neuronal morphology and cause progressive loss of function, such as in Alzheimer's and Parkinson's disease, but also in aging \cite{van2001need}. Thus the study of neuronal cell morphology in relation to function, in health and disease, is of high importance for developing suitable drugs and therapies \cite{meijering2010neuron}.
 
@@ -165,7 +165,7 @@ The mentioned hyperparameters of the machine learning algorithms need to be opti
 \label{subsubsec:featureSelection}
 Although a priori it is appropriate to consider as many features as possible, and increasing  computational power allows us to construct larger and larger feature sets, in the end many features may be irrelevant or may even negatively impact the performance of the machine learning algorithms. Thus the experimentation also aimed to investigate which of all considered features positively contribute most to the performance of the algorithms in this application. Knowledge of the best features allows one to build potentially better and computationally more efficient classifiers. Moreover, it may shed light on which image information is most relevant to the classification task, which in turn may provide useful hints to improve the imaging process. There exist various approaches for feature selection using machine learning algorithms in supervised classification problems, including filter, wrapper, and embedded approaches \cite{saeys2007review}. This study uses the filter approach, as it is independent of the classifier, fast, scalable, and needs to be applied only once, after which the different algorithms can be evaluated.
 \section{Experimental Results}
-\label{sec:experimental-results}
+\label{ch5:sec:experimental-results}
 All experiments in this study were carried out using the BioCAI HPC cluster facility at the University of A Coru\~{n}a. The area under the receiver operating curve (AUROC) measure is used to quantitatively assess and compare the performances of the machine learning algorithms as it captures both Type I and Type II errors \cite{fawcett2006introduction}. First, an initial exploratory experiment was performed on various combinations of CHARM and SIFT feature sets to find out which of these deserved closer investigation. An in-depth performance evaluation of all the algorithms was conducted using the most promising feature sets, subsequently investigating which specific features of the complete set contributed most to the performance. Finally, an analysis was made to see whether the differences in performance of the algorithms were statistically significant or not.
 \begin{figure}[h!]
 	\centering
