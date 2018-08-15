@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Clean auxiliary files..."
 
-extensions='aux log bbl blg glo gz ist toc glg gls nlo bib.sav dvi fls fdb_latexmk' # array with the extensions
+extensions='aux log bbl blg glo gz ist toc glg gls nlo bib.sav bib.bak dvi fls fdb_latexmk' # array with the extensions
 
 for ext in $extensions # go through the extensions
 do
