@@ -5,7 +5,9 @@
 % Miroslav Radojevic
 % 
 % ************************************************************************
-
+% build:
+% cd phdthesis_rootdir;
+% sh clean.sh; rm -rf ./phdthesis.pdf; pdflatex phdthesis; bibtex phdthesis; pdflatex phdthesis; makeglossaries phdthesis; pdflatex phdthesis; sh clean.sh;
 \documentclass[10pt, twoside, openright]{report}%draft
 
 \setcounter{secnumdepth}{3}
@@ -34,15 +36,14 @@
 \usepackage{multicol,multirow}
 \usepackage{lipsum}
 \usepackage{graphicx}
-<<<<<<< HEAD
 \usepackage[absolute,overlay]{textpos}
 
-\bibliographystyle{./styfiles/mybibstyle}
-=======
-%\usepackage[backend=bibtex,firstinits=true]{biblatex}
-\bibliographystyle{./styfiles/mybibstyle} % https://tex.stackexchange.com/questions/98567/how-to-abbreviate-authors-firstname-in-bibliography
->>>>>>> 22fb9164d105b92121f160154fe0f718bd28f243
+%\bibliographystyle{./styfiles/mybibstyle}
 
+%\usepackage[backend=bibtex,firstinits=true]{biblatex}
+\bibliographystyle{./styfiles/mybibstyle} %https://tex.stackexchange.com/questions/98567/how-to-abbreviate-authors-firstname-in-bibliography
+
+% margin rectangle
 %\renewcommand*\ShowFrameColor{\color{teal}}
 %\renewcommand*\ShowFrameLinethickness{0.3pt}
 
@@ -126,7 +127,7 @@
 \makeglossaries
 \loadglsentries{abbreviations}
 % ************************************************************************
-%\includeonly{./chapter1/chapter1,./bibliography}
+%\includeonly{}
 % ************************************************************************
 \begin{document}
 \selectlanguage{english}
