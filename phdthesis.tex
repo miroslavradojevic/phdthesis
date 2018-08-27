@@ -7,7 +7,16 @@
 % ************************************************************************
 % build:
 % cd phdthesis_rootdir;
-% sh clean.sh; rm -rf ./phdthesis.pdf; pdflatex phdthesis; bibtex phdthesis; pdflatex phdthesis; makeglossaries phdthesis; pdflatex phdthesis; sh clean.sh;
+%%%% build
+% sh clean.sh; 
+% rm -rf ./phdthesis.pdf; 
+% pdflatex phdthesis; 
+% bibtex phdthesis; 
+% pdflatex phdthesis; 
+% makeglossaries phdthesis; 
+% pdflatex phdthesis; 
+% sh clean.sh;
+%%%%
 \documentclass[10pt, twoside, openright]{report}%draft
 
 \setcounter{secnumdepth}{3}
@@ -38,7 +47,13 @@
 \usepackage{graphicx}
 \usepackage[absolute,overlay]{textpos}
 
-\bibliographystyle{./styfiles/mybibstyle}%https://tex.stackexchange.com/questions/98567/how-to-abbreviate-authors-firstname-in-bibliography
+\bibliographystyle{./styfiles/mybibstyle}
+
+%%% on first name abbreviation in bibliography:
+% https://tex.stackexchange.com/questions/98567/how-to-abbreviate-authors-firstname-in-bibliography
+% https://tex.stackexchange.com/questions/168749/bibliography-style-with-only-the-initials-of-the-first-names
+%%% on capitalization in the names in the bibliography list
+% https://tex.stackexchange.com/questions/10772/bibtex-loses-capitals-when-creating-bbl-file
 
 % margin rectangle
 %\renewcommand*\ShowFrameColor{\color{teal}}
