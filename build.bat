@@ -1,10 +1,10 @@
 echo off
 title Build PhD Thesis
 :: See the title at the top
-pdflatex phdthesis
-bibtex phdthesis
-pdflatex phdthesis
-makeglossaries phdthesis
-pdflatex phdthesis
+pdflatex.exe phdthesis
+bibtex.exe phdthesis
+pdflatex.exe phdthesis
+makeglossaries.exe phdthesis
+pdflatex.exe phdthesis
 echo done
 pause
