@@ -7,4 +7,3 @@ pdflatex.exe phdthesis
 makeglossaries.exe phdthesis
 pdflatex.exe phdthesis
 echo done
-pause
