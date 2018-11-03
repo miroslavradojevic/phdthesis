@@ -17,7 +17,7 @@
 % pdflatex phdthesis; 
 % sh clean.sh;
 %%%%
-\documentclass[10pt, twoside, openright]{report}%draft
+\documentclass[10pt, twoside, openright, draft]{report}
 
 \setcounter{secnumdepth}{3}
 %\usepackage{./styfiles/mya4layout}
@@ -148,11 +148,10 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-\include{./coverpage}
+\include{./coverfront}
 \include{./titlepage}
 \include{./colophon}
 \include{./formalpage}
-\include{./preface}
 \include{./contents}
 
 %\glsaddall
@@ -183,9 +182,11 @@
 \include{./chapter5/chapter5}
 \include{./bibliography}
 \include{./samenvatting}
-\include{./portfolio}
+\include{./acknowledgement}
 \include{./publications}
+\include{./portfolio}
 \include{./curriculum}
+\include{./coverback}
 
 % ************************************************************************
 \end{document}
