@@ -3,21 +3,24 @@
 % Stellingen
 %
 % ************************************************************************
-\documentclass[10pt]{report}
+\documentclass[10pt,a5paper]{report}
 \usepackage[dutch]{babel}
-\topmargin         0.0mm
-\leftmargin        0.0mm
-\pdfpagewidth    170.0mm
-\pdfpageheight   240.0mm
-\textheight      194.0mm
-\topmargin         0.0mm
-\hoffset         -26.0mm
-\textwidth       130.0mm
+\usepackage{enumitem}
+\usepackage[a5paper,bindingoffset=0mm,left=15mm,right=15mm,top=15mm,bottom=15mm,footskip=0mm]{geometry}
+\geometry{a5paper}
+%\pdfpagewidth    148.0mm % A5 measures 148 × 210 millimeters or 5.83 × 8.27 inches.
+%\pdfpageheight   210.0mm
+%\leftmargin      -25.0mm
+%\topmargin       -25.0mm
+\textwidth        118.0mm
+\textheight       190.0mm
+\hoffset            0.0mm
+\voffset            0.0mm
+
 % ************************************************************************
 \begin{document}
 \selectlanguage{dutch}
 \pagestyle{empty}
-\setlength{\leftmargini}{0em}
 % ************************************************************************
 
 \begin{center}
@@ -39,14 +42,14 @@
 \bigskip
 \small
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=2.5mm]
   
 \item Junctions and terminations of the neuron tree image can both be extracted by the same nonlinear decision (\emph{Chapter 2 of this thesis}).
 
 \medskip
   
 \item Bayesian multi-object tracking helps separating closely running neuron fibers (\emph{Chapter 3 of this thesis}).  
-% allows convenient handling of bifurcations and terminations during the tracing process by modeling of spawned objects and observation clutter  
+
 \medskip
 
 \item Tracing image structures repeatedly and in a statistically independent way yields more evidence about the underlying neuron branches and leads to better reconstructions (\emph{Chapter 4 of this thesis}).
@@ -75,8 +78,6 @@
 
 \item ``Neuronal curse of dimensionality'': neuron reconstruction algorithms should be designed right from the start to be able to deal with ever increasing data volumes.
 %``Neuronal curse of dimensionality'': automated reconstruction algorithms should be designed to span the sizeable gulf between the processing capability and the expanding image volumes.
-% adapting neuron reconstruction computer algorithms to larger data volume imposes challenge as grand as crafting the new ones.
-% Data volume does not scale as well as processing capability, performance.
 
 \medskip
 
