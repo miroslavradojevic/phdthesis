@@ -204,12 +204,12 @@ and the lower and higher inflection points of $\mu^{L}$ are denoted by $L_{\text
 
 \begin{figure}%[!t]
 	\centering
-	\includegraphics[height=9em]{L_fuzzification_1}
-	\includegraphics[height=9em]{L_fuzzification_2} \\[2ex]
-	\includegraphics[height=9em]{U_fuzzification_1}
-	\includegraphics[height=9em]{U_fuzzification_2} \\[2ex]
-	\includegraphics[height=9em]{C_fuzzification_1}
-	\includegraphics[height=9em]{C_fuzzification_2} \\
+	\includegraphics[height=9em]{L_fuzzification_1_embedded}
+	\includegraphics[height=9em]{L_fuzzification_2_embedded} \\[2ex]
+	\includegraphics[height=9em]{U_fuzzification_1_embedded}
+	\includegraphics[height=9em]{U_fuzzification_2_embedded} \\[2ex]
+	\includegraphics[height=9em]{C_fuzzification_1_embedded}
+	\includegraphics[height=9em]{C_fuzzification_2_embedded} \\
 	\caption{Input membership functions used in the fuzzification step for $\textrm{FL}_{1}$. Example LOW and HIGH membership values are shown (right column) for input values (dashed vertical lines in the plots on the left) $l_{i}=0.35$ (top row), $u_{i}=10$ (middle row), and $c_{i}=0.85$ (bottom row). The inflection points of the membership functions are, respectively, $L_{\textrm{LOW}}=0.05$ and $L_{\textrm{HIGH}}=0.4$ for $\mu^{L}$, $U_{\textrm{HIGH}}=5$ and $U_{\textrm{LOW}}=20$ for $\mu^{U}$, and $C_{\textrm{LOW}}=0.5$ and $C_{\textrm{HIGH}}=0.95$ for $\mu^{C}$. Notice that features $u_{i}$ (the centerline bending energies of the streamlines) are reinterpreted here to express the degree of smoothness (hence the inverted membership functions as compared to the other two).}
 	\label{ch2_fig7}
 \end{figure}
@@ -241,8 +241,8 @@ and centroid defuzzification then results in a scalar output value $\hat{o}$. Th
 
 \begin{figure}
 	\centering
-	\includegraphics[height=9em]{fig9a}
-	\includegraphics[height=9em]{fig9b}
+	\includegraphics[height=9em]{fig9a_embedded}
+	\includegraphics[height=9em]{fig9b_embedded}
 	\caption{Output membership functions used in module $\mathrm{FL}_{1}$. Example output fuzzy sets $\Upsilon_{\!i}$ corresponding to rules $R_i$ from Table~\ref{tab:rules-FL1} are shown as the textured areas. Value $\hat{o}$ (left panel) represents the centroid of the aggregated output fuzzy sets. The resulting output membership values (right panel) serve as input for module $\mathrm{FL}_{2}$.}
 	\label{ch2_fig9}
 \end{figure}
@@ -336,8 +336,8 @@ z^{\textrm{JUN}}(x,y) & \textrm{if}\ (x,y)\in F \\
 which indicate the degree to which any pixel $(x,y)$ belongs to a termination or a junction, respectively.
 \begin{figure}[ht!]
 	\centering
-	\includegraphics[height=9em]{fig10a}
-	\includegraphics[height=9em]{fig10b}
+	\includegraphics[height=9em]{fig10a_embedded}
+	\includegraphics[height=9em]{fig10b_embedded}
 	\caption{Output membership functions used in module $\mathrm{FL}_{2}$. Example output fuzzy sets $\Upsilon_{\!i}$ corresponding to rules $R_i$ from Table~\ref{tab:rules-FL2} are shown as the textured areas. Value $\hat{z}$ (left panel) represents the centroid of the aggregated output fuzzy sets. The resulting output membership values (right panel) indicate the degree to which there may be a termination (END), junction (JUN), or neither of these (NONE) at the image pixel location under consideration.}
 	\label{ch2_fig10}
 \end{figure}
@@ -391,8 +391,8 @@ Performance was quantified by counting the correct and incorrect hits and the mi
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{1em}}c@{\hspace{1em}}}
-	\includegraphics[width=0.4\columnwidth]{triplets_fjun_fend_vs_pratio} &
-	\includegraphics[width=0.4\columnwidth]{triplets_fboth_vs_snr}
+	\includegraphics[width=0.4\columnwidth]{triplets_fjun_fend_vs_pratio_embedded} &
+	\includegraphics[width=0.4\columnwidth]{triplets_fboth_vs_snr_embedded}
 	\end{tabular}
 	\caption{Performance of the method in detecting terminations and junctions in simulated images of triplets. The values of $\textrm{F}_{\textrm{END}}$ and $\textrm{F}_{\textrm{JUN}}$ are shown (left panel) for the various branch diameter ratios $d_{\max}/d_{\min}$ at $\textrm{SNR} = 4$. The distribution of $\textrm{F}_{\textrm{BOTH}}$ values is shown as a box plot (right panel) for the various SNR levels.}
 	\label{ch2_fig13}
@@ -452,7 +452,7 @@ To evaluate the method on more complex images, with the known ground truth, the 
 The evaluation results (Fig.~\ref{ch2_fig15}) confirm the conclusion from the experiments on triplets that the method performs well for $\textrm{SNR} \geq 4$ and is somewhat better in detecting terminations than detecting junctions. For $\textrm{SNR} = 4$ the performance for junction detection is $\textrm{F}_{\textrm{JUN}} \approx 0.85$ while for termination detection $\textrm{F}_{\textrm{END}} \approx 0.95$. The higher performance for termination detection may be explained by the fact that the underlying image structure is usually less ambiguous (a single line-like structure surrounded by darker background) than in the case of junctions (multiple line-like structures that are possibly very close to each other). Example detection results are shown in Fig.~\ref{ch2_fig16}.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.4\columnwidth]{overview_real}
+	\includegraphics[width=0.4\columnwidth]{overview_real_embedded}
 	\caption{Performance of the method in detecting terminations and junctions in 30 real fluorescence microscopy images of neurons. The distributions of the $\textrm{F}_\textrm{END}$, $\textrm{F}_\textrm{JUN}$, and $\textrm{F}_\textrm{BOTH}$ values for all images together are shown as box plots.}
 	\label{ch2_fig17}
 \end{figure}
@@ -471,9 +471,9 @@ Finally the performance comparison of the Neuron Pinpointer method against other
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hspace{1em}}c@{\hspace{1em}}c@{\hspace{1em}}}
-	\includegraphics[width=0.3\columnwidth]{compareJUN_all}
-	\includegraphics[width=0.3\columnwidth]{compareEND_all}
-	\includegraphics[width=0.3\columnwidth]{compareBOTH_all}
+	\includegraphics[width=0.3\columnwidth]{compareJUN_all_embedded}
+	\includegraphics[width=0.3\columnwidth]{compareEND_all_embedded}
+	\includegraphics[width=0.3\columnwidth]{compareBOTH_all_embedded}
 	\end{tabular}
 	\caption{Critical-point detection performance of the introduced method (NP) compared to two other methods (AS and APP2). The median values of $\textrm{F}_{\textrm{JUN}}$ (left plot) are 0.81 (NP), 0.65 (AS), and 0.47 (APP2). The median values of $\textrm{F}_{\textrm{END}}$ (middle plot) are 0.73 (NP), 0.28 (AS), and 0.21 (APP2). Finally, the median values of $\textrm{F}_{\textrm{BOTH}}$ (right plot) are 0.76 (NP), 0.35 (AS), and 0.29 (APP2).}
 	\label{ch2_fig19}
