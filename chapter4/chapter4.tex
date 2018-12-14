@@ -55,8 +55,8 @@ The soma typically has a considerably larger diameter than the individual branch
 \begin{figure}
 	\centering
 	\begin{tabular}{cc}
-		\includegraphics[width=0.35\columnwidth]{fig2a} &
-		\includegraphics[width=0.35\columnwidth]{fig2b} \\ %\hspace{2em} 
+		\includegraphics[width=0.35\columnwidth]{fig2a_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig2b_embedded} \\ %\hspace{2em} 
 		(a) $\mathrm{x}_{i}^k \sim p(\mathrm{x}_i | \mathrm{x}_{i-1}^k)$ & \hspace{2em} 
 		(b) $p(\mathrm{z} | \mathrm{x})=\textrm{e}^{Kc_{\mathrm{x}}}$ \\
 	\end{tabular}
@@ -283,12 +283,12 @@ Prior to evaluating how well introduced method emulates expert manual reconstruc
 		\begin{tabular}{c@{\hspace{0.02\textwidth}}c@{}c@{}}
 	& \hspace{2.5em}S = 2 & \hspace{2.5em}S = 3 \\[0.5em]
 	\rotatebox[origin=c]{90}{COR = 0} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig6a} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig6b} \\
+	\includegraphics[align=c,width=0.48\textwidth]{fig6a_embedded} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig6b_embedded} \\
 	\\[0.01\columnwidth]
 	\rotatebox[origin=c]{90}{COR = 1} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig6c} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig6d}
+	\includegraphics[align=c,width=0.48\textwidth]{fig6c_embedded} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig6d_embedded}
 		\end{tabular}
 		\caption{Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
 		\label{ch4_fig6}
@@ -299,12 +299,12 @@ Prior to evaluating how well introduced method emulates expert manual reconstruc
 		\begin{tabular}{c@{\hspace{0.02\textwidth}}c@{}c@{}}
 	& \hspace{2.5em}S = 2 & \hspace{2.5em}S = 3 \\[0.5em]
 	\rotatebox[origin=c]{90}{COR = 0} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig7a} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig7b} \\
+	\includegraphics[align=c,width=0.48\textwidth]{fig7a_embedded} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig7b_embedded} \\
 	\\[0.01\textwidth]
 	\rotatebox[origin=c]{90}{COR = 1} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig7c} &
-	\includegraphics[align=c,width=0.48\textwidth]{fig7d}
+	\includegraphics[align=c,width=0.48\textwidth]{fig7c_embedded} &
+	\includegraphics[align=c,width=0.48\textwidth]{fig7d_embedded}
 		\end{tabular}
 		\caption{Examples are shown for COR = 0 (top) and 1 (bottom) in combination with S = 2 (left) and 3 (right).}
 		\label{ch4_fig7}
@@ -321,16 +321,16 @@ Using this plugin a synthetic data set was created containing image stacks for a
 	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
 		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
 		\rotatebox[origin=c]{90}{S = 2} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8a} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8b} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8c} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8d} \\
+		\includegraphics[align=c,width=0.23\textwidth]{fig8a_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8b_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8c_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8d_embedded} \\
 		\\[0.2ex]
 		\rotatebox[origin=c]{90}{S = 3} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8e} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8f} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8g} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig8h}
+		\includegraphics[align=c,width=0.23\textwidth]{fig8e_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8f_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8g_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig8h_embedded}
 	\end{tabular}
 	\caption{Average F score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
 	\label{ch4_fig8}
@@ -340,16 +340,16 @@ Using this plugin a synthetic data set was created containing image stacks for a
 	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
 		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
 		\rotatebox[origin=c]{90}{S = 2} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9a_shift} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9b} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9c} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9d} \\
+		\includegraphics[align=c,width=0.23\textwidth]{fig9a_shift_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9b_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9c_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9d_embedded} \\
 		\\[0.2ex]
 		\rotatebox[origin=c]{90}{S = 3} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9e} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9f} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9g} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig9h}
+		\includegraphics[align=c,width=0.23\textwidth]{fig9e_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9f_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9g_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig9h_embedded}
 	\end{tabular}
 	\caption{Average SSD score of the methods for the synthetic images as a function of COR. Examples are shown for S = 2 (top) and 3 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).}
 	\label{ch4_fig9}
@@ -359,16 +359,16 @@ Using this plugin a synthetic data set was created containing image stacks for a
 	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
 		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
 	    \rotatebox[origin=c]{90}{COR = 0}  &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10a} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10b} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10c} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10d} \\
+		\includegraphics[align=c,width=0.23\textwidth]{fig10a_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig10b_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig10c_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig10d_embedded} \\
 		\\[0.2ex]
 		\rotatebox[origin=c]{90}{COR = 1}  &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10e} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10f} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10g} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig10h}
+		\includegraphics[align=c,width=0.23\textwidth]{fig10e_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig10f_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig10g_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig10h_embedded}
 	\end{tabular}
 	\caption{Average F score of the methods for the synthetic images as a function of S. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).\vspace{\baselineskip}}
 	\label{ch4_fig10}
@@ -378,16 +378,16 @@ Using this plugin a synthetic data set was created containing image stacks for a
 	\begin{tabular}{c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{\hspace{0.5em}}c@{}}
 		& \hspace{2em}SNR = 2 & \hspace{2em}SNR = 4 & \hspace{2em}SNR = 5 & \hspace{2em}SNR = 10 \\[0.5ex]
 		\rotatebox[origin=c]{90}{COR = 0} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11a} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11b} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11c} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11d} \\
+		\includegraphics[align=c,width=0.23\textwidth]{fig11a_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig11b_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig11c_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig11d_embedded} \\
 		\\[0.2ex]
 		\rotatebox[origin=c]{90}{COR = 1} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11e} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11f} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11g} &
-		\includegraphics[align=c,width=0.23\textwidth]{fig11h}
+		\includegraphics[align=c,width=0.23\textwidth]{fig11e_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig11f_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig11g_embedded} &
+		\includegraphics[align=c,width=0.23\textwidth]{fig11h_embedded}
 	\end{tabular}
 	\caption{Average SSD score of the methods for the synthetic images as a function of S. Examples are shown for COR = 0 (top) and 1 (bottom) in combination with SNR = 2, 4, 5, 10 (left to right).}
 	\label{ch4_fig11}
@@ -471,10 +471,10 @@ The results of the experiments on these three real data sets (Figs.~\ref{ch4_fig
 \begin{figure}
 	\centering
 	\begin{tabular}{cc}
-		\includegraphics[width=0.35\columnwidth]{fig14a} &
-		\includegraphics[width=0.35\columnwidth]{fig14b} \\%[0.01\columnwidth]
-		\includegraphics[width=0.35\columnwidth]{fig14c} &
-		\includegraphics[width=0.35\columnwidth]{fig14d} 
+		\includegraphics[width=0.35\columnwidth]{fig14a_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig14b_embedded} \\%[0.01\columnwidth]
+		\includegraphics[width=0.35\columnwidth]{fig14c_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig14d_embedded} 
 	\end{tabular}
 	\caption{Performance comparison for the OPF data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
 	\label{ch4_fig14}
@@ -483,10 +483,10 @@ The results of the experiments on these three real data sets (Figs.~\ref{ch4_fig
 \begin{figure}
 	\centering
 	\begin{tabular}{cc}
-		\includegraphics[width=0.35\columnwidth]{fig15a} &
-		\includegraphics[width=0.35\columnwidth]{fig15b} \\%[0.01\columnwidth]
-		\includegraphics[width=0.35\columnwidth]{fig15c} &
-		\includegraphics[width=0.35\columnwidth]{fig15d}
+		\includegraphics[width=0.35\columnwidth]{fig15a_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig15b_embedded} \\%[0.01\columnwidth]
+		\includegraphics[width=0.35\columnwidth]{fig15c_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig15d_embedded}
 	\end{tabular}
 	\caption{Performance comparison for the NCL1A data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
 	\label{ch4_fig15}
@@ -495,10 +495,10 @@ The results of the experiments on these three real data sets (Figs.~\ref{ch4_fig
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{}c@{}}
-		\includegraphics[width=0.35\columnwidth]{fig16a} &
-		\includegraphics[width=0.35\columnwidth]{fig16b} \\%[0.01\columnwidth]
-		\includegraphics[width=0.35\columnwidth]{fig16c} &
-		\includegraphics[width=0.35\columnwidth]{fig16d}
+		\includegraphics[width=0.35\columnwidth]{fig16a_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig16b_embedded} \\%[0.01\columnwidth]
+		\includegraphics[width=0.35\columnwidth]{fig16c_embedded} &
+		\includegraphics[width=0.35\columnwidth]{fig16d_embedded}
 	\end{tabular}
 	\caption{Performance comparison for the BGN data set. Results are shown for the F measure (left column) and SSD measure (right column) and in the form of distributions for S = 2 (standard R box plots in top row) and averages as a function of S (bottom row).}
 	\label{ch4_fig16}
