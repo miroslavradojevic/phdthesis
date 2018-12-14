@@ -18,6 +18,7 @@ chapter2\overview_real
 chapter2\compareJUN_all
 chapter2\compareEND_all
 chapter2\compareBOTH_all
+chapter2\nmorpho_snr4 chapter2\nmorpho_snr 
 chapter3\fig3a chapter3\fig3b chapter3\fig3c 
 chapter3\fig4a chapter3\fig4b chapter3\fig4c chapter3\fig4d
 chapter3\fig6a1 chapter3\fig6a2 
